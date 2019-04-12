@@ -128,7 +128,7 @@ SUBSYSTEM_DEF(mapping)
 	/*
 	HACK_LoadMapConfig()
 	*/
-	if(initialized)
+	if(subsystem_initialized)
 		return
 	/*
 	if(config.defaulted)
@@ -458,7 +458,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 
 /datum/controller/subsystem/mapping/Recover()
 	flags |= SS_NO_INIT
-	initialized = SSmapping.initialized
+	subsystem_initialized = SSmapping.subsystem_initialized
 
 	unused_turfs = SSmapping.unused_turfs
 	turf_reservations = SSmapping.turf_reservations
