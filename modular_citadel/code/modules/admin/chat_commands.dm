@@ -7,7 +7,7 @@
 	if(world.time - last_check < 10)
 		return
 	last_check = world.time
-	return "Players: [clients.len] -- Address: [world.internet_address]:[world.port]"
+	return "Players: [GLOB.clients.len] -- Address: [world.internet_address]:[world.port]"
 
 /datum/tgs_chat_command/ahelp
 	name = "ahelp"

@@ -128,7 +128,7 @@ SUBSYSTEM_DEF(mapping)
 	/*
 	HACK_LoadMapConfig()
 	*/
-	if(subsystem_initialized)
+	if(initialized)
 		return
 	/*
 	if(config.defaulted)
@@ -458,7 +458,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 
 /datum/controller/subsystem/mapping/Recover()
 	flags |= SS_NO_INIT
-	subsystem_initialized = SSmapping.subsystem_initialized
+	initialized = SSmapping.initialized
 
 	unused_turfs = SSmapping.unused_turfs
 	turf_reservations = SSmapping.turf_reservations
@@ -635,7 +635,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 		GLOB.the_gateway.wait = world.time
 
 /datum/controller/subsystem/mapping/proc/wipe_reservations(wipe_safety_delay = 100)
-	if(clearing_reserved_turfs || !subsystem_initialized)			//in either case this is just not needed.
+	if(clearing_reserved_turfs || !initialized)			//in either case this is just not needed.
 		return
 	clearing_reserved_turfs = TRUE
 	//SSshuttle.transit_requesters.Cut()
@@ -659,7 +659,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 	clearing_reserved_turfs = FALSE
 
 /datum/controller/subsystem/mapping/proc/RequestBlockReservation(width, height, z, type = /datum/turf_reservation, turf_type_override)
-	UNTIL(subsystem_initialized && !clearing_reserved_turfs)
+	UNTIL(initialized && !clearing_reserved_turfs)
 	var/datum/turf_reservation/reserve = new type
 	if(turf_type_override)
 		reserve.turf_type = turf_type_override
@@ -713,7 +713,7 @@ GLOBAL_LIST_EMPTY(the_station_areas)
 
 //DO NOT CALL THIS PROC DIRECTLY, CALL wipe_reservations().
 /datum/controller/subsystem/mapping/proc/do_wipe_turf_reservations()
-	UNTIL(subsystem_initialized)							//This proc is for AFTER init, before init turf reservations won't even exist and using this will likely break things.
+	UNTIL(initialized)							//This proc is for AFTER init, before init turf reservations won't even exist and using this will likely break things.
 	for(var/i in turf_reservations)
 		var/datum/turf_reservation/TR = i
 		if(!QDELETED(TR))
