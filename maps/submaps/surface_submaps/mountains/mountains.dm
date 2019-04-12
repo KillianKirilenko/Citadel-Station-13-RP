@@ -324,8 +324,9 @@
 	fixed_orientation = TRUE
 	cost = 6
 
-/datum/map_template/surface/mountains/deep/cultmine
+/datum/map_template/submap/surface/mountains/deep/cultmine
 	name = "Cult Mine"
 	desc = "A mining operation that found more than it bargained for."
 	mappath = 'maps/submaps/surface_submaps/mountains/cultmine.dmm'
+	id = "mountain_cultmine"
 	cost = 10
