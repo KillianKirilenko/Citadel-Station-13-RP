@@ -34,32 +34,32 @@
 	external_pressure_bound = ONE_ATMOSPHERE * 1.1
 
 
-/obj/effect/step_trigger/teleporter/to_mining/New()
-	..()
+/obj/effect/step_trigger/teleporter/to_mining/Initialize()
+	. = ..()
 	teleport_x = src.x
 	teleport_y = 2
 	teleport_z = Z_LEVEL_SURFACE_MINE
 
-/obj/effect/step_trigger/teleporter/from_mining/New()
-	..()
+/obj/effect/step_trigger/teleporter/from_mining/Initialize()
+	. = ..()
 	teleport_x = src.x
 	teleport_y = world.maxy - 1
 	teleport_z = Z_LEVEL_SURFACE_LOW
 
-/obj/effect/step_trigger/teleporter/to_solars/New()
-	..()
+/obj/effect/step_trigger/teleporter/to_solars/Initialize()
+	. = ..()
 	teleport_x = world.maxx - 1
 	teleport_y = src.y
 	teleport_z = Z_LEVEL_SOLARS
 
-/obj/effect/step_trigger/teleporter/from_solars/New()
-	..()
+/obj/effect/step_trigger/teleporter/from_solars/Initialize()
+	. = ..()
 	teleport_x = 2
 	teleport_y = src.y
 	teleport_z = Z_LEVEL_SURFACE_LOW
 
-/obj/effect/step_trigger/teleporter/wild/New()
-	..()
+/obj/effect/step_trigger/teleporter/wild/Initialize()
+	. = ..()
 
 	//If starting on east/west edges.
 	if (src.x == 1)
@@ -93,6 +93,7 @@
 	icon = 'icons/obj/stairs.dmi'
 	icon_state = "stairs"
 	invisibility = 0
+
 /obj/effect/step_trigger/teleporter/from_underdark/Initialize()
 	. = ..()
 	teleport_x = x
@@ -103,7 +104,7 @@
 			teleport_z = Z.z
 
 /obj/effect/step_trigger/teleporter/planetary_fall/virgo3b/Initialize()
-	planet = planet_virgo3b
+	planet = GLOB.planet_virgo3b
 	. = ..()
 
 /obj/effect/step_trigger/lost_in_space
@@ -255,10 +256,10 @@ var/global/list/latejoin_tram   = list()
 	name = "JoinLateTram"
 	delete_me = 1
 
-/obj/effect/landmark/tram/New()
+/obj/effect/landmark/tram/Initialize()
+	. = ..()
 	latejoin_tram += loc // Register this turf as tram latejoin.
 	latejoin += loc // Also register this turf as fallback latejoin, since we won't have any arrivals shuttle landmarks.
-	..()
 
 /datum/spawnpoint/tram
 	display_name = "Tram Station"
@@ -352,10 +353,6 @@ var/global/list/latejoin_tram   = list()
 	"Turn Off" 			= new/datum/holodeck_program(/area/houseboat/holodeck/off, list())
 	)
 
-// Our map is small, if the supermatter is ejected lets not have it just blow up somewhere else
-/obj/machinery/power/supermatter/touch_map_edge()
-	qdel(src)
-
 //Airlock antitox vendor
 /obj/machinery/vending/wallmed_airlock
 	name = "Airlock NanoMed"
@@ -373,8 +370,8 @@ var/global/list/latejoin_tram   = list()
 	desc = "Neutralizes toxins and provides a mild analgesic effect."
 	icon_state = "pill2"
 
-/obj/item/weapon/reagent_containers/pill/airlock/New()
-	..()
+/obj/item/weapon/reagent_containers/pill/airlock/Initialize()
+	. = ..()
 	reagents.add_reagent("anti_toxin", 15)
 	reagents.add_reagent("paracetamol", 5)
 
@@ -393,12 +390,12 @@ var/global/list/latejoin_tram   = list()
 	name = "expedition weaponry cabinet"
 	req_one_access = list(access_explorer,access_brig)
 
-/obj/structure/closet/secure_closet/guncabinet/excursion/New()
-	..()
+/obj/structure/closet/secure_closet/guncabinet/excursion/Initialize()
+	. = ..()
 	for(var/i = 1 to 4)
-		new /obj/item/weapon/gun/energy/frontier/locked(src)
+		new /obj/item/gun/energy/frontier/locked(src)
 	for(var/i = 1 to 4)
-		new /obj/item/weapon/gun/energy/frontier/locked/holdout(src)
+		new /obj/item/gun/energy/frontier/locked/holdout(src)
 
 // Underdark mob spawners
 /obj/tether_away_spawner/underdark_normal
@@ -409,10 +406,10 @@ var/global/list/latejoin_tram   = list()
 	prob_fall = 50
 	guard = 20
 	mobs_to_pick_from = list(
-		/mob/living/simple_animal/hostile/jelly = 3,
-		/mob/living/simple_animal/hostile/giant_spider/hunter = 1,
-		/mob/living/simple_animal/hostile/giant_spider/phorogenic = 1,
-		/mob/living/simple_animal/hostile/giant_spider/lurker = 1,
+		/mob/living/simple_mob/animal/jelly = 3,
+		/mob/living/simple_mob/animal/giant_spider/hunter = 1,
+		/mob/living/simple_mob/animal/giant_spider/phorogenic = 1,
+		/mob/living/simple_mob/animal/giant_spider/lurker = 1,
 	)
 
 /obj/tether_away_spawner/underdark_hard
@@ -423,9 +420,9 @@ var/global/list/latejoin_tram   = list()
 	prob_fall = 50
 	guard = 20
 	mobs_to_pick_from = list(
-		/mob/living/simple_animal/hostile/corrupthound = 1,
-		/mob/living/simple_animal/hostile/rat = 1,
-		/mob/living/simple_animal/hostile/mimic = 1
+		/mob/living/simple_mob/mechanical/corrupthound = 1,
+		/mob/living/simple_mob/animal/rat = 1,
+		///mob/living/simple_mob/alien/mimic = 1
 	)
 
 /obj/tether_away_spawner/underdark_boss
@@ -436,7 +433,7 @@ var/global/list/latejoin_tram   = list()
 	prob_fall = 100
 	guard = 70
 	mobs_to_pick_from = list(
-		/mob/living/simple_animal/hostile/dragon = 1
+		/mob/living/simple_mob/animal/dragon = 1
 	)
 
 // Used at centcomm for the elevator
