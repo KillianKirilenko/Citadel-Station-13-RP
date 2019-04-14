@@ -65,10 +65,7 @@
 		return
 	var/datum/client_color/CC = client_colors[1]
 	if(CC)
-		client.color = CC.color
-
-
-
+		faganimate(client, color = CC.color, time = 10)
 
 /datum/client_color/glass_color
 	priority = 0
