@@ -217,8 +217,7 @@ var/list/admin_verbs_debug = list(
 	/client/proc/show_plant_genes,
 	/client/proc/enable_debug_verbs,
 	/client/proc/callproc,
-	/client/proc/callproc_target,
-	/client/proc/debug_process,
+	/client/proc/callproc_datum,
 	/client/proc/SDQL2_query,
 	/client/proc/Jump,
 	/client/proc/debug_rogueminer,
@@ -237,7 +236,7 @@ var/list/admin_verbs_debug = list(
 
 var/list/admin_verbs_paranoid_debug = list(
 	/client/proc/callproc,
-	/client/proc/callproc_target,
+	/client/proc/callproc_datum,
 	/client/proc/debug_process,
 	/client/proc/debug_controller
 	)

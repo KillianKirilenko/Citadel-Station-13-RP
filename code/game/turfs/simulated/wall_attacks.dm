@@ -60,7 +60,7 @@
 	var/damage_lower = 25
 	var/damage_upper = 75
 	if(isanimal(user))
-		var/mob/living/simple_mob/S = user
+		var/mob/living/simple_animal/S = user
 		playsound(src, S.attack_sound, 75, 1)
 		if(!(S.melee_damage_upper >= STRUCTURE_MIN_DAMAGE_THRESHOLD * 2))
 			to_chat(user, "<span class='notice'>You bounce against the wall.</span>")

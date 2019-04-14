@@ -275,7 +275,7 @@ var/const/enterloopsanity = 100
 	// Here's hoping it doesn't stay like this for years before we finish conversion to step_
 	var/atom/firstbump
 	var/CanPassSelf = CanPass(mover, src)
-	if(CanPassSelf || CHECK_BITFIELD(mover.movement_type, UNSTOPPABLE))
+	if(CanPassSelf)// || CHECK_BITFIELD(mover.movement_type, UNSTOPPABLE))
 		for(var/i in contents)
 			if(QDELETED(mover))
 				return FALSE		//We were deleted, do not attempt to proceed with movement.
