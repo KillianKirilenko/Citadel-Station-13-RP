@@ -34,6 +34,9 @@
 	//Detective Work, used for the duplicate data points kept in the scanners
 	var/list/original_atom
 
+	//deprecated
+	var/throwpass = FALSE
+
 /atom/New(loc, ...)
 	// During dynamic mapload (reader.dm) this assigns the var overrides from the .dmm file
 	// Native BYOND maploading sets those vars before invoking New(), by doing this FIRST we come as close to that behavior as we can.
