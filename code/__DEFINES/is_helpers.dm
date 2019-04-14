@@ -31,11 +31,11 @@
 
 #define isnewplayer(A)	istype(A, /mob/new_player)
 
-#define isanimal(A)		istype(A, /mob/living/simple_mob)
-#define ismouse(A)		istype(A, /mob/living/simple_mob/animal/passive/mouse)
-#define iscorgi(A)		istype(A, /mob/living/simple_mob/animal/passive/dog/corgi)
-#define isslime(A)		istype(A, /mob/living/simple_mob/slime)
-#define isxeno(A)		istype(A, /mob/living/simple_mob/animal/space/alien)
+#define isanimal(A)		istype(A, /mob/living/simple_animal)
+#define ismouse(A)		istype(A, /mob/living/simple_animal/animal/passive/mouse)
+#define iscorgi(A)		istype(A, /mob/living/simple_animal/animal/passive/dog/corgi)
+#define isslime(A)		istype(A, /mob/living/simple_animal/slime)
+#define isxeno(A)		istype(A, /mob/living/simple_animal/animal/space/alien)
 
 #define iscarbon(A)		istype(A, /mob/living/carbon)
 #define isalien(A)		istype(A, /mob/living/carbon/alien)
