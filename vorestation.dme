@@ -10,6 +10,7 @@
 #define DEBUG
 // END_PREFERENCES
 // BEGIN_INCLUDE
+#include "code\__COMPILE_OPTIONS.dm"
 #include "code\_away_mission_tests.dm"
 #include "code\_macros.dm"
 #include "code\_macros_vr.dm"
@@ -1437,7 +1438,7 @@
 #include "code\modules\admin\verbs\getlogs.dm"
 #include "code\modules\admin\verbs\grief_fixers.dm"
 #include "code\modules\admin\verbs\lightning_strike.dm"
-#include "code\modules\admin\verbs\map_template_loadverb.dm"
+#include "code\modules\admin\verbs\map_templates.dm"
 #include "code\modules\admin\verbs\mapping.dm"
 #include "code\modules\admin\verbs\panicbunker.dm"
 #include "code\modules\admin\verbs\playsound.dm"
