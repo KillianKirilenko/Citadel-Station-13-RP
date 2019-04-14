@@ -44,7 +44,7 @@
 #define COMSIG_ATOM_EXIT "atom_exit"							//from base of atom/Exit(): (/atom/movable/exiting, /atom/newloc)
 	#define COMPONENT_ATOM_BLOCK_EXIT 1
 #define COMSIG_ATOM_EXITED "atom_exited"						//from base of atom/Exited(): (atom/movable/exiting, atom/newloc)
-#define COMSIG_ATOM_DIR_CHANGE "set_dir"							//from base of atom/setDir(): (olddir, newdir)
+#define COMSIG_ATOM_DIR_CHANGE "setDir"							//from base of atom/setDir(): (olddir, newdir)
 #define COMSIG_ATOM_CONTENTS_DEL "contents_del"					//from base of atom/handle_contents_del(): (atom/deleted)
 #define COMSIG_ATOM_SET_LIGHT "atom_set_light"					//from base of atom/set_light(): (l_range, l_power, l_color)
 
