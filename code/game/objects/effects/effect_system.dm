@@ -434,7 +434,7 @@ steam.start() -- spawns the effect
 			var/light = -1
 			var/flash = -1
 
-			// Clamp all values to fractions of max_explosion_range, following the same pattern as for tank transfer bombs
+			// CLAMP all values to fractions of max_explosion_range, following the same pattern as for tank transfer bombs
 			if (round(amount/12) > 0)
 				devst = devst + amount/12
 
