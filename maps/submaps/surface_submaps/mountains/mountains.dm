@@ -295,7 +295,7 @@
 	//mappath = 'maps/submaps/surface_submaps/mountains/vault3.dmm'
 	//cost = 5
 
-/datum/map_template/surface/mountains/deep/vault4
+/datum/map_template/submap/surface/mountains/deep/vault4
 	name = "Mine Vault 4"
 	desc = "A small xeno vault with potential loot. Also horrible suprises."
 	mappath = 'maps/submaps/surface_submaps/mountains/vault4.dmm'
