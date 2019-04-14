@@ -2,7 +2,7 @@ PROCESSING_SUBSYSTEM_DEF(chemistry)
 	name = "Chemistry"
 	wait = 10
 	init_order = INIT_ORDER_CHEMISTRY
-	flags = SS_KEEP_TIMING
+	flags = SS_KEEP_TIMING | SS_NO_FIRE				//reagents may need processing in the future but for now it's not needed
 	var/list/chemical_reactions = list()
 	var/list/chemical_reagents = list()
 
