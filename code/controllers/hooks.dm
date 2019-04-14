@@ -33,7 +33,7 @@
 	var/status = 1
 	for(var/P in typesof("[hook_path]/proc"))
 		if(!call(caller, P)(arglist(args)))
-			stack_Trace("Hook '[P]' failed or runtimed.")
+			stack_trace("Hook '[P]' failed or runtimed.")
 			status = 0
 
 	return status

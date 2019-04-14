@@ -38,7 +38,6 @@ var/last_message = 0
 
 /mob/living/carbon/human/Life()
 	set invisibility = 0
-	set background = BACKGROUND_ENABLED
 
 
 	///////////////////////// CITADEL STATION ADDITIONS START
