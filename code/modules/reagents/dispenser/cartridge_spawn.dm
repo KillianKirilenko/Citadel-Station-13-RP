@@ -1,4 +1,4 @@
-/client/proc/spawn_chemdisp_cartridge(size in list("small", "medium", "large"), reagent in GLOB.chemical_reagents_list)
+/client/proc/spawn_chemdisp_cartridge(size in list("small", "medium", "large"), reagent in GLOB.wchemical_reagents_list)
 	set name = "Spawn Chemical Dispenser Cartridge"
 	set category = "Admin"
 
