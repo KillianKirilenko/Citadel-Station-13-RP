@@ -82,7 +82,7 @@ obj/structure/windoor_assembly/Destroy()
 	|| istype(user.module,/obj/item/weapon/robot_module/drone))) //Only dron (and engiborg) needs this.
 		rename_door(user)
 
-/obj/structure/windoor_assembly/attackby(obj/item/W as obj, mob/user as mob)
+/obj/structure/windoor_assembly/attackby(obj/item/W, mob/living/user)
 	if(istype(W, /obj/item/weapon/pen))
 		rename_door(user)
 		return
@@ -194,7 +194,7 @@ obj/structure/windoor_assembly/Destroy()
 				if(src.electronics && istype(src.electronics, /obj/item/weapon/circuitboard/broken))
 					to_chat(usr,"<span class='warning'>The assembly has broken airlock electronics.</span>")
 					return
-				to_chat(usr,browse(null, "window=windoor_access")) //Not sure what this actually does... -Ner
+				user << browse(null, "window=windoor_access")		//Not sure what this actually does... -Ner
 				playsound(src, W.usesound, 100, 1)
 				user.visible_message("[user] pries the windoor into the frame.", "You start prying the windoor into the frame.")
 

@@ -245,7 +245,6 @@ var/global/list/narsie_list = list()
 			qdel(A)
 	else if (isturf(A))
 		var/dist = get_dist(A, src)
-		var/turf/T2 = A
 
 		for (var/atom/movable/AM2 in A.contents)
 			if (AM2 == src) // This is the snowflake.
@@ -264,8 +263,8 @@ var/global/list/narsie_list = list()
 
 				spawn (0)
 					AM2.singularity_pull(src, src.current_size)
-
-		T2.ScapeAway()
+		var/turf/T2 = A
+		T2.ScrapeAway()
 
 /obj/singularity/narsie/ex_act(severity) //No throwing bombs at it either. --NEO
 	return
