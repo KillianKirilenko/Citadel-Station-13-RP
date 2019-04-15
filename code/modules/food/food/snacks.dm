@@ -4507,10 +4507,8 @@ END CITADEL CHANGE */
 	bitesize = 1
 	nutriment_amt = 10
 
-/obj/item/weapon/reagent_containers/food/snacks/chipplate/attack_hand(mob/user as mob)
-	var/obj/item/weapon/reagent_containers/food/snacks/returningitem = new vendingobject(loc)
-	if(!returningitem.reagents)
-		returningitem.initialize()
+/obj/item/weapon/reagent_containers/food/snacks/chipplate/attack_hand(mob/living/user)
+	var/obj/item/weapon/reagent_containers/food/snacks/returningitem = new vendingobject(drop_location())
 	returningitem.reagents.clear_reagents()
 	reagents.trans_to_holder(returningitem.reagents, bitesize)
 	returningitem.bitesize = bitesize/2
@@ -4554,7 +4552,7 @@ END CITADEL CHANGE */
 	nutriment_desc = list("queso" = 20)
 	nutriment_amt = 20
 
-/obj/item/weapon/reagent_containers/food/snacks/dip/attackby(obj/item/weapon/reagent_containers/food/snacks/item as obj, mob/user as mob)
+/obj/item/weapon/reagent_containers/food/snacks/dip/attackby(obj/item/weapon/reagent_containers/food/snacks/item, mob/living/user)
 	. = ..()
 	var/obj/item/weapon/reagent_containers/food/snacks/returningitem
 	if(istype(item,/obj/item/weapon/reagent_containers/food/snacks/chip/nacho) && item.icon_state == "chip_nacho")
@@ -4562,8 +4560,6 @@ END CITADEL CHANGE */
 	else if (istype(item,/obj/item/weapon/reagent_containers/food/snacks/chip) && (item.icon_state == "chip" || item.icon_state == "chip_half"))
 		returningitem = new chiptrans(src)
 	if(returningitem)
-		if(!returningitem.reagents)
-			returningitem.initialize() // initialise it so things don't break
 		returningitem.reagents.clear_reagents() //Clear the new chip
 		var/memed = 0
 		item.reagents.trans_to_holder(returningitem.reagents, item.reagents.total_volume) //Old chip to new chip
