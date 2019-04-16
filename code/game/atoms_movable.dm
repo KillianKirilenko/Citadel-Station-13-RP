@@ -296,3 +296,6 @@
 	if(GLOB.pixel_movement[var_name])
 		return FALSE
 	return TRUE
+
+/atom/movable/proc/moveToNullspace()
+	return forceMove(null)

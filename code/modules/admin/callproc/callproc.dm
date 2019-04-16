@@ -20,6 +20,8 @@
 				return
 			target = value["value"]
 			if(!istype(target))
+				to_chat(usr, "<span class='danger'>Invalid target.</span>")
+				return
 		if("No")
 			target = null
 			targetselected = FALSE
