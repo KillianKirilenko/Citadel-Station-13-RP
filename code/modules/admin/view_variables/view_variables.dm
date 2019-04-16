@@ -18,7 +18,7 @@
 	var/title = ""
 	var/refid = REF(D)
 	var/icon/sprite
-	var/hash
+	var/hashh
 
 	var/type = /list
 	if (!islist)

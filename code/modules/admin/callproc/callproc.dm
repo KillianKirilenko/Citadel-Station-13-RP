@@ -1,25 +1,28 @@
 /client/proc/callproc()
 	set category = "Debug"
 	set name = "Advanced ProcCall"
-	set waitfor = 0
+	set waitfor = FALSE
+	callproc_blocking()
 
+/client/proc/callproc_blocking(list/get_retval)
 	if(!check_rights(R_DEBUG))
 		return
 
-	var/datum/target = null
-	var/targetselected = 0
-	var/returnval = null
+	var/datum/target
+	var/targetselected = FALSE
+	var/returnval
 
 	switch(alert("Proc owned by something?",,"Yes","No"))
 		if("Yes")
-			targetselected = 1
-			var/list/value = vv_get_value(default_class = VV_ATOM_REFERENCE, classes = list(VV_ATOM_REFERENCE, VV_DATUM_REFERENCE, VV_MOB_REFERENCE, VV_CLIENT))
+			targetselected = TRUE
+			var/list/value = vv_get_value(default_class = VV_ATOM_REFERENCE, classes = list(VV_ATOM_REFERENCE, VV_DATUM_REFERENCE, VV_MOB_REFERENCE, VV_CLIENT, VV_MARKED_DATUM, VV_TEXT_LOCATE, VV_PROCCALL_RETVAL))
 			if (!value["class"] || !value["value"])
 				return
 			target = value["value"]
+			if(!istype(target))
 		if("No")
 			target = null
-			targetselected = 0
+			targetselected = FALSE
 
 	var/procname = input("Proc path, eg: /proc/fake_blood","Path:", null) as text|null
 	if(!procname)
@@ -64,10 +67,12 @@
 		log_admin("[key_name(src)] called [procname]() with [lst.len ? "the arguments [list2params(lst)]":"no arguments"].")
 		//message_admins("[key_name(src)] called [procname]() with [lst.len ? "the arguments [list2params(lst)]":"no arguments"].")			//Proccall announce removed.
 		returnval = WrapAdminProcCall(GLOBAL_PROC, procname, lst) // Pass the lst as an argument list to the proc
+	feedback_add_details("admin_verb","APC") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
+	if(get_retval)
+		get_retval += returnval
 	. = get_callproc_returnval(returnval, procname)
 	if(.)
 		to_chat(usr, .)
-	feedback_add_details("admin_verb","APC") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
 GLOBAL_VAR(AdminProcCaller)
 GLOBAL_PROTECT(AdminProcCaller)

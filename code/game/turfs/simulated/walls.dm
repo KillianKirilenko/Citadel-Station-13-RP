@@ -91,12 +91,12 @@
 	take_damage(damage)
 	return ..()
 
-/turf/simulated/wall/_hitby(atom/movable/AM, datum/thrownthing/throwingdatum)
+/turf/simulated/wall/hitby(atom/movable/AM, speed)	//)hitby(atom/movable/AM, datum/thrownthing/throwingdatum)
 	. = ..()
 	if(ismob(AM))
 		return
 
-	var/tforce = AM.throwforce * (throwingdatum.speed/THROWFORCE_SPEED_DIVISOR)
+	var/tforce = AM.throwforce * speed	//(throwingdatum.speed/THROWFORCE_SPEED_DIVISOR)
 	if (tforce < 15)
 		return
 

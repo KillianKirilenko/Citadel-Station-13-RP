@@ -301,36 +301,5 @@
 /mob/living/bot/is_sentient()
 	return FALSE
 
-/******************************************************************/
-// Navigation procs
-// Used for A-star pathfinding
-
-
-// Returns the surrounding cardinal turfs with open links
-// Including through doors openable with the ID
-/turf/proc/CardinalTurfsWithAccess(var/obj/item/weapon/card/id/ID)
-	var/L[] = new()
-
-	//	for(var/turf/simulated/t in oview(src,1))
-
-	for(var/d in cardinal)
-		var/turf/T = get_step(src, d)
-		if(istype(T) && !T.density)
-			if(!LinkBlockedWithAccess(src, T, ID))
-				L.Add(T)
-	return L
-
-
-// Similar to above but not restricted to just cardinal directions.
-/turf/proc/TurfsWithAccess(var/obj/item/weapon/card/id/ID)
-	var/L[] = new()
-
-	for(var/d in alldirs)
-		var/turf/T = get_step(src, d)
-		if(istype(T) && !T.density)
-			if(!LinkBlockedWithAccess(src, T, ID))
-				L.Add(T)
-	return L
-
 /mob/living/bot/isSynthetic() //Robots are synthetic, no?
 	return 1
