@@ -28,15 +28,15 @@
 
 /datum/trait/nonconductive
 	name = "Non-Conductive"
-	desc = "Decreases your susceptibility to electric shocks by a 25% amount."
+	desc = "Decreases your susceptibility to electrical shocks by 10%."
 	cost = 2 //This effects tasers!
-	var_changes = list("siemens_coefficient" = 0.75)
+	var_changes = list("siemens_coefficient" = 0.9)
 
 /datum/trait/nonconductive_plus
 	name = "Major Non-Conductive"
-	desc = "Decreases your susceptibility to electric shocks by a 50% amount."
+	desc = "Decreases your susceptibility to electrical shocks by 25%."
 	cost = 3 //Let us not forget this effects tasers!
-	var_changes = list("siemens_coefficient" = 0.5)
+	var_changes = list("siemens_coefficient" = 0.75)
 
 /datum/trait/darksight
 	name = "Darksight"
@@ -90,9 +90,9 @@
 
 /datum/trait/photoresistant
 	name = "Photoresistant"
-	desc = "Decreases stun duration from flashes and other light-based stuns and disabilities by 50%"
+	desc = "Decreases stun duration from flashes and other light-based stuns and disabilities by 25%"
 	cost = 1
-	var_changes = list("flash_mod" = 0.5)
+	var_changes = list("flash_mod" = 0.75)
 
 /datum/trait/winged_flight
 	name = "Winged Flight"

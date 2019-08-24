@@ -92,7 +92,7 @@
 
 /datum/trait/photosensitive
 	name = "Photosensitive"
-	desc = "Increases stun duration from flashes and other light-based stuns."
+	desc = "Increases stun duration from flashes and other light-based stuns by 100%."
 	cost = -1
 	var_changes = list("flash_mod" = 2.0)
 
