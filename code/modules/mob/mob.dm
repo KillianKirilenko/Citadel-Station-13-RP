@@ -1,5 +1,5 @@
 /mob/Destroy()//This makes sure that mobs withGLOB.clients/keys are not just deleted from the game.
-	mob_list -= src
+	GLOB.mob_list -= src
 	dead_mob_list -= src
 	living_mob_list -= src
 	unset_machine()
@@ -15,7 +15,7 @@
 	ghostize()
 	QDEL_NULL(plane_holder)
 	..()
-	return QDEL_HINT_HARDDEL_NOW
+	return QDEL_HINT_HARDDEL
 
 /mob/proc/remove_screen_obj_references()
 	hands = null
@@ -39,8 +39,8 @@
 	spell_masters = null
 	zone_sel = null
 
-/mob/Initialize()
-	mob_list += src
+/mob/Initialize(mapload)
+	GLOB.mob_list += src
 	set_focus(src)
 	if(stat == DEAD)
 		dead_mob_list += src
@@ -148,7 +148,7 @@
 		M.show_message(msg, 2, deaf_message, 1)
 
 /mob/proc/findname(msg)
-	for(var/mob/M in mob_list)
+	for(var/mob/M in GLOB.mob_list)
 		if (M.real_name == text("[]", msg))
 			return M
 	return 0
@@ -228,16 +228,31 @@
 	return
 
 //mob verbs are faster than object verbs. See http://www.byond.com/forum/?post=1326139&page=2#comment8198716 for why this isn't atom/verb/examine()
-/mob/verb/examinate(atom/A as mob|obj|turf in view())
+/mob/verb/examinate(atom/A as mob|obj|turf in view(get_turf(src))) //It used to be oview(12), but I can't really say why
 	set name = "Examine"
 	set category = "IC"
 
-	if((is_blind(src) || usr.stat) && !isobserver(src))
-		to_chat(src, "<span class='notice'>Something is there but you can't see it.</span>")
-		return 1
+	if(isturf(A) && !(sight & SEE_TURFS) && !(A in view(client ? client.view : world.view, src)))
+		// shift-click catcher may issue examinate() calls for out-of-sight turfs
+		return
+
+	if(is_blind()) //blind people see things differently (through touch)
+		return
 
 	face_atom(A)
-	A.examine(src)
+	if(!isobserver(src) && !isturf(A) && A != src)
+		if(A.loc != src)
+			for(var/mob/M in viewers(4, src))
+				if(M == src || M.is_blind())
+					continue
+				if(M.client && M.client.is_preference_enabled(/datum/client_preference/examine_look))
+					to_chat(M, "<span class='tinynotice'><b>\The [src]</b> looks at \the [A].</span>")
+
+	var/list/result
+	if(client)
+		result = A.examine(src) // if a tree is examined but no client is there to see it, did the tree ever really exist?
+
+	to_chat(src, result.Join("\n"))
 
 /mob/verb/pointed(atom/A as mob|obj|turf in view())
 	set name = "Point To"
@@ -338,9 +353,9 @@
 	if (flavor_text && flavor_text != "")
 		var/msg = replacetext(flavor_text, "\n", " ")
 		if(length(msg) <= 40)
-			return "<font color='blue'>[msg]</font>"
+			return "<font color=#4F49AF>[msg]</font>"
 		else
-			return "<font color='blue'>[copytext_preserve_html(msg, 1, 37)]... <a href='byond://?src=\ref[src];flavor_more=1'>More...</font></a>"
+			return "<font color=#4F49AF>[copytext_preserve_html(msg, 1, 37)]... <a href='byond://?src=\ref[src];flavor_more=1'>More...</font></a>"
 
 /*
 /mob/verb/help()
@@ -383,11 +398,19 @@
 	else
 		return 	// Don't set it, no need
 
-/mob/verb/abandon_mob()
+/// Alias for respawn
+/mob/verb/return_to_menu()
 	set name = "Return to Menu"
 	set category = "OOC"
+	set desc = "Return to the lobby."
+	return abandon_mob()
 
-	if(stat != DEAD || !SSticker)
+/mob/verb/abandon_mob()
+	set name = "Respawn"
+	set category = "OOC"
+	set desc = "Return to the lobby."
+
+	if(stat != DEAD)
 		to_chat(usr, "<span class='notice'><B>You must be dead to use this!</B></span>")
 		return
 
@@ -450,17 +473,18 @@
 		prefs.lastchangelog = GLOB.changelog_hash
 		SScharacter_setup.queue_preferences_save(prefs)
 		prefs.save_preferences()
-		winset(src, "rpane.changelog", "background-color=none;font-style=;")
+		winset(src, "infowindow.changelog", "background-color=none;font-style=;")
 
 /mob/verb/observe()
 	set name = "Observe"
 	set category = "OOC"
 	var/is_admin = 0
 
+	if(!client.is_preference_enabled(/datum/client_preference/debug/age_verified)) return
 	if(client.holder && (client.holder.rights & R_ADMIN))
 		is_admin = 1
 	else if(stat != DEAD || istype(src, /mob/new_player))
-		to_chat(usr, "<font color='blue'>You must be observing to use this!</font>")
+		to_chat(usr, "<font color=#4F49AF>You must be observing to use this!</font>")
 		return
 
 	if(is_admin && stat == DEAD)
@@ -470,7 +494,7 @@
 	var/list/namecounts = list()
 	var/list/creatures = list()
 
-	for(var/obj/O in world)				//EWWWWWWWWWWWWWWWWWWWWWWWW ~needs to be optimised
+	/*for(var/obj/O in world)				//EWWWWWWWWWWWWWWWWWWWWWWWW ~needs to be optimised
 		if(!O.loc)
 			continue
 		if(istype(O, /obj/item/disk/nuclear))
@@ -492,8 +516,8 @@
 				names.Add(name)
 				namecounts[name] = 1
 			creatures[name] = O
-
-	for(var/mob/M in sortList(mob_list))
+	*/
+	for(var/mob/M in sortList(GLOB.mob_list))
 		var/name = M.name
 		if (names.Find(name))
 			namecounts[name]++
@@ -576,9 +600,8 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 			for(var/name in H.organs_by_name)
 				var/obj/item/organ/external/e = H.organs_by_name[name]
 				if(e && H.lying)
-					if((e.status & ORGAN_BROKEN && (!e.splinted || (e.splinted && e.splinted in e.contents && prob(30))) || e.status & ORGAN_BLEEDING) && (H.getBruteLoss() + H.getFireLoss() >= 100))
+					if((e.status & ORGAN_BROKEN && (!e.splinted || (e.splinted && (e.splinted in e.contents) && prob(30))) || e.status & ORGAN_BLEEDING) && (H.getBruteLoss() + H.getFireLoss() >= 100))
 						return 1
-						break
 	return 0
 
 /mob/MouseDrop(mob/M as mob)
@@ -616,7 +639,7 @@ GLOBAL_VAR_INIT(exploit_warn_spam_prevention, 0)
 /mob/proc/see(message)
 	if(!is_active())
 		return 0
-	src << message
+	to_chat(src, message)
 	return 1
 
 /mob/proc/show_viewers(message)
@@ -943,6 +966,11 @@ mob/proc/yank_out_object()
 /mob/proc/updateicon()
 	return
 
+// Please always use this proc, never just set the var directly.
+/mob/proc/set_stat(var/new_stat)
+	. = (stat != new_stat)
+	stat = new_stat
+
 /mob/verb/face_direction()
 
 	set name = "Face Direction"
@@ -1165,3 +1193,49 @@ mob/proc/yank_out_object()
 /mob/onTransitZ(old_z, new_z)
 	..()
 	update_client_z(new_z)
+
+/mob/verb/local_diceroll(n as num)
+	set name = "diceroll"
+	set category = "OOC"
+	set desc = "Roll a random number between 1 and a chosen number."
+
+	n = round(n)		// why are you putting in floats??
+	if(n < 2)
+		to_chat(src, "<span class='warning'>[n] must be 2 or above, otherwise why are you rolling?</span>")
+		return
+
+	to_chat(src, "<span class='notice'>Diceroll result: <b>[rand(1, n)]</b></span>")
+
+/**
+ * Checks for anti magic sources.
+ *
+ * @params
+ * - magic - wizard-type magic
+ * - holy - cult-type magic, stuff chaplains/nullrods/similar should be countering
+ * - chargecost - charges to remove from antimagic if applicable/not a permanent source
+ * - self - check if the antimagic is ourselves
+ *
+ * @return The datum source of the antimagic
+ */
+/mob/proc/anti_magic_check(magic = TRUE, holy = FALSE, chargecost = 1, self = FALSE)
+	if(!magic && !holy)
+		return
+	var/list/protection_sources = list()
+	if(SEND_SIGNAL(src, COMSIG_MOB_RECEIVE_MAGIC, src, magic, holy, chargecost, self, protection_sources) & COMPONENT_BLOCK_MAGIC)
+		if(protection_sources.len)
+			return pick(protection_sources)
+		else
+			return src
+	if((magic && HAS_TRAIT(src, TRAIT_ANTIMAGIC)) || (holy && HAS_TRAIT(src, TRAIT_HOLY)))
+		return src
+
+/mob/drop_location()
+	if(temporary_form)
+		return temporary_form.drop_location()
+	return ..()
+
+/**
+ * Returns whether or not we should be allowed to examine a target
+ */
+/mob/proc/allow_examine(atom/A)
+	return client && (client.eye == src)

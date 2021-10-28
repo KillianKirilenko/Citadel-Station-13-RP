@@ -79,7 +79,6 @@
 /area/tether/surfacebase/tcomms/chamber
 	name = "\improper Telecomms Central Compartment"
 	icon_state = "tcomsatcham"
-	flags = BLUE_SHIELDED
 
 /area/maintenance/substation/tcomms
 	name = "\improper Telecomms Substation"
@@ -109,6 +108,6 @@
 	name = "pre-linked multitool (tether hub)"
 	desc = "This multitool has already been linked to the Tether telecomms hub and can be used to configure one (1) relay."
 
-/obj/item/multitool/triumph_buffered/Initialize()
+/obj/item/multitool/triumph_buffered/Initialize(mapload)
 	. = ..()
 	buffer = locate(/obj/machinery/telecomms/hub/preset/triumph)

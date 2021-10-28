@@ -23,9 +23,9 @@
 
 /obj/item/aicard/attack_self(mob/user)
 
-	ui_interact(user)
+	nano_ui_interact(user)
 
-/obj/item/aicard/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/datum/topic_state/state = inventory_state)
+/obj/item/aicard/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/datum/topic_state/state = inventory_state)
 	var/data[0]
 	data["has_ai"] = carded_ai != null
 	if(carded_ai)
@@ -60,7 +60,7 @@
 	var/user = usr
 	if (href_list["wipe"])
 		var/confirm = alert("Are you sure you want to disable this core's power? This cannot be undone once started.", "Confirm Shutdown", "No", "Yes")
-		if(confirm == "Yes" && (CanUseTopic(user, state) == STATUS_INTERACTIVE))
+		if(confirm == "Yes" && (CanUseTopic(user, state) == UI_INTERACTIVE))
 			add_attack_logs(user,carded_ai,"Purged from AI Card")
 			flush = 1
 			carded_ai.suiciding = 1

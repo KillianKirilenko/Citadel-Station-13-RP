@@ -1,6 +1,8 @@
 /obj/item/clothing
 	name = "clothing"
 	siemens_coefficient = 0.9
+	drop_sound = 'sound/items/drop/clothing.ogg'
+	pickup_sound = 'sound/items/pickup/cloth.ogg'
 	var/list/species_restricted = null //Only these species can wear this kit.
 	var/gunshot_residue //Used by forensics.
 
@@ -27,6 +29,7 @@
 	var/update_icon_define = null	// Only needed if you've got multiple files for the same type of clothing
 	var/recent_struggle = 0
 
+	var/clothing_flags = 0
 //Updates the icons of the mob wearing the clothing item, if any.
 /obj/item/clothing/proc/update_clothing_icon()
 	return
@@ -36,8 +39,8 @@
 	..()
 	gunshot_residue = null
 
-/obj/item/clothing/New()
-	..()
+/obj/item/clothing/Initialize(mapload)
+	. = ..()
 	if(starting_accessories)
 		for(var/T in starting_accessories)
 			var/obj/item/clothing/accessory/tie = new T(src)
@@ -231,6 +234,7 @@
 	icon = 'icons/obj/clothing/gloves.dmi'
 	siemens_coefficient = 0.9
 	blood_sprite_state = "bloodyhands"
+	material_weight_factor = 0
 	var/wired = 0
 	var/obj/item/cell/cell = 0
 	var/fingerprint_chance = 0	//How likely the glove is to let fingerprints through
@@ -246,7 +250,10 @@
 	sprite_sheets = list(
 		SPECIES_TESHARI = 'icons/mob/species/teshari/gloves.dmi',
 		SPECIES_VOX = 'icons/mob/species/vox/gloves.dmi',
-		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/hands.dmi')
+		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/hands.dmi'
+		)
+	drop_sound = 'sound/items/drop/gloves.ogg'
+	pickup_sound = 'sound/items/pickup/gloves.ogg'
 
 /obj/item/clothing/gloves/update_clothing_icon()
 	if (ismob(src.loc))
@@ -314,29 +321,30 @@
 	return 1
 
 /obj/item/clothing/gloves/dropped()
-	..()
+	. = ..()
 
 	if(!wearer)
 		return
 
-	var/mob/living/carbon/human/H = wearer
-	if(ring && istype(H))
-		if(!H.equip_to_slot_if_possible(ring, slot_gloves))
-			ring.forceMove(get_turf(src))
-		src.ring = null
+	if(ishuman(wearer))
+		restore_over_objects(wearer)
 	punch_force = initial(punch_force)
 	wearer = null
+
+/obj/item/clothing/gloves/proc/restore_over_objects(mob/living/carbon/human/wearer)
+	if(ring)
+		if(!wearer.equip_to_slot_if_possible(ring, slot_gloves))
+			ring.forceMove(get_turf(src))
+		ring = null
 
 /obj/item/clothing/gloves
 	var/datum/unarmed_attack/special_attack = null //do the gloves have a special unarmed attack?
 	var/special_attack_type = null
 
-/obj/item/clothing/gloves/New()
-	..()
+/obj/item/clothing/gloves/Initialize(mapload)
+	. = ..()
 	if(special_attack_type && ispath(special_attack_type))
 		special_attack = new special_attack_type
-
-
 
 /////////////////////////////////////////////////////////////////////
 //Rings
@@ -376,7 +384,11 @@
 	sprite_sheets = list(
 		SPECIES_TESHARI = 'icons/mob/species/teshari/head.dmi',
 		SPECIES_VOX = 'icons/mob/species/vox/head.dmi',
-		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/head.dmi')
+		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/head.dmi'
+		)
+
+	drop_sound = 'sound/items/drop/hat.ogg'
+	pickup_sound = 'sound/items/pickup/hat.ogg'
 
 /obj/item/clothing/head/attack_self(mob/user)
 	if(brightness_on)
@@ -542,13 +554,17 @@
 	sprite_sheets = list(
 		SPECIES_TESHARI = 'icons/mob/species/teshari/shoes.dmi',
 		SPECIES_VOX = 'icons/mob/species/vox/shoes.dmi',
-		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/feet.dmi')
+		SPECIES_WEREBEAST = 'icons/mob/species/werebeast/feet.dmi'
+		)
+	drop_sound = 'sound/items/drop/shoes.ogg'
+	pickup_sound = 'sound/items/pickup/shoes.ogg'
 
 	//there's a snake in my boot
 	var/list/inside_emotes = list()
 	var/recent_squish = 0
 
-/obj/item/clothing/shoes/New()
+/obj/item/clothing/shoes/Initialize(mapload)
+	. = ..()
 	inside_emotes = list(
 		"<font color='red'>You feel weightless for a moment as \the [name] moves upwards.</font>",
 		"<font color='red'>\The [name] are a ride you've got no choice but to participate in as the wearer moves.</font>",
@@ -591,6 +607,7 @@
 	if((can_hold_knife == 1) && (istype(I, /obj/item/material/shard) || \
 	 istype(I, /obj/item/material/butterfly) || \
 	 istype(I, /obj/item/material/kitchen/utensil) || \
+	 istype(I, /obj/item/storage/box/survival_knife) ||\
 	 istype(I, /obj/item/material/knife/tacknife)))
 		if(holding)
 			to_chat(user, "<span class='warning'>\The [src] is already holding \a [holding].</span>")
@@ -609,7 +626,7 @@
 			to_chat(user,"<span class='warning'>You can't fit anyone else into \the [src]!</span>")
 		else
 			var/obj/item/holder/micro/holder = I
-			if(holder.held_mob && holder.held_mob in holder)
+			if(holder.held_mob && (holder.held_mob in holder))
 				to_chat(holder.held_mob,"<span class='warning'>[user] stuffs you into \the [src]!</span>")
 				holder.held_mob.forceMove(src)
 				to_chat(user,"<span class='notice'>You stuff \the [holder.held_mob] into \the [src]!</span>")
@@ -661,7 +678,7 @@
 			recent_squish = 0
 		for(var/mob/living/M in contents)
 			var/emote = pick(inside_emotes)
-			M << emote //VOREStation edit end
+			to_chat(M, emote) //VOREStation edit end
 	return
 
 /obj/item/clothing/shoes/update_clothing_icon()
@@ -751,6 +768,7 @@
 	permeability_coefficient = 0.90
 	slot_flags = SLOT_ICLOTHING
 	armor = list(melee = 0, bullet = 0, laser = 0,energy = 0, bomb = 0, bio = 0, rad = 0)
+	equip_sound = 'sound/items/jumpsuit_equip.ogg'
 	w_class = ITEMSIZE_NORMAL
 	show_messages = 1
 	blood_sprite_state = "uniformblood"
@@ -801,8 +819,9 @@
 		return
 	..()
 
-/obj/item/clothing/under/New(var/mob/living/carbon/human/H) //need human arg for sensorprefs..
-	..()
+/obj/item/clothing/under/Initialize(mapload)
+	. = ..()
+	var/mob/living/carbon/human/H = loc
 	if(worn_state)
 		if(!item_state_slots)
 			item_state_slots = list()
@@ -850,7 +869,7 @@
 		under_icon = INV_W_UNIFORM_DEF_ICON
 
 	// The _s is because the icon update procs append it.
-	if((under_icon == rolled_down_icon && "[worn_state]_s" in icon_states(under_icon)) || ("[worn_state]_d_s" in icon_states(under_icon)))
+	if((under_icon == rolled_down_icon && ("[worn_state]_s" in icon_states(under_icon))) || ("[worn_state]_d_s" in icon_states(under_icon)))
 		if(rolled_down != 1)
 			rolled_down = 0
 	else
@@ -875,7 +894,7 @@
 		under_icon = INV_W_UNIFORM_DEF_ICON
 
 	// The _s is because the icon update procs append it.
-	if((under_icon == rolled_down_sleeves_icon && "[worn_state]_s" in icon_states(under_icon)) || ("[worn_state]_r_s" in icon_states(under_icon)))
+	if((under_icon == rolled_down_sleeves_icon && ("[worn_state]_s" in icon_states(under_icon))) || ("[worn_state]_r_s" in icon_states(under_icon)))
 		if(rolled_sleeves != 1)
 			rolled_sleeves = 0
 	else
@@ -889,16 +908,16 @@
 
 
 /obj/item/clothing/under/examine(mob/user)
-	..(user)
+	. = ..()
 	switch(src.sensor_mode)
 		if(0)
-			to_chat(user, "Its sensors appear to be disabled.")
+			. += "Its sensors appear to be disabled."
 		if(1)
-			to_chat(user, "Its binary life sensors appear to be enabled.")
+			. += "Its binary life sensors appear to be enabled."
 		if(2)
-			to_chat(user, "Its vital tracker appears to be enabled.")
+			. += "Its vital tracker appears to be enabled."
 		if(3)
-			to_chat(user, "Its vital tracker and tracking beacon appear to be enabled.")
+			. += "Its vital tracker and tracking beacon appear to be enabled."
 
 /obj/item/clothing/under/proc/set_sensors(mob/usr as mob)
 	var/mob/M = usr
@@ -939,7 +958,7 @@
 	set_sensors(usr)
 
 /obj/item/clothing/under/verb/rollsuit()
-	set name = "Roll Down Jumpsuit"
+	set name = "Roll Jumpsuit"
 	set category = "Object"
 	set src in usr
 	if(!istype(usr, /mob/living)) return
@@ -962,13 +981,13 @@
 		else
 			item_state_slots[slot_w_uniform_str] = "[worn_state]_d"
 
-		to_chat(usr, "<span class='notice'>You roll down your [src].</span>")
+		to_chat(usr, "<span class='notice'>You roll your [src].</span>")
 	else
 		body_parts_covered = initial(body_parts_covered)
 		if(icon_override == rolled_down_icon)
 			icon_override = initial(icon_override)
 		item_state_slots[slot_w_uniform_str] = "[worn_state]"
-		to_chat(usr, "<span class='notice'>You roll up your [src].</span>")
+		to_chat(usr, "<span class='notice'>You unroll your [src].</span>")
 	update_clothing_icon()
 
 /obj/item/clothing/under/verb/rollsleeves()
@@ -1004,6 +1023,6 @@
 	update_clothing_icon()
 
 
-/obj/item/clothing/under/rank/New()
+/obj/item/clothing/under/rank/Initialize(mapload)
+	. = ..()
 	sensor_mode = pick(0,1,2,3)
-	..()

@@ -11,8 +11,8 @@
 	on_rolled = list("down" = "none")
 	var/hide_on_roll = FALSE
 
-/obj/item/clothing/accessory/storage/New()
-	..()
+/obj/item/clothing/accessory/storage/Initialize(mapload)
+	. = ..()
 	hold = new/obj/item/storage/internal(src)
 	hold.max_storage_space = slots * 2
 	hold.max_w_class = ITEMSIZE_SMALL
@@ -108,8 +108,8 @@
 			"Teshari" = 'icons/mob/species/teshari/ties.dmi'
 			)
 
-/obj/item/clothing/accessory/storage/knifeharness/New()
-	..()
+/obj/item/clothing/accessory/storage/knifeharness/Initialize(mapload)
+	. = ..()
 	hold.max_storage_space = ITEMSIZE_COST_SMALL * 2
 	hold.can_hold = list(/obj/item/material/knife/machete/hatchet/unathiknife,\
 	/obj/item/material/knife,\
@@ -117,3 +117,10 @@
 
 	new /obj/item/material/knife/machete/hatchet/unathiknife(hold)
 	new /obj/item/material/knife/machete/hatchet/unathiknife(hold)
+
+/obj/item/clothing/accessory/storage/laconic
+	name = "laconic field pouch system"
+	desc = "This lightweight webbing system supports a hardened leather case designed to sit comfortably on the wearer's hip."
+	icon_state = "laconic"
+	slot = ACCESSORY_SLOT_UTILITY
+	slots = 5

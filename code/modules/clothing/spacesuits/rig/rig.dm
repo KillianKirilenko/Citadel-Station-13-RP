@@ -85,7 +85,7 @@
 	var/offline_slowdown = 3                                  // If the suit is deployed and unpowered, it sets slowdown to this.
 	var/vision_restriction
 	var/offline_vision_restriction = 1                        // 0 - none, 1 - welder vision, 2 - blind. Maybe move this to helmets.
-	var/airtight = 1 //If set, will adjust AIRTIGHT flag and pressure protections on components. Otherwise it should leave them untouched.
+	var/airtight = 1 //If set, will adjust ALLOWINTERNALS flag and pressure protections on components. Otherwise it should leave them untouched.
 	var/rigsuit_max_pressure = 10 * ONE_ATMOSPHERE			  // Max pressure the rig protects against when sealed
 	var/rigsuit_min_pressure = 0							  // Min pressure the rig protects against when sealed
 
@@ -95,27 +95,34 @@
 	// Wiring! How exciting.
 	var/datum/wires/rig/wires
 	var/datum/effect_system/spark_spread/spark_system
+	var/datum/mini_hud/rig/minihud
+
+	//Traps, too.
+	var/isTrapped = 0 //Will it lock you in?
+	var/trapSprung = 0 //Don't define this one. It's if it's procced.
+	var/springtrapped = 0 //Will it cause severe bodily harm?
+	var/trapDelay = 300 //in deciseconds
+	var/warn = 1 //If the suit will warn you if it can't deploy a part. Will always end back at 1.
 
 /obj/item/rig/get_cell()
 	return cell
 
-/obj/item/rig/examine()
-	to_chat(usr, "This is \icon[src][src.name].")
-	to_chat(usr, "[src.desc]")
+/obj/item/rig/examine(mob/user)
+	. = ..()
 	if(wearer)
 		for(var/obj/item/piece in list(helmet,gloves,chest,boots))
 			if(!piece || piece.loc != wearer)
 				continue
-			to_chat(usr, "\icon[piece] \The [piece] [piece.gender == PLURAL ? "are" : "is"] deployed.")
+			. += "[icon2html(thing = piece, target = user)] \The [piece] [piece.gender == PLURAL ? "are" : "is"] deployed."
 
 	if(src.loc == usr)
-		to_chat(usr, "The access panel is [locked? "locked" : "unlocked"].")
-		to_chat(usr, "The maintenance panel is [open ? "open" : "closed"].")
-		to_chat(usr, "Hardsuit systems are [offline ? "<font color='red'>offline</font>" : "<font color='green'>online</font>"].")
-		to_chat(usr, "The cooling stystem is [cooling_on ? "active" : "inactive"].")
+		. += "The access panel is [locked? "locked" : "unlocked"]."
+		. += "The maintenance panel is [open ? "open" : "closed"]."
+		. += "Hardsuit systems are [offline ? "<font color='red'>offline</font>" : "<font color='green'>online</font>"]."
+		. += "The cooling stystem is [cooling_on ? "active" : "inactive"]."
 
 		if(open)
-			to_chat(usr, "It's equipped with [english_list(installed_modules)].")
+			. += "It's equipped with [english_list(installed_modules)]."
 
 /obj/item/rig/Initialize(mapload)
 	. = ..()
@@ -219,17 +226,20 @@
 	if(seal == 1)
 		piece.min_pressure_protection = rigsuit_min_pressure
 		piece.max_pressure_protection = rigsuit_max_pressure
-		piece.item_flags |= AIRTIGHT
+		piece.item_flags |= ALLOWINTERNALS
 	else
 		piece.min_pressure_protection = null
 		piece.max_pressure_protection = null
-		piece.item_flags &= ~AIRTIGHT
+		piece.item_flags &= ~ALLOWINTERNALS
 	return
 
 
 /obj/item/rig/proc/reset()
 	offline = 2
 	canremove = 1
+	//Reset the trap and upgrade it. Won't affect standard rigs.
+	trapSprung = 0
+	springtrapped = 1
 	for(var/obj/item/piece in list(helmet,boots,gloves,chest))
 		if(!piece) continue
 		piece.icon_state = "[suit_state]"
@@ -237,12 +247,57 @@
 			update_airtight(piece, 0) // Unseal
 	update_icon(1)
 
+/obj/item/rig/proc/trap(var/mob/living/carbon/human/M)
+	warn = 0
+	sleep(trapDelay)
+	if(!suit_is_deployed())//Check if it's deployed. Interrupts taking it off.
+		toggle_piece("helmet", M, ONLY_DEPLOY)
+		toggle_piece("gauntlets", M, ONLY_DEPLOY)
+		toggle_piece("chest", M, ONLY_DEPLOY)
+		toggle_piece("boots", M, ONLY_DEPLOY)
+		if(suit_is_deployed())
+			playsound(src.loc, 'sound/weapons/empty.ogg', 40, 1)
+			to_chat(M, "<span class='warning'>[src] makes a distinct clicking noise.")
+			trapSprung = 1
+		else
+			trap(M)
+			warn = 1
+	else
+		trap(M)
+		warn = 1
+
+/obj/item/rig/proc/springtrap(var/mob/living/carbon/human/M)
+	warn = 0
+	sleep(trapDelay)
+	if(!suit_is_deployed())
+		toggle_piece("helmet", M, ONLY_DEPLOY)
+		toggle_piece("gauntlets", M, ONLY_DEPLOY)
+		toggle_piece("chest", M, ONLY_DEPLOY)
+		toggle_piece("boots", M, ONLY_DEPLOY)
+		if(suit_is_deployed())
+			M.adjustBruteLossByPart(70, BP_TORSO)
+			for(var/harm = 8; harm > 0; harm--)
+				M.adjustBruteLoss(10)
+			playsound(src.loc, 'sound/weapons/gunshot_generic_rifle.ogg', 40, 1)
+			to_chat(M, "<span class ='userdanger'>[src] clamps down hard, support rods and wires shooting forth, piercing you all over!")
+			trapSprung = 1
+		else
+			springtrap(M)
+			warn = 1
+	else
+		springtrap(M)
+		warn = 1
+
 /obj/item/rig/proc/toggle_seals(var/mob/living/carbon/human/M,var/instant)
 
 	if(sealing) return
 
 	if(!check_power_cost(M))
 		return 0
+
+	if(trapSprung == 1)
+		to_chat(M, "<span class='warning'>The [src] doesn't respond to your inputs.")
+		return
 
 	deploy(M,instant)
 
@@ -270,7 +325,7 @@
 	if(!failed_to_seal)
 
 		if(!instant)
-			M.visible_message("<font color='blue'>[M]'s suit emits a quiet hum as it begins to adjust its seals.</font>","<font color='blue'>With a quiet hum, the suit begins running checks and adjusting components.</font>")
+			M.visible_message("<font color=#4F49AF>[M]'s suit emits a quiet hum as it begins to adjust its seals.</font>","<font color=#4F49AF>With a quiet hum, the suit begins running checks and adjusting components.</font>")
 			if(seal_delay && !do_after(M,seal_delay))
 				if(M)
 					to_chat(M, "<span class='warning'>You must remain still while the suit is adjusting the components.</span>")
@@ -302,16 +357,16 @@
 					piece.icon_state = "[suit_state][!seal_target ? "_sealed" : ""]"
 					switch(msg_type)
 						if("boots")
-							to_chat(M, "<font color='blue'>\The [piece] [!seal_target ? "seal around your feet" : "relax their grip on your legs"].</font>")
+							to_chat(M, "<font color=#4F49AF>\The [piece] [!seal_target ? "seal around your feet" : "relax their grip on your legs"].</font>")
 							M.update_inv_shoes()
 						if("gloves")
-							to_chat(M, "<font color='blue'>\The [piece] [!seal_target ? "tighten around your fingers and wrists" : "become loose around your fingers"].</font>")
+							to_chat(M, "<font color=#4F49AF>\The [piece] [!seal_target ? "tighten around your fingers and wrists" : "become loose around your fingers"].</font>")
 							M.update_inv_gloves()
 						if("chest")
-							to_chat(M, "<font color='blue'>\The [piece] [!seal_target ? "cinches tight again your chest" : "releases your chest"].</font>")
+							to_chat(M, "<font color=#4F49AF>\The [piece] [!seal_target ? "cinches tight again your chest" : "releases your chest"].</font>")
 							M.update_inv_wear_suit()
 						if("helmet")
-							to_chat(M, "<font color='blue'>\The [piece] hisses [!seal_target ? "closed" : "open"].</font>")
+							to_chat(M, "<font color=#4F49AF>\The [piece] hisses [!seal_target ? "closed" : "open"].</font>")
 							M.update_inv_head()
 							if(helmet)
 								helmet.update_light(wearer)
@@ -346,13 +401,23 @@
 
 	// Success!
 	canremove = seal_target
-	to_chat(M, "<font color='blue'><b>Your entire suit [canremove ? "loosens as the components relax" : "tightens around you as the components lock into place"].</b></font>")
+	if(M.hud_used)
+		if(canremove)
+			QDEL_NULL(minihud)
+		else
+			minihud = new (M.hud_used, src)
+	to_chat(M, "<font color=#4F49AF><b>Your entire suit [canremove ? "loosens as the components relax" : "tightens around you as the components lock into place"].</b></font>")
 	M.client.screen -= booting_L
 	qdel(booting_L)
 	booting_R.icon_state = "boot_done"
 	spawn(40)
 		M.client.screen -= booting_R
 		qdel(booting_R)
+
+	if(isTrapped == 1 && springtrapped == 1)
+		springtrap(M)
+	if(isTrapped == 1 && springtrapped == 0)
+		trap(M)
 
 	if(canremove)
 		for(var/obj/item/rig_module/module in installed_modules)
@@ -462,7 +527,7 @@
 	if(cell.charge <= 0)
 		turn_cooling_off(H, 1)
 
-/obj/item/rig/process()
+/obj/item/rig/process(delta_time)
 	// If we've lost any parts, grab them back.
 	var/mob/living/M
 	for(var/obj/item/piece in list(gloves,boots,helmet,chest))
@@ -561,7 +626,7 @@
 	else
 		stat(null, text("No Cell Inserted!"))
 
-/obj/item/rig/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/nano_state = inventory_state)
+/obj/item/rig/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/nano_state = inventory_state)
 	if(!user)
 		return
 
@@ -739,7 +804,7 @@
 		return
 
 	if(seal_delay > 0 && istype(M) && (M.back == src || M.belt == src))
-		M.visible_message("<font color='blue'>[M] starts putting on \the [src]...</font>", "<font color='blue'>You start putting on \the [src]...</font>")
+		M.visible_message("<font color=#4F49AF>[M] starts putting on \the [src]...</font>", "<font color=#4F49AF>You start putting on \the [src]...</font>")
 		if(!do_after(M,seal_delay))
 			if(M && (M.back == src || M.belt == src))
 				if(!M.unEquip(src))
@@ -748,7 +813,7 @@
 			return
 
 	if(istype(M) && (M.back == src || M.belt == src))
-		M.visible_message("<font color='blue'><b>[M] struggles into \the [src].</b></font>", "<font color='blue'><b>You struggle into \the [src].</b></font>")
+		M.visible_message("<font color=#4F49AF><b>[M] struggles into \the [src].</b></font>", "<font color=#4F49AF><b>You struggle into \the [src].</b></font>")
 		wearer = M
 		wearer.wearing_rig = src
 		update_icon()
@@ -762,6 +827,10 @@
 		return
 
 	if(usr == wearer && (usr.stat||usr.paralysis||usr.stunned)) // If the usr isn't wearing the suit it's probably an AI.
+		return
+
+	if(trapSprung == 1)
+		to_chat(H, "<span class='warning'>The [src] doesn't respond to your inputs.")
 		return
 
 	var/obj/item/check_slot
@@ -798,7 +867,7 @@
 				holder = use_obj.loc
 				if(istype(holder))
 					if(use_obj && check_slot == use_obj)
-						to_chat(H, "<font color='blue'><b>Your [use_obj.name] [use_obj.gender == PLURAL ? "retract" : "retracts"] swiftly.</b></font>")
+						to_chat(H, "<font color=#4F49AF><b>Your [use_obj.name] [use_obj.gender == PLURAL ? "retract" : "retracts"] swiftly.</b></font>")
 						use_obj.canremove = 1
 						holder.drop_from_inventory(use_obj)
 						use_obj.forceMove(get_turf(src))
@@ -812,7 +881,7 @@
 			use_obj.forceMove(H)
 			if(!H.equip_to_slot_if_possible(use_obj, equip_to, 0, 1))
 				use_obj.forceMove(src)
-				if(check_slot)
+				if(check_slot && warn == 1)
 					to_chat(H, "<span class='danger'>You are unable to deploy \the [piece] as \the [check_slot] [check_slot.gender == PLURAL ? "are" : "is"] in the way.</span>")
 					return
 			else
@@ -969,13 +1038,13 @@
 			return 0
 
 	if(offline || !cell || !cell.charge || locked_down)
-		if(user) user << "<span class='warning'>Your host rig is unpowered and unresponsive.</span>"
+		if(user) to_chat(user, "<span class='warning'>Your host rig is unpowered and unresponsive.</span>")
 		return 0
 	if(!wearer || (wearer.back != src && wearer.belt != src))
-		if(user) user << "<span class='warning'>Your host rig is not being worn.</span>"
+		if(user) to_chat(user, "<span class='warning'>Your host rig is not being worn.</span>")
 		return 0
 	if(!wearer.stat && !control_overridden && !ai_override_enabled)
-		if(user) user << "<span class='warning'>You are locked out of the suit servo controller.</span>"
+		if(user) to_chat(user, "<span class='warning'>You are locked out of the suit servo controller.</span>")
 		return 0
 	return 1
 
@@ -1018,7 +1087,7 @@
 			return 0
 
 	if(malfunctioning)
-		direction = pick(cardinal)
+		direction = pick(GLOB.cardinal)
 
 	// Inside an object, tell it we moved.
 	if(isobj(wearer.loc) || ismob(wearer.loc))

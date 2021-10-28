@@ -111,6 +111,8 @@
 	name = "small parcel"
 	icon = 'icons/obj/storage.dmi'	//VOREStation Edit
 	icon_state = "deliverycrate3"
+	drop_sound = 'sound/items/drop/cardboardbox.ogg'
+	pickup_sound = 'sound/items/pickup/cardboardbox.ogg'
 	var/obj/item/wrapped = null
 	var/sortTag = null
 	var/examtext = null
@@ -232,7 +234,7 @@
 		if(user in target) //no wrapping closets that you are inside - it's not physically possible
 			return
 
-		user.attack_log += text("\[[time_stamp()]\] <font color='blue'>Has used [src.name] on \ref[target]</font>")
+		user.attack_log += text("\[[time_stamp()]\] <font color=#4F49AF>Has used [src.name] on \ref[target]</font>")
 
 
 		if (istype(target, /obj/item) && !(istype(target, /obj/item/storage) && !istype(target,/obj/item/storage/box)))
@@ -293,7 +295,7 @@
 			else if(src.amount < 3)
 				to_chat(user, "<span class='warning'>You need more paper.</span>")
 		else
-			to_chat(user, "<font color='blue'>The object you are trying to wrap is unsuitable for the sorting machinery!</font>")
+			to_chat(user, "<font color=#4F49AF>The object you are trying to wrap is unsuitable for the sorting machinery!</font>")
 		if (src.amount <= 0)
 			new /obj/item/c_tube( src.loc )
 			qdel(src)
@@ -302,7 +304,7 @@
 
 	examine(mob/user)
 		if(..(user, 0))
-			to_chat(user, "<font color='blue'>There are [amount] units of package wrap left!</font>")
+			to_chat(user, "<font color=#4F49AF>There are [amount] units of package wrap left!</font>")
 
 		return
 
@@ -350,7 +352,7 @@
 
 	Topic(href, href_list)
 		src.add_fingerprint(usr)
-		if(href_list["nextTag"] && href_list["nextTag"] in tagger_locations)
+		if(href_list["nextTag"] && (href_list["nextTag"] in tagger_locations))
 			src.currTag = href_list["nextTag"]
 		openwindow(usr)
 

@@ -63,6 +63,8 @@
 	permeability_coefficient = 0.01
 	germ_level = 0
 	fingerprint_chance = 25
+	drop_sound = 'sound/items/drop/rubber.ogg'
+	pickup_sound = 'sound/items/pickup/rubber.ogg'
 //	var/balloonPath = /obj/item/latexballon
 
 //TODO: Make inflating gloves a thing
@@ -88,6 +90,8 @@
 	item_state_slots = list(slot_r_hand_str = "lightbrown", slot_l_hand_str = "lightbrown")
 	permeability_coefficient = 0.05
 	siemens_coefficient = 0.75 //thick work gloves
+	drop_sound = 'sound/items/drop/leather.ogg'
+	pickup_sound = 'sound/items/pickup/leather.ogg'
 
 /obj/item/clothing/gloves/duty
 	desc = "These brown duty gloves are made from a durable synthetic."
@@ -116,6 +120,8 @@
 	siemens_coefficient = 0
 	permeability_coefficient = 0.05
 	species_restricted = list("Vox")
+	drop_sound = 'sound/items/drop/metalboots.ogg'
+	pickup_sound = 'sound/items/pickup/toolbox.ogg'
 
 	cold_protection = HANDS
 	min_cold_protection_temperature = GLOVES_MIN_COLD_PROTECTION_TEMPERATURE
@@ -134,6 +140,8 @@
 	overgloves = 1
 	force = 5
 	punch_force = 5
+	drop_sound = 'sound/items/drop/metalboots.ogg'
+	pickup_sound = 'sound/items/pickup/toolbox.ogg'
 
 /obj/item/clothing/gloves/ranger
 	var/glovecolor = "white"
@@ -143,7 +151,7 @@
 	icon = 'icons/obj/clothing/ranger.dmi'
 	icon_state = "ranger_gloves"
 
-/obj/item/clothing/gloves/ranger/Initialize()
+/obj/item/clothing/gloves/ranger/Initialize(mapload)
 	. = ..()
 	if(icon_state == "ranger_gloves")
 		name = "[glovecolor] ranger gloves"
@@ -180,11 +188,16 @@
 	if(user.mind.isholy && !blessed)
 		blessed = TRUE
 		siemens_coefficient = 0
-		to_chat(user, "<font color='blue'>You repeat the incantations etched into the gloves.</font>")
+		to_chat(user, "<font color=#4F49AF>You repeat the incantations etched into the gloves.</font>")
 	else
 		blessed = FALSE
 		siemens_coefficient = 0.5
-		to_chat(user, "<font color='blue'>You dispel the incantations eteched into the gloves for now.</font>")
+		to_chat(user, "<font color=#4F49AF>You dispel the incantations eteched into the gloves for now.</font>")
 
 	if(!user.mind.isholy)
 		to_chat(user, "<font color='red'>You're not sure what language this is.</font>")
+
+/obj/item/clothing/gloves/bountyskin
+	name = "bounty hunter skinsuit (gloves)"
+	desc = "These gloves were originally integrated into the bounty hunter skinsuit. Later iterations were made removable for practicality."
+	icon_state = "bountyskin"

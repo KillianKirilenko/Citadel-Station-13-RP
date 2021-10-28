@@ -1,7 +1,12 @@
 /atom
 	layer = TURF_LAYER //This was here when I got here. Why though?
 	var/level = 2
+
+	/// Atom flags
 	var/flags = NONE
+	///Intearaction flags
+	var/interaction_flags_atom = NONE
+
 	var/list/fingerprints
 	var/list/fingerprintshidden
 	var/fingerprintslast = null
@@ -13,10 +18,24 @@
 	var/throwpass = 0
 	var/germ_level = GERM_LEVEL_AMBIENT // The higher the germ level, the more germ on the atom.
 	var/simulated = 1 //filter for actions - used by lighting overlays
+	var/atom_say_verb = "says"
+	var/bubble_icon = "normal" ///what icon the atom uses for speechbubbles
 	var/fluorescent // Shows up under a UV light.
 
 	var/list/atom_colours	 //used to store the different colors on an atom
 							//its inherent color, the colored paint applied on it, special color effect etc...
+
+/*		new overlay system
+	/// a very temporary list of overlays to remove
+	var/list/remove_overlays
+	/// a very temporary list of overlays to add
+	var/list/add_overlays
+*/
+
+	///vis overlays managed by SSvis_overlays to automaticaly turn them like other overlays
+	var/list/managed_vis_overlays
+	///overlays managed by [update_overlays][/atom/proc/update_overlays] to prevent removing overlays that weren't added by the same proc
+	var/list/managed_overlays
 
 	/// The orbiter comopnent if we're being orbited.
 	var/datum/component/orbiter/orbiters
@@ -26,14 +45,6 @@
 	//var/chem_is_open_container = 0
 	// replaced by OPENCONTAINER flags and atom/proc/is_open_container()
 	///Chemistry.
-
-/*		New overlay system
-	var/list/priority_overlays	//overlays that should remain on top and not normally removed when using cut_overlay functions, like c4.
-	var/list/remove_overlays // a very temporary list of overlays to remove
-	var/list/add_overlays // a very temporary list of overlays to add
-
-	var/list/managed_vis_overlays //vis overlays managed by SSvis_overlays to automaticaly turn them like other overlays
-*/
 
 	//Detective Work, used for the duplicate data points kept in the scanners
 	var/list/original_atom
@@ -59,12 +70,6 @@
 			return
 	// Don't call ..() unless /datum/New() ever exists
 
-	// Uncomment if anything ever uses the return value of SSatoms.InitializeAtoms ~Leshana
-	// If a map is being loaded, it might want to know about newly created objects so they can be handled.
-	// var/list/created = SSatoms.created_atoms
-	// if(created)
-	// 	created += src
-
 // Note: I removed "auto_init" feature (letting types disable auto-init) since it shouldn't be needed anymore.
 // 	You can replicate the same by checking the value of the first parameter to initialize() ~Leshana
 
@@ -83,14 +88,12 @@
 	if(color)
 		add_atom_colour(color, FIXED_COLOUR_PRIORITY)
 
-/*
-	if (light_power && light_range)
+	if(light_power && light_range)
 		update_light()
 
-	if (opacity && isturf(loc))
+	if(opacity && isturf(loc))
 		var/turf/T = loc
-		T.has_opaque_atom = TRUE // No need to recalculate it in this case, it's guaranteed to be on afterwards anyways.
-*/
+		T.has_opaque_atom = TRUE // No need to recalculate it in this case, it's guranteed to be on afterwards anyways.
 
 /*
 	if (canSmoothWith)
@@ -108,6 +111,42 @@
 // Put your AddComponent() calls here
 /atom/proc/ComponentInitialize()
 	return
+
+/**
+ * Top level of the destroy chain for most atoms
+ *
+ * Cleans up the following:
+ * * Removes alternate apperances from huds that see them
+ * * qdels the reagent holder from atoms if it exists
+ * * clears the orbiters list
+ * * clears overlays and priority overlays
+ * * clears the light object
+ */
+/atom/Destroy()
+/*
+	if(alternate_appearances)
+		for(var/K in alternate_appearances)
+			var/datum/atom_hud/alternate_appearance/AA = alternate_appearances[K]
+			AA.remove_from_hud(src)
+*/
+
+	if(reagents)
+		qdel(reagents)
+
+	orbiters = null // The component is attached to us normaly and will be deleted elsewhere
+
+	LAZYCLEARLIST(overlays)
+
+/*
+	for(var/i in targeted_by)
+		var/mob/M = i
+		LAZYREMOVE(M.do_afters, src)
+	targeted_by = null
+*/
+
+	QDEL_NULL(light)
+
+	return ..()
 
 /atom/proc/reveal_blood()
 	return
@@ -199,24 +238,85 @@
 			found += A.search_contents_for(path,filter_path)
 	return found
 
-//All atoms
-/atom/proc/examine(mob/user, var/distance = -1, var/infix = "", var/suffix = "")
-	//This reformat names to get a/an properly working on item descriptions when they are bloody
-	var/f_name = "\a [src][infix]."
-	if(src.blood_DNA && !istype(src, /obj/effect/decal))
-		if(gender == PLURAL)
-			f_name = "some "
-		else
-			f_name = "a "
-		if(blood_color != SYNTH_BLOOD_COLOUR)
-			f_name += "<span class='danger'>blood-stained</span> [name][infix]!"
-		else
-			f_name += "oil-stained [name][infix]."
+/atom/proc/get_examine_name(mob/user)
+	. = "\a [src]"
+	var/list/override = list(gender == PLURAL ? "some" : "a", " ", "[name]")
 
-	to_chat(user, "\icon[src] That's [f_name] [suffix]")
-	user << desc
+	var/should_override = FALSE
 
-	return distance == -1 || (get_dist(src, user) <= distance)
+	if(SEND_SIGNAL(src, COMSIG_ATOM_GET_EXAMINE_NAME, user, override) & COMPONENT_EXNAME_CHANGED)
+		should_override = TRUE
+
+
+	if(blood_DNA && !istype(src, /obj/effect/decal))
+		override[EXAMINE_POSITION_BEFORE] = " blood-stained "
+		should_override = TRUE
+
+	if(should_override)
+		. = override.Join("")
+
+///Generate the full examine string of this atom (including icon for goonchat)
+/atom/proc/get_examine_string(mob/user, thats = FALSE)
+	return "[icon2html(thing = src, target = user)] [thats? "That's ":""][get_examine_name(user)]"
+// todo:
+/atom/proc/examine(mob/user)
+	. = list("[get_examine_string(user, TRUE)].")
+
+	if(desc)
+		. += desc
+
+	if(reagents)
+		if(is_open_container())
+			. += "It contains:"
+			if(length(reagents.reagent_list))
+				if(user.can_see_reagents()) //Show each individual reagent
+					for(var/datum/reagent/R in reagents.reagent_list)
+						. += "[R.volume] units of [R.name]"
+				else //Otherwise, just show the total volume
+					var/total_volume = 0
+					for(var/datum/reagent/R in reagents.reagent_list)
+						total_volume += R.volume
+					. += "[total_volume] units of various reagents"
+			else
+				. += "Nothing."
+
+
+	SEND_SIGNAL(src, COMSIG_PARENT_EXAMINE, user, .)
+
+/// Updates the icon of the atom
+/atom/proc/update_icon()
+	SIGNAL_HANDLER
+
+	var/signalOut = SEND_SIGNAL(src, COMSIG_ATOM_UPDATE_ICON)
+	. = FALSE
+
+	if(!(signalOut & COMSIG_ATOM_NO_UPDATE_ICON_STATE))
+		update_icon_state()
+		. = TRUE
+
+	if(!(signalOut & COMSIG_ATOM_NO_UPDATE_OVERLAYS))
+		if(LAZYLEN(managed_vis_overlays))
+			SSvis_overlays.remove_vis_overlay(src, managed_vis_overlays)
+
+		var/list/new_overlays = update_overlays()
+		if(managed_overlays)
+			cut_overlay(managed_overlays)
+			managed_overlays = null
+		if(length(new_overlays))
+			managed_overlays = new_overlays
+			add_overlay(new_overlays)
+		. = TRUE
+
+	SEND_SIGNAL(src, COMSIG_ATOM_UPDATED_ICON, signalOut, .)
+
+/// Updates the icon state of the atom
+/atom/proc/update_icon_state()
+
+/// Updates the overlays of the atom
+/atom/proc/update_overlays()
+	SHOULD_CALL_PARENT(TRUE)
+	. = list()
+	SEND_SIGNAL(src, COMSIG_ATOM_UPDATE_OVERLAYS, .)
 
 // called by mobs when e.g. having the atom as their machine, pulledby, loc (AKA mob being inside the atom) or buckled var set.
 // see code/modules/mob/mob_movement.dm for more.
@@ -244,11 +344,6 @@
 
 /atom/proc/melt()
 	return
-
-// Previously this was defined both on /obj/ and /turf/ seperately.  And that's bad.
-/atom/proc/update_icon()
-	return
-
 
 /atom/proc/hitby(atom/movable/AM as mob|obj)
 	if (density)
@@ -452,7 +547,7 @@
 		cur_y = y_arr.Find(src.z)
 		if(cur_y)
 			break
-//	world << "X = [cur_x]; Y = [cur_y]"
+//	to_chat(world, "X = [cur_x]; Y = [cur_y]")
 	if(cur_x && cur_y)
 		return list("x"=cur_x,"y"=cur_y)
 	else
@@ -554,6 +649,23 @@
 /atom/proc/GenerateTag()
 	return
 
+/atom/proc/atom_say(message)
+	if(!message)
+		return
+	var/list/speech_bubble_hearers = list()
+	for(var/mob/M in get_hearers_in_view(7, src))
+		M.show_message("<span class='game say'><span class='name'>[src]</span> [atom_say_verb], \"[message]\"</span>", 2, null, 1)
+		if(M.client)
+			speech_bubble_hearers += M.client
+
+	if(length(speech_bubble_hearers))
+		var/image/I = generate_speech_bubble(src, "[bubble_icon][say_test(message)]", FLY_LAYER)
+		I.appearance_flags = APPEARANCE_UI_IGNORE_ALPHA
+		INVOKE_ASYNC(GLOBAL_PROC, /.proc/flick_overlay, I, speech_bubble_hearers, 30)
+
+/atom/proc/speech_bubble(bubble_state = "", bubble_loc = src, list/bubble_recipients = list())
+	return
+
 /*
 	Atom Colour Priority System
 	A System that gives finer control over which atom colour to colour the atom with.
@@ -609,11 +721,54 @@
 			return
 
 /**
-  * Returns if we have gravity on a specified turf.
+  * Returns true if this atom has gravity for the passed in turf
+  *
+  * Sends signals COMSIG_ATOM_HAS_GRAVITY and COMSIG_TURF_HAS_GRAVITY, both can force gravity with
+  * the forced gravity var
+  *
+  * Gravity situations:
+  * * No gravity if you're not in a turf
+  * * No gravity if this atom is in is a space turf
+  * * Gravity if the area it's in always has gravity
+  * * Gravity if there's a gravity generator on the z level
+  * * Gravity if the Z level has an SSMappingTrait for ZTRAIT_GRAVITY
+  * * otherwise no gravity
   */
 /atom/proc/has_gravity(turf/T)
-	if(!T)
+	if(!T || !isturf(T))
 		T = get_turf(src)
+
 	if(!T)
-		return TRUE
-	return T.has_gravity()
+		return 0
+
+/*
+	var/list/forced_gravity = list()
+	SEND_SIGNAL(src, COMSIG_ATOM_HAS_GRAVITY, T, forced_gravity)
+	if(!forced_gravity.len)
+		SEND_SIGNAL(T, COMSIG_TURF_HAS_GRAVITY, src, forced_gravity)
+	if(forced_gravity.len)
+		var/max_grav
+		for(var/i in forced_gravity)
+			max_grav = max(max_grav, i)
+		return max_grav
+*/
+
+	if(isspaceturf(T)) // Turf never has gravity
+		return 0
+
+	var/area/A = get_area(T)
+	if(A.has_gravity) // Areas which always has gravity
+		return A.has_gravity
+/*
+	else
+		// There's a gravity generator on our z level
+		if(GLOB.gravity_generators["[T.z]"])
+			var/max_grav = 0
+			for(var/obj/machinery/gravity_generator/main/G in GLOB.gravity_generators["[T.z]"])
+				max_grav = max(G.setting,max_grav)
+			return max_grav
+*/
+	return SSmapping.level_trait(T.z, ZTRAIT_GRAVITY)
+
+/atom/proc/is_incorporeal()
+	return FALSE

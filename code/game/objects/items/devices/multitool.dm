@@ -7,6 +7,7 @@
 /obj/item/multitool
 	name = "multitool"
 	desc = "Used for pulsing wires to test which to cut. Not recommended by doctors."
+	description_info = "You can use this on airlocks or APCs to try to hack them without cutting wires."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "multitool"
 	force = 5.0
@@ -14,7 +15,8 @@
 	throwforce = 5.0
 	throw_range = 15
 	throw_speed = 3
-	desc = "You can use this on airlocks or APCs to try to hack them without cutting wires."
+	drop_sound = 'sound/items/drop/multitool.ogg'
+	pickup_sound = 'sound/items/pickup/multitool.ogg'
 
 	matter = list(DEFAULT_WALL_MATERIAL = 50,"glass" = 20)
 
@@ -26,7 +28,7 @@
 	var/obj/machinery/telecomms/buffer // simple machine buffer for device linkage
 	var/obj/machinery/clonepod/connecting //same for cryopod linkage
 	var/obj/machinery/connectable	//Used to connect machinery.
-	var/weakref_wiring //Used to store weak references for integrated circuitry. This is now the Omnitool.
+	var/datum/weakref_wiring //Used to store weak references for integrated circuitry. This is now the Omnitool.
 	toolspeed = 1
 
 /obj/item/multitool/attack_self(mob/living/user)

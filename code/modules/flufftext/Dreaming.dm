@@ -33,13 +33,13 @@ mob/living/carbon/proc/dream()
 
 	spawn(0)
 		for(var/i = rand(1,4),i > 0, i--)
-			to_chat(src, "<font color='blue'><i>... [pick(dreams)] ...</i></font>")
+			to_chat(src, "<font color=#4F49AF><i>... [pick(dreams)] ...</i></font>")
 			sleep(rand(40,70))
 			if(paralysis <= 0)
 				dreaming = 0
-				return 0
+				return
 		dreaming = 0
-		return 1
+		return
 
 mob/living/carbon/proc/handle_dreams()
 	if(client && !dreaming && prob(5))

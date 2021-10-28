@@ -22,14 +22,14 @@
 	var/locked = 0
 	var/scan_id = 1
 	var/is_secure = 0
-	var/wrenchable = 0
+	var/wrenchable = TRUE
 	var/datum/wires/smartfridge/wires = null
 
 /obj/machinery/smartfridge/secure
 	is_secure = 1
 
-/obj/machinery/smartfridge/New()
-	..()
+/obj/machinery/smartfridge/Initialize(mapload)
+	. = ..()
 	if(is_secure)
 		wires = new/datum/wires/smartfridge/secure(src)
 	else
@@ -71,7 +71,6 @@
 	if(istype(O, /obj/item/slimepotion))
 		return TRUE
 	return FALSE
-
 
 /obj/machinery/smartfridge/secure/medbay
 	name = "\improper Refrigerated Medicine Storage"
@@ -126,6 +125,16 @@
 	if(istype(O,/obj/item/reagent_containers/glass) || istype(O,/obj/item/reagent_containers/food/drinks) || istype(O,/obj/item/reagent_containers/food/condiment))
 		return 1
 
+/obj/machinery/smartfridge/food
+	name = "\improper Hot Foods Display"
+	desc = "A climated storage for dishes waiting to be eaten"
+
+/obj/machinery/smartfridge/food/accept_check(obj/item/O)
+	if(istype(O,/obj/item/reagent_containers/food/snacks) && !istype(O,/obj/item/reagent_containers/food/snacks/grown))//No fruits
+		return 1
+	if(istype(O,/obj/item/reagent_containers/food/condiment))//condiments need storage as well
+		return 1
+
 /obj/machinery/smartfridge/drying_rack
 	name = "\improper Drying Rack"
 	desc = "A machine for drying plants."
@@ -142,7 +151,7 @@
 			return 1
 	return 0
 
-/obj/machinery/smartfridge/drying_rack/process()
+/obj/machinery/smartfridge/drying_rack/process(delta_time)
 	..()
 	if(stat & (BROKEN|NOPOWER))
 		return
@@ -184,7 +193,7 @@
 			return
 	return
 
-/obj/machinery/smartfridge/process()
+/obj/machinery/smartfridge/process(delta_time)
 	if(stat & (BROKEN|NOPOWER))
 		return
 	if(src.seconds_electrified > 0)
@@ -295,13 +304,13 @@
 	if(stat & (NOPOWER|BROKEN))
 		return
 	wires.Interact(user)
-	ui_interact(user)
+	nano_ui_interact(user)
 
 /*******************
 *   SmartFridge Menu
 ********************/
 
-/obj/machinery/smartfridge/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/smartfridge/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	user.set_machine(src)
 
 	var/data[0]

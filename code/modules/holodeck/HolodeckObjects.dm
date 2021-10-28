@@ -106,7 +106,7 @@
 	base_icon = 'icons/turf/flooring/asteroid.dmi'
 	initial_flooring = null
 
-/turf/simulated/floor/holofloor/desert/Initialize()
+/turf/simulated/floor/holofloor/desert/Initialize(mapload)
 	. = ..()
 	if(prob(10))
 		add_overlay("asteroid[rand(0,9)]")
@@ -257,7 +257,7 @@ datum/unarmed_attack/holopugilism/unarmed_override(var/mob/living/carbon/human/u
 //VOREStation Add
 /obj/structure/bed/holobed/attackby(obj/item/W as obj, mob/user as mob)
 	if(W.is_wrench())
-		user << ("<span class='notice'>It's a holochair, you can't dismantle it!</span>")
+		to_chat(user, "<span class='notice'>It's a holochair, you can't dismantle it!</span>")
 	return
 //VOREStation Add End
 /obj/item/holo
@@ -282,11 +282,11 @@ datum/unarmed_attack/holopugilism/unarmed_override(var/mob/living/carbon/human/u
 	flags = NOBLOODY
 	var/active = 0
 
-/obj/item/holo/esword/green/New()
-		lcolor = "#008000"
+/obj/item/holo/esword/green
+	lcolor = "#008000"
 
-/obj/item/holo/esword/red/New()
-		lcolor = "#FF0000"
+/obj/item/holo/esword/red
+	lcolor = "#FF0000"
 
 /obj/item/holo/esword/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
 	if(active && default_parry_check(user, attacker, damage_source) && prob(50))
@@ -348,6 +348,8 @@ datum/unarmed_attack/holopugilism/unarmed_override(var/mob/living/carbon/human/u
 	name = "basketball"
 	desc = "Here's your chance, do your dance at the Space Jam."
 	w_class = ITEMSIZE_LARGE //Stops people from hiding it in their bags/pockets
+	drop_sound = 'sound/items/drop/basketball.ogg'
+	pickup_sound = 'sound/items/pickup/basketball.ogg'
 
 /obj/structure/holohoop
 	name = "basketball hoop"
@@ -406,10 +408,6 @@ datum/unarmed_attack/holopugilism/unarmed_override(var/mob/living/carbon/human/u
 /obj/machinery/readybutton/attack_ai(mob/user as mob)
 	to_chat(user, "The station AI is not to interact with these devices!")
 	return
-
-/obj/machinery/readybutton/New()
-	..()
-
 
 /obj/machinery/readybutton/attackby(obj/item/W as obj, mob/user as mob)
 	to_chat(user, "The device is a solid button, there's nothing you can do with it!")
@@ -477,8 +475,8 @@ datum/unarmed_attack/holopugilism/unarmed_override(var/mob/living/carbon/human/u
 	meat_amount = 0
 	meat_type = null
 
-/mob/living/simple_mob/animal/space/carp/holodeck/New()
-	..()
+/mob/living/simple_mob/animal/space/carp/holodeck/Initialize(mapload)
+	. = ..()
 	set_light(2) //hologram lighting
 
 /mob/living/simple_mob/animal/space/carp/holodeck/proc/set_safety(var/safe)

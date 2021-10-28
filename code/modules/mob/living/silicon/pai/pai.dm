@@ -1,3 +1,12 @@
+/datum/category_item/catalogue/fauna/silicon/pai
+	name = "Silicons - pAI"
+	desc = "There remains some dispute over whether the 'p' stands \
+	for 'pocket', 'personal', or 'portable'. Regardless, the pAI is a \
+	modern marvel. Consumer grade Artificial Intelligence, many pAI are \
+	underclocked or sharded versions of larger Intelligence matrices. \
+	Some, in fact, are splintered and limited copies of organic brain states."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /mob/living/silicon/pai
 	name = "pAI"
 	icon = 'icons/mob/pai.dmi'
@@ -7,12 +16,15 @@
 	pass_flags = 1
 	mob_size = MOB_SMALL
 
+	catalogue_data = list(/datum/category_item/catalogue/fauna/silicon/pai)
+
 	holder_type = /obj/item/holder/pai
 
 	can_pull_size = ITEMSIZE_SMALL
 	can_pull_mobs = MOB_PULL_SMALLER
 
 	idcard_type = /obj/item/card/id
+	silicon_privileges = PRIVILEGES_PAI
 	var/idaccessible = 0
 
 	var/network = "SS13"
@@ -88,9 +100,9 @@
 
 	var/current_pda_messaging = null
 
-/mob/living/silicon/pai/New(var/obj/item/paicard)
-	src.loc = paicard
-	card = paicard
+/mob/living/silicon/pai/Initialize(mapload)
+	. = ..()
+	card = loc
 	sradio = new(src)
 	communicator = new(src)
 	if(card)
@@ -235,7 +247,7 @@
 				cameralist[C.network] = C.network
 
 	src.network = input(usr, "Which network would you like to view?") as null|anything in cameralist
-	to_chat(src, "<font color='blue'>Switched to [src.network] camera network.</font>")
+	to_chat(src, "<font color=#4F49AF>Switched to [src.network] camera network.</font>")
 //End of code by Mord_Sith
 */
 

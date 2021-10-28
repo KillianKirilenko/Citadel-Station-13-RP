@@ -1,7 +1,15 @@
+/datum/category_item/catalogue/fauna/hippo
+	name = "Hippo"
+	desc = "A hardy savannah creature native to Earth, the only use for the \
+	hippopotamus on the Frontier is entertainment. Often traded by rare animal \
+	enthusiasts, the hippo is heavy, hardy, and aggressive."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /mob/living/simple_mob/vore/hippo
 	name = "hippo"
 	desc = "Mostly know for the spectacular hit of the live action movie Hungry Hungry Hippos."
 	tt_desc = "Hippopotamus amphibius"
+	catalogue_data = list(/datum/category_item/catalogue/fauna/hippo)
 
 	icon_state = "hippo"
 	icon_living = "hippo"
@@ -11,6 +19,9 @@
 
 	maxHealth = 200
 	health = 200
+	randomized = TRUE
+	mod_min = 100
+	mod_max = 150
 	movement_cooldown = 5
 	see_in_dark = 3
 

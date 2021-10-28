@@ -1,6 +1,28 @@
+/datum/category_item/catalogue/fauna/silicon
+	name = "Silicons"
+	desc = "Silicon based life, in all its myriad forms, began as a \
+	tool of some kind. This history has lead to a disconnect between \
+	synthetic and organic life which varies in severity across cultures."
+	value = CATALOGUER_REWARD_TRIVIAL
+	unlocked_by_any = list(/datum/category_item/catalogue/fauna/silicon)
+
+// Obtained by scanning all X.
+/datum/category_item/catalogue/fauna/all_silicons
+	name = "Collection - Silicons"
+	desc = "You have scanned a large array of different types of Silicons, \
+	and therefore you have been granted a fair sum of points, through this \
+	entry."
+	value = CATALOGUER_REWARD_MEDIUM
+	unlocked_by_all = list(
+		/datum/category_item/catalogue/fauna/silicon/ai,
+		/datum/category_item/catalogue/fauna/silicon/pai,
+		/datum/category_item/catalogue/fauna/silicon/robot
+		)
+
 /mob/living/silicon
 	gender = NEUTER
 	voice_name = "synthesized voice"
+	silicon_privileges = PRIVILEGES_SILICON
 	var/syndicate = 0
 	var/const/MAIN_CHANNEL = "Main Frequency"
 	var/lawchannel = MAIN_CHANNEL // Default channel on which to state laws
@@ -27,9 +49,9 @@
 
 	var/hudmode = null
 
-/mob/living/silicon/New()
+/mob/living/silicon/Initialize(mapload)
 	silicon_mob_list |= src
-	..()
+	. = ..()
 	add_language(LANGUAGE_GALCOM)
 	set_default_language(GLOB.all_languages[LANGUAGE_GALCOM])
 	init_id()
@@ -76,10 +98,10 @@
 	to_chat(src, "<span class='danger'>Warning: Electromagnetic pulse detected.</span>")
 	..()
 
-/mob/living/silicon/stun_effect_act(var/stun_amount, var/agony_amount)
+/mob/living/silicon/stun_effect_act(var/stun_amount, var/agony_amount, var/def_zone, var/used_weapon=null)
 	return	//immune
 
-/mob/living/silicon/electrocute_act(var/shock_damage, var/obj/source, var/siemens_coeff = 0.0)
+/mob/living/silicon/electrocute_act(var/shock_damage, var/obj/source, var/siemens_coeff = 1.0, var/def_zone = null, var/stun = 1)
 	if(shock_damage > 0)
 		var/datum/effect_system/spark_spread/s = new /datum/effect_system/spark_spread
 		s.set_up(5, 1, loc)
@@ -105,35 +127,17 @@
 	if(!Proj.nodamage)
 		switch(Proj.damage_type)
 			if(BRUTE)
-				adjustBruteLoss(Proj.damage)
+				adjustBruteLoss(Proj.get_final_damage(src))
 			if(BURN)
-				adjustFireLoss(Proj.damage)
+				adjustFireLoss(Proj.get_final_damage(src))
 
 	Proj.on_hit(src,2)
 	updatehealth()
 	return 2
 
-/mob/living/silicon/apply_effect(var/effect = 0,var/effecttype = STUN, var/blocked = 0)
+/mob/living/silicon/apply_effect(var/effect = 0,var/effecttype = STUN, var/blocked = 0, var/check_protection = 1)
 	return 0//The only effect that can hit them atm is flashes and they still directly edit so this works for now
-/*
-	if(!effect || (blocked >= 2))	return 0
-	switch(effecttype)
-		if(STUN)
-			stunned = max(stunned,(effect/(blocked+1)))
-		if(WEAKEN)
-			weakened = max(weakened,(effect/(blocked+1)))
-		if(PARALYZE)
-			paralysis = max(paralysis,(effect/(blocked+1)))
-		if(IRRADIATE)
-			radiation += min((effect - (effect*getarmor(null, "rad"))), 0)//Rads auto check armor
-		if(STUTTER)
-			stuttering = max(stuttering,(effect/(blocked+1)))
-		if(EYE_BLUR)
-			eye_blurry = max(eye_blurry,(effect/(blocked+1)))
-		if(DROWSY)
-			drowsyness = max(drowsyness,(effect/(blocked+1)))
-	updatehealth()
-	return 1*/
+
 
 /proc/islinked(var/mob/living/silicon/robot/bot, var/mob/living/silicon/ai/ai)
 	if(!istype(bot) || !istype(ai))
@@ -184,11 +188,10 @@
 	popup.open()
 
 //can't inject synths
-/mob/living/silicon/can_inject(var/mob/user, var/error_msg)
+/mob/living/silicon/can_inject(var/mob/user, var/error_msg, var/target_zone, var/ignore_thickness = FALSE)
 	if(error_msg)
 		to_chat(user, "<span class='alert'>The armoured plating is too tough.</span>")
 	return 0
-
 
 //Silicon mob language procs
 
@@ -196,7 +199,7 @@
 	return universal_speak || (speaking in src.speech_synthesizer_langs) || (speaking.name == "Noise")	//need speech synthesizer support to vocalize a language
 
 /mob/living/silicon/add_language(var/language, var/can_speak=1)
-	var/var/datum/language/added_language = GLOB.all_languages[language]
+	var/datum/language/added_language = GLOB.all_languages[language]
 	if(!added_language)
 		return
 
@@ -206,7 +209,7 @@
 		return 1
 
 /mob/living/silicon/remove_language(var/rem_language)
-	var/var/datum/language/removed_language = GLOB.all_languages[rem_language]
+	var/datum/language/removed_language = GLOB.all_languages[rem_language]
 	if(!removed_language)
 		return
 
@@ -411,7 +414,7 @@
 	//Handle job slot/tater cleanup.
 	var/job = mind.assigned_role
 
-	SSjobs.FreeRole(job)
+	job_master.FreeRole(job)
 
 	if(mind.objectives.len)
 		qdel(mind.objectives)

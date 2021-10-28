@@ -12,6 +12,8 @@
 	throwforce = 7
 	flags = NOCONDUCT
 	w_class = ITEMSIZE_NORMAL
+	drop_sound = 'sound/items/drop/metalweapon.ogg'
+	pickup_sound = 'sound/items/pickup/metalweapon.ogg'
 	origin_tech = list(TECH_COMBAT = 2)
 	attack_verb = list("beaten")
 	var/lightcolor = "#FF6A00"
@@ -22,10 +24,9 @@
 	var/hitcost = 240
 	var/use_external_power = FALSE //only used to determine if it's a cyborg baton
 
-/obj/item/melee/baton/New()
-	..()
+/obj/item/melee/baton/Initialize(mapload)
+	. = ..()
 	update_icon()
-	return
 
 /obj/item/melee/baton/get_cell()
 	return bcell
@@ -67,11 +68,10 @@
 				usr.put_in_l_hand(src)
 		src.add_fingerprint(usr)
 
-/obj/item/melee/baton/loaded/New() //this one starts with a cell pre-installed.
-	..()
+/obj/item/melee/baton/loaded/Initialize(mapload)
+	. = ..()
 	bcell = new/obj/item/cell/device/weapon(src)
 	update_icon()
-	return
 
 /obj/item/melee/baton/proc/deductcharge(var/chrgdeductamt)
 	if(status == 1)		//Only deducts charge when it's on
@@ -102,13 +102,11 @@
 		set_light(0)
 
 /obj/item/melee/baton/examine(mob/user)
-	if(!..(user, 1))
-		return
-
+	. = ..()
 	if(bcell)
-		user <<"<span class='notice'>The baton is [round(bcell.percent())]% charged.</span>"
+		. += "<span class='notice'>The baton is [round(bcell.percent())]% charged.</span>"
 	if(!bcell)
-		to_chat(user, "<span class='warning'>The baton does not have a power source installed.</span>")
+		. += "<span class='warning'>The baton does not have a power source installed.</span>"
 
 /obj/item/melee/baton/attackby(obj/item/W, mob/user)
 	if(use_external_power)

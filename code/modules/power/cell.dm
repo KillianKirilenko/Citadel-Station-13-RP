@@ -14,6 +14,8 @@
 	throw_speed = 3
 	throw_range = 5
 	w_class = ITEMSIZE_NORMAL
+	/// Are we EMP immune?
+	var/emp_proof = FALSE
 	var/charge
 	var/maxcharge = 1000
 	var/rigged = 0		// true if rigged to explode
@@ -45,7 +47,7 @@
 /obj/item/cell/get_cell()
 	return src
 
-/obj/item/cell/process()
+/obj/item/cell/process(delta_time)
 	if(self_recharge)
 		if(world.time >= last_use + charge_delay)
 			give(charge_amount)
@@ -144,18 +146,14 @@
 
 
 /obj/item/cell/examine(mob/user)
-	var/msg = desc
-
+	. = ..()
 	if(get_dist(src, user) <= 1)
-		msg += " It has a power rating of [maxcharge].\nThe charge meter reads [round(src.percent() )]%."
+		. += " It has a power rating of [maxcharge].\nThe charge meter reads [round(src.percent() )]%."
+	if(maxcharge < 30000)
+		. += "[desc]\nThe manufacturer's label states this cell has a power rating of [maxcharge], and that you should not swallow it.\nThe charge meter reads [round(src.percent() )]%."
+	else
+		. += "This power cell has an exciting chrome finish, as it is an uber-capacity cell type! It has a power rating of [maxcharge]!\nThe charge meter reads [round(src.percent() )]%."
 
-	to_chat(user, msg)
-/*
-		if(maxcharge <= 2500)
-			to_chat(user, "[desc]\nThe manufacturer's label states this cell has a power rating of [maxcharge], and that you should not swallow it.\nThe charge meter reads [round(src.percent() )]%.")
-		else
-			to_chat(user, "This power cell has an exciting chrome finish, as it is an uber-capacity cell type! It has a power rating of [maxcharge]!\nThe charge meter reads [round(src.percent() )]%.")
-*/
 /obj/item/cell/attackby(obj/item/W, mob/user)
 	..()
 	if(istype(W, /obj/item/reagent_containers/syringe))
@@ -206,6 +204,9 @@
 		rigged = 1 //broken batteries are dangerous
 
 /obj/item/cell/emp_act(severity)
+	. = ..()
+	if(emp_proof)
+		return
 	//remove this once emp changes on dev are merged in
 	if(isrobot(loc))
 		var/mob/living/silicon/robot/R = loc
@@ -216,7 +217,6 @@
 		charge = 0
 
 	update_icon()
-	..()
 
 /obj/item/cell/ex_act(severity)
 
@@ -269,5 +269,5 @@
 
 /obj/item/cell/suicide_act(mob/user)
 	var/datum/gender/TU = gender_datums[user.get_visible_gender()]
-	viewers(user) << "<span class='danger'>\The [user] is licking the electrodes of \the [src]! It looks like [TU.he] [TU.is] trying to commit suicide.</span>"
+	user.visible_message("<span class='danger'>\The [user] is licking the electrodes of \the [src]! It looks like [TU.he] [TU.is] trying to commit suicide.</span>")
 	return (FIRELOSS)

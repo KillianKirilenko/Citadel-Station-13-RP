@@ -27,6 +27,9 @@
 	icon_state = "jackboots"
 	armor = list(melee = 30, bullet = 10, laser = 10, energy = 15, bomb = 20, bio = 0, rad = 0)
 	siemens_coefficient = 0.7
+	drop_sound = 'sound/items/drop/boots.ogg'
+	pickup_sound = 'sound/items/pickup/boots.ogg'
+
 
 /obj/item/clothing/shoes/boots/jackboots/toeless
 	name = "toe-less jackboots"
@@ -213,11 +216,16 @@
 	if(user.mind.isholy && !blessed)
 		blessed = TRUE
 		item_flags |= NOSLIP
-		to_chat(user, "<font color='blue'>You repeat the incantations etched into the boots.</font>")
+		to_chat(user, "<font color=#4F49AF>You repeat the incantations etched into the boots.</font>")
 	else
 		blessed = FALSE
 		item_flags &= ~NOSLIP
-		to_chat(user, "<font color='blue'>You dispel the incantations etched into the boots for now.</font>")
+		to_chat(user, "<font color=#4F49AF>You dispel the incantations etched into the boots for now.</font>")
 
 	if(!user.mind.isholy)
 		to_chat(user, "<font color='red'>You're not sure what language this is.</font>")
+
+/obj/item/clothing/shoes/boots/laconic
+	name = "laconic field boots"
+	desc = "These flexible boots cover the wearer's calves. An additional protective kneepad is integrated, perhaps to assist in collecting specimens in the field."
+	icon_state = "laconic"

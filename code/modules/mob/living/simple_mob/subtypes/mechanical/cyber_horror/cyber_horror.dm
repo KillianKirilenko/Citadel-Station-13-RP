@@ -1,4 +1,18 @@
  //Fodder
+
+/datum/category_item/catalogue/fauna/cyberhorror
+	name = "Cyber Horror"
+	desc = "First witnessed on Surt, the entities hence dubbed 'Cyber Horrors' have \
+	begun to appear at various sites across the Frontier. Based on recordings and logs \
+	found at the mining colony on Surt, these creatures were created via the introduction \
+	of an unidentified Nanite pathogen into organic hosts. The infestation of the host was \
+	treated by the workers on Surt as a form of religious ritual intended to bring the \
+	victim closer to the creators of the pathogen. After those who resisted the plague on \
+	Surt fell, the perpetrators of the incident are believed to have escaped to spread \
+	the affliction to other hosts."
+	value = CATALOGUER_REWARD_TRIVIAL
+	unlocked_by_any = list(/datum/category_item/catalogue/fauna/cyberhorror)
+
 /mob/living/simple_mob/mechanical/cyber_horror
 	name = "Cyber horror"
 	desc = "What was once a man, twisted and warped by machine."
@@ -6,6 +20,7 @@
 	icon_state = "cyber_horror"
 	icon_dead = "cyber_horror_dead"
 	icon_gib = "cyber_horror_dead"
+	catalogue_data = list(/datum/category_item/catalogue/fauna/cyberhorror)
 
 	faction = "synthtide"
 
@@ -180,7 +195,7 @@
  //Slightly more durable fodder
 /mob/living/simple_mob/mechanical/cyber_horror/vox
 	name = "Vox shambles"
-	desc = "Once a Vox now torn and changed, peices of a Durand has been grafted onto it."
+	desc = "Once a Vox now torn and changed, peices of a Durand have been grafted onto it."
 	icon_state = "vox_cyber_horror"
 	icon_dead = "vox_cyber_horror_dead"
 
@@ -196,77 +211,77 @@
 
 	ai_holder_type = /datum/ai_holder/simple_mob/melee/hit_and_run
 
-	var/cloaked = FALSE
+	var/stealthed = FALSE
  // Lower = Harder to see.
-	var/cloaked_alpha = 30
+	var/stealthed_alpha = 30
  // This is added on top of the normal melee damage.
-	var/cloaked_bonus_damage = 30
+	var/stealthed_bonus_damage = 30
  // How long to stun for.
-	var/cloaked_weaken_amount = 3
- // Amount of time needed to re-cloak after losing it.
-	var/cloak_cooldown = 10 SECONDS
+	var/stealthed_weaken_amount = 3
+ // Amount of time needed to re-stealth after losing it.
+	var/stealth_cooldown = 10 SECONDS
  // world.time
-	var/last_uncloak = 0
+	var/last_unstealth = 0
 
 
-/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/cloak()
-	if(cloaked)
+/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/stealth()
+	if(stealthed)
 		return
-	animate(src, alpha = cloaked_alpha, time = 1 SECOND)
-	cloaked = TRUE
+	animate(src, alpha = stealthed_alpha, time = 1 SECOND)
+	stealthed = TRUE
 
-/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/uncloak()
- // This is assigned even if it isn't cloaked already, to 'reset' the timer if the spider is continously getting attacked.
-	last_uncloak = world.time
-	if(!cloaked)
+/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/unstealth()
+ // This is assigned even if it isn't stealthed already, to 'reset' the timer if the spider is continously getting attacked.
+	last_unstealth = world.time
+	if(!stealthed)
 		return
 	animate(src, alpha = initial(alpha), time = 1 SECOND)
-	cloaked = FALSE
+	stealthed = FALSE
 
 
-// Check if cloaking if possible.
-/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/can_cloak()
+// Check if stealthing if possible.
+/mob/living/simple_mob/mechanical/cyber_horror/tajaran/proc/can_stealth()
 	if(stat)
 		return FALSE
-	if(last_uncloak + cloak_cooldown > world.time)
+	if(last_unstealth + stealth_cooldown > world.time)
 		return FALSE
 
 	return TRUE
 
 
-// Called by things that break cloaks, like Technomancer wards.
+// Called by things that break stealths, like Technomancer wards.
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/break_cloak()
-	uncloak()
+	unstealth()
 
 
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/is_cloaked()
-	return cloaked
+	return stealthed
 
 
 // Cloaks the tajaran automatically, if possible.
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/handle_special()
-	if(!cloaked && can_cloak())
-		cloak()
+	if(!stealthed && can_stealth())
+		stealth()
 
 
-// Applies bonus base damage if cloaked.
+// Applies bonus base damage if stealthed.
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/apply_bonus_melee_damage(atom/A, damage_amount)
-	if(cloaked)
-		return damage_amount + cloaked_bonus_damage
+	if(stealthed)
+		return damage_amount + stealthed_bonus_damage
 	return ..()
 
-// Applies stun, then uncloaks.
+// Applies stun, then unstealths.
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/apply_melee_effects(atom/A)
-	if(cloaked)
+	if(stealthed)
 		if(isliving(A))
 			var/mob/living/L = A
-			L.Weaken(cloaked_weaken_amount)
+			L.Weaken(stealthed_weaken_amount)
 			to_chat(L, span("danger", "\The [src] tears into you!"))
 			playsound(L, 'sound/weapons/spiderlunge.ogg', 75, 1)
-	uncloak()
+	unstealth()
 	..() // For the poison.
 
-// Force uncloaking if attacked.
+// Force unstealthing if attacked.
 /mob/living/simple_mob/mechanical/cyber_horror/tajaran/bullet_act(obj/item/projectile/P)
 	. = ..()
 	break_cloak()
@@ -299,7 +314,7 @@
 //Direct Ranged Mob
 /mob/living/simple_mob/mechanical/cyber_horror/corgi
 	name = "Malformed Corgi"
-	desc = "Pieces of metal and technology is embedded in this Ian."
+	desc = "Pieces of metal and technology are embedded in this corgi."
 	icon_state = "corgi_cyber_horror"
 	icon_dead = "corgi_cyber_horror_dead"
 	maxHealth = 50
@@ -365,3 +380,75 @@
 	icon_state = "force_missile"
 	damage = 12
 	damage_type = BURN
+
+////////////////////////
+//Lavaland Cyber_Horrors
+////////////////////////
+
+/mob/living/simple_mob/mechanical/cyber_horror/surt
+	name = "ash coated remnant"
+	desc = "What was once a man, now twisted and warped by machine. A heavy layer of volcanic ash clings to what little organic portions remain."
+
+	heat_resist = 1
+
+/datum/say_list/cyber_horror/surt
+	speak = list("H@!#$$P M@!$#",
+				 "GHAA!@@#",
+				 "KR@!!N",
+				 "K!@@##L!@@ %!@#E",
+				 "G@#!$ H@!#%",
+				 "H!@%%@ @!E")
+	emote_hear = list("sparks!", "groans.", "wails.", "sobs.")
+	emote_see = list ("stares unblinkingly.", "jitters and twitches.", "emits a synthetic scream.", "rapidly twitches.", "convulses.", "twitches uncontrollably.", "goes stock still.")
+	say_threaten = list ("FR@#DOM","EN@ T#I$-$","N0$ M^> B@!#", "P#RF$*!T$ON")
+	say_got_target = list("I *#@ Y@%","!E@#$P","F#RR @I","D0@#$ ##OK %","IT $##TS")
+
+// Fragile but dangerous
+/mob/living/simple_mob/mechanical/cyber_horror/plasma_cyber_horror/surt
+	name = "obsidian-studded husk"
+	desc = "What was once a phoronoid, now a empty shell of malfunctioning nanites. Chunks of volcanic glass have been painfully grafted into the tissue."
+
+	heat_resist = 1
+
+// Mech Shredder
+/mob/living/simple_mob/mechanical/cyber_horror/ling_cyber_horror/surt
+	name = "grainy nanite abomination"
+	desc = "What was once something, now an exposed shell with lashing cables. Its form is mealy and inconsistent - it appears to have involuntarily incorporated the ash into its biology."
+
+	heat_resist = 1
+
+//Slightly more durable fodder
+/mob/living/simple_mob/mechanical/cyber_horror/vox/surt
+	name = "ragged shambler"
+	desc = "Once a Vox now torn and changed, peices of a Durand have been grafted onto it. This body seems fresher than the others - perhaps a recent convert."
+
+	heat_resist = 1
+
+ // Hit and run mob
+/mob/living/simple_mob/mechanical/cyber_horror/tajaran/surt
+	name = "singed ash-stalker"
+	desc = "A mangled mess of machine and fur, light seems to bounce off it. Although it cannot be seen easily, at close ranges it smells strongly of burnt hair."
+
+	heat_resist = 1
+
+
+//Arcing Ranged Mob
+/mob/living/simple_mob/mechanical/cyber_horror/grey/surt
+	name = "exhumed deacon"
+	desc = "A mess of machine and organic, it's hard to even know what it was before. Strips of charred paper and hand-crafted religious icons have been draped over its body."
+
+	heat_resist = 1
+
+//Direct Ranged Mob
+/mob/living/simple_mob/mechanical/cyber_horror/corgi/surt
+	name = "matted tracker drone"
+	desc = "Pieces of metal and technology embedded in this corgi have turned it into a blank drone. Its fur is burned and matted down with soot and ash."
+
+	heat_resist = 1
+
+//Cats and mayhem
+/mob/living/simple_mob/mechanical/cyber_horror/cat_cyber_horror/surt
+	name = "smoldering hunter drone"
+	desc = "This creature, formerly a cat, has had arachnid legs crudely grafted to its body. It moves with frightening acuity."
+
+	heat_resist = 1

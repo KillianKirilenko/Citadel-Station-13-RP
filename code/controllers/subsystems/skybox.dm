@@ -27,6 +27,7 @@ SUBSYSTEM_DEF(skybox)
 	normal_space.layer = TURF_LAYER
 	normal_space.icon = 'icons/turf/space.dmi'
 	normal_space.icon_state = "white"
+	normal_space.luminosity = 1			// citadel edit - grrrr shitcode for lighting because this entire subsystem needs to be razed
 
 	// Static
 	for (var/i in 0 to 25)
@@ -60,7 +61,7 @@ SUBSYSTEM_DEF(skybox)
 		speedspace_cache["EW_[i]"] = MA
 
 	// Over-the-edge images
-	for (var/dir in alldirs)
+	for (var/dir in GLOB.alldirs)
 		var/mutable_appearance/MA = new(normal_space)
 		var/matrix/M = matrix()
 		var/horizontal = (dir & (WEST|EAST))
@@ -136,7 +137,7 @@ SUBSYSTEM_DEF(skybox)
 	for(var/z in zlevels)
 		skybox_cache["[z]"] = generate_skybox(z)
 
-	for(var/client/C)
+	for(var/client/C in GLOB.clients)
 		var/their_z = get_z(C.mob)
 		if(!their_z)	// Nullspace
 			continue
@@ -146,9 +147,9 @@ SUBSYSTEM_DEF(skybox)
 // Settings datum that maps can override to play with their skyboxes
 /datum/skybox_settings
 	var/icon = 'icons/skybox/skybox.dmi'	// Path to our background. Lets us use anything we damn well please. Skyboxes need to be 736x736
-	var/icon_state = "space5"
+	var/icon_state
 	var/color
-	var/random_color = FALSE
+	var/random_color = TRUE
 
 	var/use_stars = TRUE
 	var/star_icon = 'icons/skybox/skybox.dmi'

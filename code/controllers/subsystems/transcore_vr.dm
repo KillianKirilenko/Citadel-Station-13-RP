@@ -15,17 +15,17 @@ SUBSYSTEM_DEF(transcore)
 
 	// THINGS
 	var/overdue_time = 15 MINUTES
-	var/core_dumped = FALSE			// Core has been dumped!  Also set can_fire = 0 when you set this.
+	var/static/core_dumped = FALSE			// Core has been dumped!  Also set can_fire = 0 when you set this.
 
 	var/current_step = SSTRANSCORE_IMPLANTS
 
 	var/cost_backups = 0
 	var/cost_implants = 0
 
-	var/list/datum/transhuman/mind_record/backed_up = list()	// All known mind records, indexed by MR.mindname/mind.name
-	var/list/datum/transhuman/mind_record/has_left = list()		// Why do we even have this?
-	var/list/datum/transhuman/body_record/body_scans = list()	// All known body records, indexed by BR.mydna.name
-	var/list/obj/item/implant/backup/implants = list()	// All OPERATING implants that are being ticked
+	var/static/list/datum/transhuman/mind_record/backed_up = list()	// All known mind records, indexed by MR.mindname/mind.name
+	var/static/list/datum/transhuman/mind_record/has_left = list()		// Why do we even have this?
+	var/static/list/datum/transhuman/body_record/body_scans = list()	// All known body records, indexed by BR.mydna.name
+	var/static/list/obj/item/implant/backup/implants = list()	// All OPERATING implants that are being ticked
 
 	var/list/current_run = list()
 
@@ -33,7 +33,7 @@ SUBSYSTEM_DEF(transcore)
 	var/timer = TICK_USAGE
 
 	INTERNAL_PROCESS_STEP(SSTRANSCORE_IMPLANTS,TRUE,process_implants,cost_implants,SSTRANSCORE_BACKUPS)
-	INTERNAL_PROCESS_STEP(SSTRANSCORE_BACKUPS,FALSE,process_backups,cost_backups,SSTRANSCORE_IMPLANTS)
+//	INTERNAL_PROCESS_STEP(SSTRANSCORE_BACKUPS,FALSE,process_backups,cost_backups,SSTRANSCORE_IMPLANTS)
 
 /datum/controller/subsystem/transcore/proc/process_implants(resumed = 0)
 	if (!resumed)
@@ -57,7 +57,7 @@ SUBSYSTEM_DEF(transcore)
 			continue
 
 		//In a human
-		ENABLE_BITFIELD(H.hud_updateflag, BACKUP_HUD)
+		BITSET(H.hud_updateflag, BACKUP_HUD)
 
 		if(H == imp.imp_in && H.mind && H.stat < DEAD)
 			SStranscore.m_backup(H.mind,H.nif)
@@ -113,19 +113,6 @@ SUBSYSTEM_DEF(transcore)
 	msg += "} "
 	..(jointext(msg, null))
 
-/datum/controller/subsystem/transcore/Recover()
-	if (istype(SStranscore.body_scans))
-		for(var/N in SStranscore.body_scans[N])
-			if(N)
-				body_scans[N] = SStranscore.body_scans[N]
-	if(SStranscore.core_dumped)
-		core_dumped = TRUE
-		can_fire = FALSE
-	else if (istype(SStranscore.backed_up))
-		for(var/N in SStranscore.backed_up[N])
-			if(N)
-				backed_up[N] = SStranscore.backed_up[N]
-
 /datum/controller/subsystem/transcore/proc/m_backup(var/datum/mind/mind, var/obj/item/nif/nif, var/one_time = FALSE)
 	ASSERT(mind)
 	if(!mind.name || core_dumped)
@@ -155,18 +142,29 @@ SUBSYSTEM_DEF(transcore)
 			MR.nif_software = null
 			MR.nif_savedata = null
 
-	else
-		MR = new(mind, mind.current, add_to_db = TRUE, one_time = one_time)
 
-	return 1
+	MR = new(mind, mind.current, add_to_db = FALSE, one_time = one_time)
+
+	return MR
+
+/datum/controller/subsystem/transcore/proc/m_backupE(var/datum/mind/mind, var/obj/item/nif/nif, var/one_time = FALSE)
+	ASSERT(mind)
+	if(!mind.name || core_dumped)
+		return 0
+
+	var/datum/transhuman/mind_record/MRE
+
+	MRE = new(mind, mind.current, add_to_db = FALSE, one_time = one_time)
+
+	return MRE
 
 // Send a past-due notification to the medical radio channel.
 /datum/controller/subsystem/transcore/proc/notify(var/name, var/repeated = FALSE)
 	ASSERT(name)
 	if(repeated)
-		global_announcer.autosay("This is a repeat notification that [name] is past-due for a mind backup.", "TransCore Oversight", "Medical")
+		GLOB.global_announcer.autosay("This is a repeat notification that [name] is past-due for a mind backup.", "TransCore Oversight", "Medical")
 	else
-		global_announcer.autosay("[name] is past-due for a mind backup.", "TransCore Oversight", "Medical")
+		GLOB.global_announcer.autosay("[name] is past-due for a mind backup.", "TransCore Oversight", "Medical")
 
 // Called from mind_record to add itself to the transcore.
 /datum/controller/subsystem/transcore/proc/add_backup(datum/transhuman/mind_record/MR)
@@ -199,8 +197,8 @@ SUBSYSTEM_DEF(transcore)
 // Moves all mind records from the databaes into the disk and shuts down all backup canary processing.
 /datum/controller/subsystem/transcore/proc/core_dump(obj/item/disk/transcore/disk)
 	ASSERT(disk)
-	global_announcer.autosay("An emergency core dump has been initiated!", "TransCore Oversight", "Command")
-	global_announcer.autosay("An emergency core dump has been initiated!", "TransCore Oversight", "Medical")
+	GLOB.global_announcer.autosay("An emergency core dump has been initiated!", "TransCore Oversight", "Command")
+	GLOB.global_announcer.autosay("An emergency core dump has been initiated!", "TransCore Oversight", "Medical")
 
 	disk.stored += backed_up
 	backed_up.Cut()

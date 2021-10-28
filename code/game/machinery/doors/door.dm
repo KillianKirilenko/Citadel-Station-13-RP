@@ -15,9 +15,9 @@
 	var/closed_layer = DOOR_CLOSED_LAYER
 
 	var/visible = 1
-	var/p_open = 0
-	var/operating = 0
-	var/autoclose = 0
+	var/p_open = 0//[bool]is the door open?
+	var/operating = 0//[bool]Is the door opening or closing?
+	var/autoclose = 0//[bool]should the door close automaticly
 	var/glass = 0
 	var/normalspeed = 1
 	var/heat_proof = 0 // For glass airlocks/opacity firedoors
@@ -49,7 +49,7 @@
 			visible_message("<span class='notice'>\The [user] bonks \the [src] harmlessly.</span>")
 	user.do_attack_animation(src)
 
-/obj/machinery/door/New()
+/obj/machinery/door/Initialize(mapload, newdir)
 	. = ..()
 	if(density)
 		layer = closed_layer
@@ -72,14 +72,13 @@
 	update_icon()
 
 	update_nearby_tiles(need_rebuild=1)
-	return
 
 /obj/machinery/door/Destroy()
-	density = 0
+	density = FALSE
 	update_nearby_tiles()
 	. = ..()
 
-/obj/machinery/door/process()
+/obj/machinery/door/process(delta_time)
 	if(close_door_at && world.time >= close_door_at)
 		if(autoclose)
 			close_door_at = next_close_time()
@@ -156,7 +155,9 @@
 		return
 	src.add_fingerprint(user)
 	if(density)
-		if(allowed(user))
+		if(istype(user, /mob/living/simple_mob) && !(user.ckey))
+			do_animate("smdeny")
+		else if(allowed(user))
 			open()
 		else
 			do_animate("deny")
@@ -265,7 +266,8 @@
 			return
 
 		if(repairing && I.is_crowbar())
-			var/obj/item/stack/material/repairing_sheet = get_material().place_sheet(loc)
+			var/datum/material/M = get_material()
+			var/obj/item/stack/material/repairing_sheet = M.place_sheet(loc)
 			repairing_sheet.amount += repairing-1
 			repairing = 0
 			to_chat(user, "<span class='notice'>You remove \the [repairing_sheet].</span>")
@@ -329,13 +331,13 @@
 /obj/machinery/door/examine(mob/user)
 	. = ..()
 	if(src.health <= 0)
-		to_chat(user, "\The [src] is broken!")
+		. += "<span class = 'notice'>The [src] is broken!</span>"
 	if(src.health < src.maxhealth / 4)
-		to_chat(user, "\The [src] looks like it's about to break!")
+		. += "<span class = 'notice'>The [src] looks like it's about to break!</span>"
 	else if(src.health < src.maxhealth / 2)
-		to_chat(user, "\The [src] looks seriously damaged!")
+		. += "<span class = 'notice'>The [src] looks seriously damaged!</span>"
 	else if(src.health < src.maxhealth * 3/4)
-		to_chat(user, "\The [src] shows signs of damage!")
+		. += "<span class = 'notice'>The [src] shows signs of damage!</span>"
 
 
 /obj/machinery/door/proc/set_broken()
@@ -408,6 +410,9 @@
 			if(density && !(stat & (NOPOWER|BROKEN)))
 				flick("door_deny", src)
 				playsound(src.loc, 'sound/machines/buzz-two.ogg', 50, 0)
+		if("smdeny")
+			if(density && !(stat & (NOPOWER|BROKEN)))
+				flick("door_deny", src)
 	return
 
 
@@ -461,6 +466,12 @@
 		qdel(fire)
 
 	return 1
+
+/obj/machinery/door/proc/toggle_open(var/forced)
+	if(density)
+		open(forced)
+	else
+		close(forced)
 
 /obj/machinery/door/proc/requiresID()
 	return 1

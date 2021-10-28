@@ -60,7 +60,7 @@
 		if(SSxenoarch) //Sanity check due to runtimes ~Z
 			for(var/A in SSxenoarch.artifact_spawning_turfs)
 				var/turf/simulated/mineral/T = A
-				if(T.density && T.artifact_find)
+				if(istype(T, /turf/simulated/mineral) && T.density && T.artifact_find)
 					if(T.z == cur_turf.z)
 						var/cur_dist = get_dist(cur_turf, T) * 2
 						if(nearestTargetDist < 0 || cur_dist < nearestTargetDist)
@@ -71,7 +71,7 @@
 
 			for(var/A in SSxenoarch.digsite_spawning_turfs)
 				var/turf/simulated/mineral/T = A
-				if(T.density && T.finds && T.finds.len)
+				if(istype(T, /turf/simulated/mineral) && T.density && T.finds && T.finds.len)
 					if(T.z == cur_turf.z)
 						var/cur_dist = get_dist(cur_turf, T) * 2
 						if(nearestSimpleTargetDist < 0 || cur_dist < nearestSimpleTargetDist)
@@ -133,7 +133,7 @@
 
 			positive_locations.Add(D)
 
-			to_chat(user, "<span class='notice'>\icon[src] [src] pings.</span>")
+			to_chat(user, "<span class='notice'>[icon2html(thing = src, target = world)] [src] pings.</span>")
 
 	else if(istype(A, /obj/structure/boulder))
 		var/obj/structure/boulder/B = A
@@ -151,7 +151,7 @@
 
 			positive_locations.Add(D)
 
-			to_chat(user, "<span class='notice'>\icon[src] [src] pings [pick("madly","wildly","excitedly","crazily")]!</span>")
+			to_chat(user, "<span class='notice'>[icon2html(thing = src, target = world)] [src] pings [pick("madly","wildly","excitedly","crazily")]!</span>")
 
 /obj/item/depth_scanner/attack_self(var/mob/living/user)
 	interact(user)
@@ -235,7 +235,7 @@
 	STOP_PROCESSING(SSobj, src)
 	return ..()
 
-/obj/item/beacon_locator/process()
+/obj/item/beacon_locator/process(delta_time)
 	if(target_radio)
 		setDir(get_dir(src,target_radio))
 		switch(get_dist(src,target_radio))
@@ -267,9 +267,9 @@
 						scan_ticks = 0
 						var/turf/T = get_turf(src)
 						if(target_radio)
-							T.visible_message("\icon[src] [src] [pick("chirps","chirrups","cheeps")] happily.")
+							T.visible_message("[icon2html(thing = src, target = world)] [src] [pick("chirps","chirrups","cheeps")] happily.")
 						else
-							T.visible_message("\icon[src] [src] [pick("chirps","chirrups","cheeps")] sadly.")
+							T.visible_message("[icon2html(thing = src, target = world)] [src] [pick("chirps","chirrups","cheeps")] sadly.")
 		else
 			icon_state = "pinoff"
 
@@ -331,19 +331,22 @@
 	depth_scanner = new/obj/item/depth_scanner(src)
 
 /obj/item/xenoarch_multi_tool/attack_self(var/mob/living/user)
-	depth_scanner.interact(user)
+	depth_scanner.interact(usr)
 
-/obj/item/xenoarch_multi_tool/verb/swap_settings(var/mob/living/user)
+/obj/item/xenoarch_multi_tool/verb/swap_settings()
 	set name = "Swap Functionality"
 	set desc = "Swap between the scanning and measuring functionality.."
+	if(!(src in usr))
+		return
 	mode = !mode
 	if(mode)
-		to_chat(user, "The device will now scan for artifacts.")
+		to_chat(usr, "The device will now scan for artifacts.")
 	else
-		to_chat(user, "The device will now measure depth dug.")
+		to_chat(usr, "The device will now measure depth dug.")
 
-/obj/item/xenoarch_multi_tool/verb/scan_for_anomalies(var/mob/living/user)
+/obj/item/xenoarch_multi_tool/verb/scan_for_anomalies()
 	set name = "Scan for Anomalies"
 	set desc = "Scan for artifacts and anomalies within your vicinity."
-	anomaly_scanner.interact(user)
-
+	if(!(src in usr))
+		return
+	anomaly_scanner.interact(usr)

@@ -9,7 +9,7 @@
 
 	//Status updates, death etc.
 	clamp_values()
-	handle_regular_status_updates()
+	handle_regular_UI_updates()
 	handle_actions()
 	handle_instability()
 	// For some reason borg Life() doesn't call ..()
@@ -32,7 +32,7 @@
 //	SetStunned(min(stunned, 30))
 	SetParalysis(min(paralysis, 30))
 //	SetWeakened(min(weakened, 20))
-	sleeping = 0
+	SetSleeping(0)
 	adjustBruteLoss(0)
 	adjustToxLoss(0)
 	adjustOxyLoss(0)
@@ -40,7 +40,7 @@
 
 /mob/living/silicon/robot/proc/use_power()
 	// Debug only
-	// world << "DEBUG: life.dm line 35: cyborg use_power() called at tick [controller_iteration]"
+	// to_chat(world, "DEBUG: life.dm line 35: cyborg use_power() called at tick [controller_iteration]")
 	used_power_this_tick = 0
 	for(var/V in components)
 		var/datum/robot_component/C = components[V]
@@ -66,7 +66,7 @@
 			lights_on = 0
 			set_light(0)
 
-/mob/living/silicon/robot/handle_regular_status_updates()
+/mob/living/silicon/robot/handle_regular_UI_updates()
 
 	if(src.camera && !scrambledcodes)
 		if(src.stat == 2 || wires.IsIndexCut(BORG_WIRE_CAMERA))
@@ -78,7 +78,7 @@
 
 	if(src.sleeping)
 		Paralyse(3)
-		src.sleeping--
+		AdjustSleeping(-1)
 
 	//if(src.resting) // VOREStation edit. Our borgos would rather not.
 	//	Weaken(5)

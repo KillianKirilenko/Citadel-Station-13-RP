@@ -24,7 +24,7 @@
 	var/silicate = 0 // number of units of silicate
 	var/fulltile = FALSE // Set to true on full-tile variants.
 
-/obj/structure/window/New()
+/obj/structure/window/Initialize(mapload)
 	/// COMPATIBILITY PATCH - Replace this crap with a better solution (maybe copy /tg/'s ASAP!!)
 	check_fullwindow()
 	return ..()
@@ -34,27 +34,27 @@
 		fulltile = TRUE
 
 /obj/structure/window/examine(mob/user)
-	. = ..(user)
+	. = ..()
 
 	if(health == maxhealth)
-		to_chat(user, "<span class='notice'>It looks fully intact.</span>")
+		. += "<span class='notice'>It looks fully intact.</span>"
 	else
 		var/perc = health / maxhealth
 		if(perc > 0.75)
-			to_chat(user, "<span class='notice'>It has a few cracks.</span>")
+			. += "<span class='notice'>It has a few cracks.</span>"
 		else if(perc > 0.5)
-			to_chat(user, "<span class='warning'>It looks slightly damaged.</span>")
+			. += "<span class='warning'>It looks slightly damaged.</span>"
 		else if(perc > 0.25)
-			to_chat(user, "<span class='warning'>It looks moderately damaged.</span>")
+			. += "<span class='warning'>It looks moderately damaged.</span>"
 		else
-			to_chat(user, "<span class='danger'>It looks heavily damaged.</span>")
+			. += "<span class='danger'>It looks heavily damaged.</span>"
 	if(silicate)
 		if (silicate < 30)
-			to_chat(user, "<span class='notice'>It has a thin layer of silicate.</span>")
+			. += "<span class='notice'>It has a thin layer of silicate.</span>"
 		else if (silicate < 70)
-			to_chat(user, "<span class='notice'>It is covered in silicate.</span>")
+			. += "<span class='notice'>It is covered in silicate.</span>"
 		else
-			to_chat(user, "<span class='notice'>There is a thick layer of silicate covering it.</span>")
+			. += "<span class='notice'>There is a thick layer of silicate covering it.</span>"
 
 /obj/structure/window/take_damage(var/damage = 0,  var/sound_effect = 1)
 	var/initialhealth = health
@@ -300,9 +300,7 @@
 		else
 			playsound(src, W.usesound, 75, 1)
 			visible_message("<span class='notice'>[user] dismantles \the [src].</span>")
-			var/obj/item/stack/material/mats = new glasstype(loc)
-			if(is_fulltile())
-				mats.amount = 4
+			new glasstype(loc, is_fulltile()? 2 : 1)
 			qdel(src)
 	else if(istype(W, /obj/item/stack/cable_coil) && reinf && state == 0 && !istype(src, /obj/structure/window/reinforced/polarized))
 		var/obj/item/stack/cable_coil/C = W
@@ -391,9 +389,8 @@
 	update_nearby_tiles(need_rebuild=1)
 	return
 
-/obj/structure/window/New(Loc, start_dir=null, constructed=0)
-	..()
-
+/obj/structure/window/Initialize(mapload, start_dir, constructed = FALSE)
+	. = ..(mapload)
 	if (start_dir)
 		setDir(start_dir)
 
@@ -479,7 +476,7 @@
 
 /obj/structure/window/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	if(exposed_temperature > maximal_heat)
-		hit(damage_per_fire_tick, 0)
+		take_damage(damage_per_fire_tick)
 	..()
 
 
@@ -489,7 +486,7 @@
 	icon_state = "window"
 	basestate = "window"
 	glasstype = /obj/item/stack/material/glass
-	maximal_heat = T0C + 100
+	maximal_heat = T0C + 500 // Bumping it up a bit, so that a small fire doesn't instantly melt it. Also, makes sense as glass starts softening at around ~700 C
 	damage_per_fire_tick = 2.0
 	maxhealth = 12.0
 	force_threshold = 3
@@ -506,7 +503,7 @@
 	icon_state = "phoronwindow"
 	shardtype = /obj/item/material/shard/phoron
 	glasstype = /obj/item/stack/material/glass/phoronglass
-	maximal_heat = T0C + 2000
+	maximal_heat = INFINITY // This is high-grade atmospherics glass. Let's not have it burn, mmmkay?
 	damage_per_fire_tick = 1.0
 	maxhealth = 40.0
 	force_threshold = 5
@@ -524,7 +521,7 @@
 	shardtype = /obj/item/material/shard/phoron
 	glasstype = /obj/item/stack/material/glass/phoronrglass
 	reinf = 1
-	maximal_heat = T0C + 4000
+	maximal_heat = INFINITY // Same here. The reinforcement is just structural anyways
 	damage_per_fire_tick = 1.0 // This should last for 80 fire ticks if the window is not damaged at all. The idea is that borosilicate windows have something like ablative layer that protects them for a while.
 	maxhealth = 80.0
 	force_threshold = 10
@@ -541,7 +538,7 @@
 	basestate = "rwindow"
 	maxhealth = 40.0
 	reinf = 1
-	maximal_heat = T0C + 750
+	maximal_heat = T0C + 1000 // Bumping this as well, as most fires quickly get over 800 C
 	damage_per_fire_tick = 2.0
 	glasstype = /obj/item/stack/material/glass/reinforced
 	force_threshold = 6

@@ -1,28 +1,52 @@
 // Uniform slot
-/datum/gear/uniform
-	display_name = "Civilian Blazer - Blue"
-	sort_category = "Uniforms and Casual Dress"
+/datum/gear/uniform/
+	name = "Blazer - Blue"
 	path = /obj/item/clothing/under/blazer
 	slot = slot_w_uniform
+	sort_category = "Uniforms and Casual Dress"
 
 /datum/gear/uniform/blazerskirt
-	display_name = "Civilian Blazer - Skirt "
+	name = "Blazer - Skirt "
 	path = /obj/item/clothing/under/blazer/skirt
 
 /datum/gear/uniform/cheongsam
-	display_name = "Civilian Cheongsam Selection"
+	name = "Cheongsam Selection"
 	description = "Various color variations of an old earth dress style. They are pretty close fitting around the waist."
 
 /datum/gear/uniform/cheongsam/New()
 	..()
-	var/list/cheongasms = list()
-	for(var/cheongasm in typesof(/obj/item/clothing/under/cheongsam))
-		var/obj/item/clothing/under/cheongsam/cheongasm_type = cheongasm
-		cheongasms[initial(cheongasm_type.name)] = cheongasm_type
-	gear_tweaks += new/datum/gear_tweak/path(sortTim(cheongasms, /proc/cmp_text_asc))
+	var/list/cheongsams = list()
+	for(var/cheongsam in typesof(/obj/item/clothing/under/cheongsam))
+		var/obj/item/clothing/under/cheongsam/cheongsam_type = cheongsam
+		cheongsams[initial(cheongsam_type.name)] = cheongsam_type
+	gear_tweaks += new/datum/gear_tweak/path(sortTim(cheongsams, /proc/cmp_text_asc))
+
+/datum/gear/uniform/cheongsam_male
+	name = "Cheongsam (Male) - Black"
+	path = /obj/item/clothing/under/cheong
+
+/datum/gear/uniform/cheongsam_male/white
+	name = "Cheongsam (Male) - White"
+	path = /obj/item/clothing/under/cheong/white
+
+/datum/gear/uniform/cheongsam_male/red
+	name = "Cheongsam (Male) - Red"
+	path = /obj/item/clothing/under/cheong/red
+
+/datum/gear/uniform/qipao
+	name = "Qipao"
+	path = /obj/item/clothing/under/qipao
+
+/datum/gear/uniform/qipao/white
+	name = "Qipao - White"
+	path = /obj/item/clothing/under/qipao/white
+
+/datum/gear/uniform/qipao/red
+	name = "Qipao - Red"
+	path = /obj/item/clothing/under/qipao/red
 
 /datum/gear/uniform/croptop
-	display_name = "Civilian Croptop Selection"
+	name = "Croptop Selection"
 	description = "Light shirts which shows the midsection of the wearer."
 
 /datum/gear/uniform/croptop/New()
@@ -34,19 +58,19 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(croptops, /proc/cmp_text_asc))
 
 /datum/gear/uniform/kilt
-	display_name = "Civilian kilt"
+	name = "Kilt"
 	path = /obj/item/clothing/under/kilt
 
 /datum/gear/uniform/cuttop
-	display_name = "Civilian Cut Top - Grey"
+	name = "Cut Top - Grey"
 	path = /obj/item/clothing/under/cuttop
 
 /datum/gear/uniform/cuttop/red
-	display_name = "Civilian Cut Top - Red"
+	name = "Cut Top - Red"
 	path = /obj/item/clothing/under/cuttop/red
 
 /datum/gear/uniform/jumpsuit
-	display_name = "Civilian Jumpclothes Selection"
+	name = "Jumpclothes Selection"
 	path = /obj/item/clothing/under/color/grey
 
 /datum/gear/uniform/jumpsuit/New()
@@ -58,11 +82,11 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(jumpclothes, /proc/cmp_text_asc))
 
 /datum/gear/uniform/blueshortskirt
-	display_name = "Civilian Short Skirt"
+	name = "Short Skirt"
 	path = /obj/item/clothing/under/blueshortskirt
 
 /datum/gear/uniform/skirt
-	display_name = "Civilian Skirts Selection"
+	name = "Skirts Selection"
 	path = /obj/item/clothing/under/skirt
 
 /datum/gear/uniform/skirt/New()
@@ -76,7 +100,7 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(skirts, /proc/cmp_text_asc))
 
 /datum/gear/uniform/pants
-	display_name = "Civilian Pants Selection"
+	name = "Pants Selection"
 	path = /obj/item/clothing/under/pants/white
 
 /datum/gear/uniform/pants/New()
@@ -88,7 +112,7 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(pants, /proc/cmp_text_asc))
 
 /datum/gear/uniform/shorts
-	display_name = "Civilian Shorts Selection"
+	name = "Shorts Selection"
 	path = /obj/item/clothing/under/shorts/jeans
 
 /datum/gear/uniform/shorts/New()
@@ -99,122 +123,8 @@
 		shorts[initial(short_type.name)] = short_type
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(shorts, /proc/cmp_text_asc))
 
-/datum/gear/uniform/job_skirt/ce
-	display_name = "Chief Engineer Skirt"
-	path = /obj/item/clothing/under/rank/chief_engineer/skirt
-	allowed_roles = list("Chief Engineer")
-
-/datum/gear/uniform/job_skirt/atmos
-	display_name = "Atmospheric Skirt"
-	path = /obj/item/clothing/under/rank/atmospheric_technician/skirt
-	allowed_roles = list("Chief Engineer","Atmospheric Technician")
-
-/datum/gear/uniform/job_skirt/eng
-	display_name = "Engineering Skirt"
-	path = /obj/item/clothing/under/rank/engineer/skirt
-	allowed_roles = list("Chief Engineer","Station Engineer")
-
-/datum/gear/uniform/job_skirt/roboticist
-	display_name = "Roboticist Skirt"
-	path = /obj/item/clothing/under/rank/roboticist/skirt
-	allowed_roles = list("Research Director","Roboticist")
-
-/datum/gear/uniform/job_skirt/cmo
-	display_name = "Chief Medical Officer Skirt"
-	path = /obj/item/clothing/under/rank/chief_medical_officer/skirt
-	allowed_roles = list("Chief Medical Officer")
-
-/datum/gear/uniform/job_skirt/chem
-	display_name = "Chemist Skirt"
-	path = /obj/item/clothing/under/rank/chemist/skirt
-	allowed_roles = list("Chief Medical Officer","Chemist")
-
-/datum/gear/uniform/job_skirt/viro
-	display_name = "Medical Skirt - Virologist"
-	path = /obj/item/clothing/under/rank/virologist/skirt
-	allowed_roles = list("Chief Medical Officer","Medical Doctor")
-
-/datum/gear/uniform/job_skirt/med
-	display_name = "Medical Skirt"
-	path = /obj/item/clothing/under/rank/medical/skirt
-	allowed_roles = list("Chief Medical Officer","Medical Doctor","Chemist","Psychiatrist","Paramedic")
-
-/datum/gear/uniform/job_skirt/sci
-	display_name = "Science Skirt"
-	path = /obj/item/clothing/under/rank/scientist/skirt
-	allowed_roles = list("Research Director","Scientist", "Xenobiologist")
-
-/datum/gear/uniform/job_skirt/cargo
-	display_name = "Cargo Skirt"
-	path = /obj/item/clothing/under/rank/cargotech/skirt
-	allowed_roles = list("Quartermaster","Cargo Technician")
-
-/datum/gear/uniform/job_skirt/qm
-	display_name = "Quartermaster Skirt"
-	path = /obj/item/clothing/under/rank/cargo/skirt
-	allowed_roles = list("Quartermaster")
-
-/datum/gear/uniform/job_skirt/warden
-	display_name = "Warden Skirt"
-	path = /obj/item/clothing/under/rank/warden/skirt
-	allowed_roles = list("Head of Security", "Warden")
-
-/datum/gear/uniform/job_skirt/security
-	display_name = "Security Skirt"
-	path = /obj/item/clothing/under/rank/security/skirt
-	allowed_roles = list("Head of Security", "Warden", "Detective", "Security Officer")
-
-/datum/gear/uniform/job_skirt/head_of_security
-	display_name = "Head of Security Skirt"
-	path = /obj/item/clothing/under/rank/head_of_security/skirt
-	allowed_roles = list("Head of Security")
-
-
-/datum/gear/uniform/job_turtle/
-	description = "You feel the urge to talk about the Cosmos."
-
-/datum/gear/uniform/job_turtle/science
-	display_name = "Science Turtleneck"
-	path = /obj/item/clothing/under/rank/scientist/turtleneck
-	allowed_roles = list("Research Director", "Scientist", "Roboticist", "Xenobiologist")
-
-/datum/gear/uniform/job_turtle/security
-	display_name = "Security Turtleneck"
-	path = /obj/item/clothing/under/rank/security/turtleneck
-	allowed_roles = list("Head of Security", "Warden", "Detective", "Security Officer")
-
-/datum/gear/uniform/job_turtle/engineering
-	display_name = "Engineering Turtleneck"
-	path = /obj/item/clothing/under/rank/engineer/turtleneck
-	allowed_roles = list("Chief Engineer", "Atmospheric Technician", "Station Engineer")
-
-/datum/gear/uniform/job_turtle/medical
-	display_name = "Medical Turtleneck"
-	path = /obj/item/clothing/under/rank/medical/turtleneck
-	allowed_roles = list("Chief Medical Officer", "Paramedic", "Medical Doctor", "Psychologist", "Field Medic", "Chemist")
-
-/datum/gear/uniform/jeans_qm
-	display_name = "Quartermaster Jeans"
-	path = /obj/item/clothing/under/rank/cargo/jeans
-	allowed_roles = list("Quartermaster")
-
-/datum/gear/uniform/jeans_qmf
-	display_name = "Quartermaster Jeans - Female"
-	path = /obj/item/clothing/under/rank/cargo/jeans/female
-	allowed_roles = list("Quartermaster")
-
-/datum/gear/uniform/jeans_cargo
-	display_name = "Cargo Jeans"
-	path = /obj/item/clothing/under/rank/cargotech/jeans
-	allowed_roles = list("Quartermaster","Cargo Technician")
-
-/datum/gear/uniform/jeans_cargof
-	display_name = "Cargo Jeans - Female"
-	path = /obj/item/clothing/under/rank/cargotech/jeans/female
-	allowed_roles = list("Quartermaster","Cargo Technician")
-
 /datum/gear/uniform/suit/lawyer
-	display_name = "Civilian Suit One-Piece Selection"
+	name = "Suit One-Piece Selection"
 	path = /obj/item/clothing/under/lawyer
 
 /datum/gear/uniform/suit/lawyer/New()
@@ -226,7 +136,7 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(lsuits, /proc/cmp_text_asc))
 
 /datum/gear/uniform/suit/suit_jacket
-	display_name = "Civilian Suit Modular Selection"
+	name = "Suit Modular Selection"
 	path = /obj/item/clothing/under/suit_jacket
 
 /datum/gear/uniform/suit/suit_jacket/New()
@@ -240,42 +150,27 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(msuits, /proc/cmp_text_asc))
 
 /datum/gear/uniform/suit/amish
-	display_name = "Civilian Suit - Amish"
+	name = "Suit - Amish"
 	path = /obj/item/clothing/under/sl_suit
 
 /datum/gear/uniform/suit/gentle
-	display_name = "Civilian Suit - Gentlemen"
+	name = "Suit - Gentlemen"
 	path = /obj/item/clothing/under/gentlesuit
 
 /datum/gear/uniform/suit/gentleskirt
-	display_name = "Civilian Suit - Lady"
+	name = "Suit - Lady"
 	path = /obj/item/clothing/under/gentlesuit/skirt
 
 /datum/gear/uniform/suit/white
-	display_name = "Civilian Suit - White"
+	name = "Suit - White"
 	path = /obj/item/clothing/under/scratch
 
 /datum/gear/uniform/suit/whiteskirt
-	display_name = "Civilian Suit - White Skirt"
+	name = "Suit - White Skirt"
 	path = /obj/item/clothing/under/scratch/skirt
 
-/datum/gear/uniform/suit/detectiveskirt
-	display_name = "Detective Suit - Skirt"
-	path = /obj/item/clothing/under/det/skirt
-	allowed_roles = list("Detective")
-
-/datum/gear/uniform/suit/iaskirt
-	display_name = "Internal Affairs Suit - Skirt"
-	path = /obj/item/clothing/under/rank/internalaffairs/skirt
-	allowed_roles = list("Internal Affairs Agent")
-
-/datum/gear/uniform/suit/bartenderskirt
-	display_name = "Bartender - Suit - Skirt"
-	path = /obj/item/clothing/under/rank/bartender/skirt
-	allowed_roles = list("Bartender")
-
 /datum/gear/uniform/scrub
-	display_name = "Civilian Scrubs Selection"
+	name = "Scrubs Selection"
 	path = /obj/item/clothing/under/rank/medical/scrubs
 
 /datum/gear/uniform/scrub/New()
@@ -287,82 +182,55 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(scrubs, /proc/cmp_text_asc))
 
 /datum/gear/uniform/oldwoman
-	display_name = "Civilian Old Woman Attire"
+	name = "Old Woman Attire"
 	path = /obj/item/clothing/under/oldwoman
 
 /datum/gear/uniform/sundress
-	display_name = "Civilian Sundress"
+	name = "Sundress"
 	path = /obj/item/clothing/under/sundress
 
 /datum/gear/uniform/sundress/white
-	display_name = "Civilian Sundress - White"
+	name = "Sundress - White"
 	path = /obj/item/clothing/under/sundress_white
 
+/datum/gear/uniform/turtlebaggy
+	name = "Baggy Turtleneck - Cream"
+	path = /obj/item/clothing/under/turtlebaggy
+
+/datum/gear/uniform/turtlebaggy/purple
+	name = "Baggy Turtleneck - Purple"
+	path = /obj/item/clothing/under/turtlebaggy/purple
+
+/datum/gear/uniform/turtlebaggy/red
+	name = "Baggy Turtleneck - Red"
+	path = /obj/item/clothing/under/turtlebaggy/red
+
+/datum/gear/uniform/turtlebaggy/blue
+	name = "Baggy Turtleneck - Blue"
+	path = /obj/item/clothing/under/turtlebaggy/blue
+
+/datum/gear/uniform/turtlebaggy/green
+	name = "Baggy Turtleneck - Green"
+	path = /obj/item/clothing/under/turtlebaggy/green
+
+/datum/gear/uniform/turtlebaggy/black
+	name = "Baggy Turtleneck - Black"
+	path = /obj/item/clothing/under/turtlebaggy/black
+
 /datum/gear/uniform/pentagramdress
-	display_name = "Pentagram Dress"
+	name = "Pentagram Dress"
 	path = /obj/item/clothing/under/pentagramdress
 
 /datum/gear/uniform/dress_fire
-	display_name = "Civilian Flame Dress"
+	name = "Flame Dress"
 	path = /obj/item/clothing/under/dress/dress_fire
 
-/datum/gear/uniform/uniform_captain
-	display_name = "Facility Director Uniform - Dress"
-	path = /obj/item/clothing/under/dress/dress_cap
-	allowed_roles = list("Facility Director")
-
-/datum/gear/uniform/corpdetsuit
-	display_name = "Detective Uniform - Corporate"
-	path = /obj/item/clothing/under/det/corporate
-	allowed_roles = list("Detective","Head of Security")
-
-/datum/gear/uniform/corpsecsuit
-	display_name = "Security Uniform - Corporate"
-	path = /obj/item/clothing/under/rank/security/corp
-	allowed_roles = list("Security Officer","Head of Security","Warden")
-
-/datum/gear/uniform/corpwarsuit
-	display_name = "Warden Uniform - Corporate"
-	path = /obj/item/clothing/under/rank/warden/corp
-	allowed_roles = list("Head of Security","Warden")
-
-/datum/gear/uniform/corphossuit
-	display_name = "Head of Security Uniform - Corporate"
-	path = /obj/item/clothing/under/rank/head_of_security/corp
-	allowed_roles = list("Head of Security")
-
-/datum/gear/uniform/uniform_hop
-	display_name = "Head of Personnel Uniform - Dress"
-	path = /obj/item/clothing/under/dress/dress_hop
-	allowed_roles = list("Head of Personnel")
-
-/datum/gear/uniform/uniform_hr
-	display_name = "Head of Personnel Uniform - HR Director"
-	path = /obj/item/clothing/under/dress/dress_hr
-
-	allowed_roles = list("Head of Personnel")
-
-/datum/gear/uniform/navysecsuit
-	display_name = "Security Uniform - Navy Blue"
-	path = /obj/item/clothing/under/rank/security/navyblue
-	allowed_roles = list("Security Officer","Head of Security","Warden")
-
-/datum/gear/uniform/navywarsuit
-	display_name = "Warden Uniform - Navy Blue"
-	path = /obj/item/clothing/under/rank/warden/navyblue
-	allowed_roles = list("Head of Security","Warden")
-
-/datum/gear/uniform/navyhossuit
-	display_name = "Head of Security Uniform - Navy Blue"
-	path = /obj/item/clothing/under/rank/head_of_security/navyblue
-	allowed_roles = list("Head of Security")
-
 /datum/gear/uniform/whitedress
-	display_name = "Civilian White Wedding Dress"
+	name = "White Wedding Dress"
 	path = /obj/item/clothing/under/dress/white
 
 /datum/gear/uniform/longdress
-	display_name = "Civilian Long Dress"
+	name = "Long Dress"
 	path = /obj/item/clothing/under/dress/white2
 
 /datum/gear/uniform/longdress/New()
@@ -370,7 +238,7 @@
 	gear_tweaks += gear_tweak_free_color_choice
 
 /datum/gear/uniform/shortplaindress
-	display_name = "Civilian Plain Dress"
+	name = "Plain Dress"
 	path = /obj/item/clothing/under/dress/white3
 
 /datum/gear/uniform/shortplaindress/New()
@@ -378,7 +246,7 @@
 	gear_tweaks += gear_tweak_free_color_choice
 
 /datum/gear/uniform/longwidedress
-	display_name = "Civilian Long Wide Dress"
+	name = "Long Wide Dress"
 	path = /obj/item/clothing/under/dress/white4
 
 /datum/gear/uniform/longwidedress/New()
@@ -386,11 +254,11 @@
 	gear_tweaks += gear_tweak_free_color_choice
 
 /datum/gear/uniform/reddress
-	display_name = "Civilian Red Dress - Belted"
+	name = "Red Dress - Belted"
 	path = /obj/item/clothing/under/dress/darkred
 
 /datum/gear/uniform/wedding
-	display_name = "Civilian Wedding Dress selection"
+	name = "Wedding Dress Selection"
 	path = /obj/item/clothing/under/wedding
 
 /datum/gear/uniform/wedding/New()
@@ -403,23 +271,23 @@
 
 
 /datum/gear/uniform/suit/reallyblack
-	display_name = "Civilian Executive Suit"
+	name = "Executive Suit"
 	path = /obj/item/clothing/under/suit_jacket/really_black
 
 /datum/gear/uniform/skirts
-	display_name = "Civilian Executive Skirt"
+	name = "Executive Skirt"
 	path = /obj/item/clothing/under/suit_jacket/female/skirt
 
 /datum/gear/uniform/dresses
-	display_name = "Civilian Sailor Dress"
+	name = "Sailor Dress"
 	path = /obj/item/clothing/under/dress/sailordress
 
 /datum/gear/uniform/dresses/eveninggown
-	display_name = "Civilian Red Evening Gown"
+	name = "Red Evening Gown"
 	path = /obj/item/clothing/under/dress/redeveninggown
 
 /datum/gear/uniform/dresses/maid
-	display_name = "Civilian Maid Uniform Selection"
+	name = "Maid Uniform Selection"
 	path = /obj/item/clothing/under/dress/maid
 
 /datum/gear/uniform/dresses/maid/New()
@@ -431,51 +299,51 @@
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(maids, /proc/cmp_text_asc))
 
 /datum/gear/uniform/utility
-	display_name = "Civilian Utility - Black"
+	name = "Utility - Black"
 	path = /obj/item/clothing/under/utility
 
 /datum/gear/uniform/utility/blue
-	display_name = "Civilian Utility - Blue"
+	name = "Utility - Blue"
 	path = /obj/item/clothing/under/utility/blue
 
 /datum/gear/uniform/utility/grey
-	display_name = "Civilian Utility - Grey"
+	name = "Utility - Grey"
 	path = /obj/item/clothing/under/utility/grey
 
 /datum/gear/uniform/sweater
-	display_name = "Civilian Sweater - Grey"
+	name = "Sweater - Grey"
 	path = /obj/item/clothing/under/rank/psych/turtleneck/sweater
 
 /datum/gear/uniform/brandsuit/aether
-	display_name = "Civilian Jumpsuit - Aether"
+	name = "Jumpsuit - Aether"
 	path = /obj/item/clothing/under/aether
 
 /datum/gear/uniform/brandsuit/focal
-	display_name = "Civilian Jumpsuit - Focal"
+	name = "Jumpsuit - Focal"
 	path = /obj/item/clothing/under/focal
 
 /datum/gear/uniform/mbill
-	display_name = "Civilian Outfit - Major Bill's"
+	name = "Outfit - Major Bill's"
 	path = /obj/item/clothing/under/mbill
 
 /datum/gear/uniform/brandsuit/grayson
-	display_name = "Civilian Outfit - Grayson"
+	name = "Outfit - Grayson"
 	path = /obj/item/clothing/under/grayson
 
 /datum/gear/uniform/brandsuit/wardt
-	display_name = "Civilian Jumpsuit - Ward-Takahashi"
+	name = "Jumpsuit - Ward-Takahashi"
 	path = /obj/item/clothing/under/wardt
 
 /datum/gear/uniform/frontier
-	display_name = "Civilian Outfit - Frontier"
+	name = "Outfit - Frontier"
 	path = 	/obj/item/clothing/under/frontier
 
 /datum/gear/uniform/brandsuit/hephaestus
-	display_name = "Civilian Jumpsuit - Hephaestus"
+	name = "Jumpsuit - Hephaestus"
 	path = 	/obj/item/clothing/under/hephaestus
 
 /datum/gear/uniform/yogapants
-	display_name = "Civilian Yoga Pants"
+	name = "Yoga Pants"
 	path = /obj/item/clothing/under/pants/yogapants
 
 /datum/gear/uniform/yogapants/New()
@@ -483,159 +351,98 @@
 	gear_tweaks += gear_tweak_free_color_choice
 
 /datum/gear/uniform/black_corset
-	display_name = "Civilian Black Corset"
+	name = "Black Corset"
 	path = /obj/item/clothing/under/dress/black_corset
 
 /datum/gear/uniform/flower_dress
-	display_name = "Civilian Flower Dress"
+	name = "Flower Dress"
 	path = /obj/item/clothing/under/dress/flower_dress
 
 /datum/gear/uniform/red_swept_dress
-	display_name = "Civilian Red Swept Dress"
+	name = "Red Swept Dress"
 	path = /obj/item/clothing/under/dress/red_swept_dress
 
 /datum/gear/uniform/bathrobe
-	display_name = "Civilian Bathrobe"
+	name = "Bathrobe"
 	path = /obj/item/clothing/under/bathrobe
 
 /datum/gear/uniform/flamenco
-	display_name = "Civilian Flamenco Dress"
+	name = "Flamenco Dress"
 	path = /obj/item/clothing/under/dress/flamenco
 
 /datum/gear/uniform/westernbustle
-	display_name = "Civilian Western Bustle"
+	name = "Western Bustle"
 	path = /obj/item/clothing/under/dress/westernbustle
 
 /datum/gear/uniform/circuitry
-	display_name = "Civilian Jumpsuit - Circuitry"
+	name = "Jumpsuit - Circuitry"
 	path = /obj/item/clothing/under/circuitry
-// NEW UNIFORMS BEGIN HERE
-/datum/gear/uniform/sifguard
-	display_name = "Civilian Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew
 
-/datum/gear/uniform/sifguard/medical
-	display_name = "Medical Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew/medical
-	allowed_roles = list("Chief Medical Officer","Medical Doctor","Chemist","Paramedic","Geneticist","Field Medic")
-
-/datum/gear/uniform/sifguard/science
-	display_name = "Science Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew/research
-	allowed_roles = list("Research Director","Scientist","Roboticist","Xenobiologist")
-
-/datum/gear/uniform/sifguard/engineering
-	display_name = "Engineering Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew/engineering
-	allowed_roles = list("Chief Engineer","Atmospheric Technician","Station Engineer")
-
-/datum/gear/uniform/sifguard/supply
-	display_name = "Cargo Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew/supply
-	allowed_roles = list("Quartermaster","Cargo Technician","Shaft Miner")
-
-/datum/gear/uniform/sifguard/security
-	display_name = "Security Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/crew/security
-	allowed_roles = list("Security Officer","Head of Security","Warden","Detective")
-
-/datum/gear/uniform/sifguard/command
-	display_name = "Command Uniform - Crew"
-	path = /obj/item/clothing/under/solgov/utility/sifguard/officer/crew
-	allowed_roles = list("Head of Security","Facility Director","Head of Personnel","Chief Engineer","Research Director","Chief Medical Officer","Command Secretary")
-
-/datum/gear/uniform/fleet/medical
-	display_name = "Medical Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/medical
-	allowed_roles = list("Chief Medical Officer","Medical Doctor","Chemist","Paramedic","Geneticist","Field Medic")
-
-
-/datum/gear/uniform/fleet/science
-	display_name = "Science Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/exploration
-	allowed_roles = list("Research Director","Scientist","Roboticist","Xenobiologist")
-
-
-/datum/gear/uniform/fleet/engineering
-	display_name = "Engineering Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/engineering
-	allowed_roles = list("Chief Engineer","Atmospheric Technician","Station Engineer")
-
-/datum/gear/uniform/fleet/supply
-	display_name = "Cargo Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/supply
-	allowed_roles = list("Quartermaster","Cargo Technician","Shaft Miner")
-
-/datum/gear/uniform/fleet/security
-	display_name = "Security Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/security
-	allowed_roles = list("Security Officer","Head of Security","Warden","Detective")
-
-/datum/gear/uniform/fleet/command
-	display_name = "Command Uniform - Coveralls"
-	path = /obj/item/clothing/under/solgov/utility/fleet/command
-	allowed_roles = list("Head of Security","Facility Director","Head of Personnel","Chief Engineer","Research Director","Chief Medical Officer","Command Secretary")
-
-/datum/gear/uniform/marine/medical
-	display_name = "Medical Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/medical
-	allowed_roles = list("Chief Medical Officer","Medical Doctor","Chemist","Paramedic","Geneticist","Field Medic")
-
-/datum/gear/uniform/marine/science
-	display_name = "Science Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/exploration
-	allowed_roles = list("Research Director","Scientist","Roboticist","Xenobiologist")
-
-/datum/gear/uniform/marine/engineering
-	display_name = "Engineering Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/engineering
-	allowed_roles = list("Chief Engineer","Atmospheric Technician","Station Engineer")
-
-/datum/gear/uniform/marine/supply
-	display_name = "Cargo Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/supply
-	allowed_roles = list("Quartermaster","Cargo Technician","Shaft Miner")
-
-/datum/gear/uniform/marine/security
-	display_name = "Security Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/security
-	cost = 2
-	allowed_roles = list("Security Officer","Head of Security","Warden","Detective")
-
-/datum/gear/uniform/marine/command
-	display_name = "Command Uniform - Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/command
-	allowed_roles = list("Head of Security","Facility Director","Head of Personnel","Chief Engineer","Research Director","Chief Medical Officer","Command Secretary")
+/datum/gear/uniform/sysguard
+	name = "Uniform - Crew"
+	path = /obj/item/clothing/under/oricon/utility/sysguard/crew
 
 /datum/gear/uniform/marine/green
-	display_name = "Civilian Uniform - Green Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/green
+	name = "Uniform - Green Fatigues"
+	path = /obj/item/clothing/under/oricon/utility/marine/green
 
 /datum/gear/uniform/marine/tan
-	display_name = "Civilian Uniform - Tan Fatigues"
-	path = /obj/item/clothing/under/solgov/utility/marine/tan
+	name = "Uniform - Tan Fatigues"
+	path = /obj/item/clothing/under/oricon/utility/marine/tan
 /datum/gear/uniform/sleekoverall
-	display_name = "Civilian Overalls - Sleek"
+	name = "Overalls - Sleek"
 	path = /obj/item/clothing/under/overalls/sleek
 
 /datum/gear/uniform/sarired
-	display_name = "Civilian Sari - Red"
+	name = "Sari - Red"
 	path = /obj/item/clothing/under/dress/sari
 
 /datum/gear/uniform/sarigreen
-	display_name = "Civilian Sari - Green"
+	name = "Sari - Green"
 	path = /obj/item/clothing/under/dress/sari/green
 
+/datum/gear/uniform/kamishimo
+	name = "Kamishimo"
+	path = /obj/item/clothing/under/kamishimo
+
+/datum/gear/uniform/kimono
+	name = "Kimono - Plain"
+	path = /obj/item/clothing/under/kimono
+
+/datum/gear/uniform/kimono_black
+	name = "Kimono - Black"
+	path = /obj/item/clothing/under/kimono_black
+
+/datum/gear/uniform/kimono_sakura
+	name = "Kimono - Sakura"
+	path = /obj/item/clothing/under/kimono_sakura
+
+/datum/gear/uniform/kimono_fancy
+	name = "Kimono - Festival"
+	path = /obj/item/clothing/under/kimono_fancy
+
+/datum/gear/uniform/kimono_selection
+	name = "Kimono Selection"
+	description = "Colorful variants of the basic kimono. Stylish and comfy!"
+
+/datum/gear/uniform/kimono_selection/New()
+	..()
+	var/list/kimonos = list()
+	for(var/kimono in typesof(/obj/item/clothing/under/kimono))
+		var/obj/item/clothing/under/kimono/kimono_type = kimono
+		kimonos[initial(kimono_type.name)] = kimono_type
+	gear_tweaks += new/datum/gear_tweak/path(sortTim(kimonos, /proc/cmp_text_asc))
+
 /datum/gear/uniform/wrappedcoat
-	display_name = "Civilian Modern Wrapped Coat"
+	name = "Modern Wrapped Coat"
 	path = /obj/item/clothing/under/moderncoat
 
 /datum/gear/uniform/ascetic
-	display_name = "Civilian Plain Ascetic Garb"
+	name = "Plain Ascetic Garb"
 	path = /obj/item/clothing/under/ascetic
 
 /datum/gear/uniform/pleated
-	display_name = "Civilian Pleated Skirt"
+	name = "Pleated Skirt"
 	path = /obj/item/clothing/under/skirt/pleated
 
 /datum/gear/uniform/pleated/New()
@@ -643,102 +450,67 @@
 	gear_tweaks += gear_tweak_free_color_choice
 
 /datum/gear/uniform/lilacdress
-	display_name = "Civilian Lilac Dress"
+	name = "Lilac Dress"
 	path = /obj/item/clothing/under/dress/lilacdress
 
 /datum/gear/uniform/stripeddress
-	display_name = "Civilian Striped Dress"
+	name = "Striped Dress"
 	path = /obj/item/clothing/under/dress/stripeddress
 
 /datum/gear/uniform/festivedress
-	display_name = "Civilian Festive Dress"
+	name = "Festive Dress"
 	path = /obj/item/clothing/under/festivedress
 
 /datum/gear/uniform/haltertop
-	display_name = "Civilian Halter Top"
+	name = "Halter Top"
 	path = /obj/item/clothing/under/haltertop
 
 /datum/gear/uniform/littleblackdress
-	display_name = "Civilian Little Black Dress"
+	name = "Little Black Dress"
 	path = /obj/item/clothing/under/littleblackdress
 
-/datum/gear/uniform/bridgeofficer
-	display_name = "Bridge Officer Uniform"
-	path = /obj/item/clothing/under/bridgeofficer
-	allowed_roles = list("Command Secretary")
-
-/datum/gear/uniform/paramedunidark
-	display_name = "Paramedic Uniform - Dark"
-	path = /obj/item/clothing/under/paramedunidark
-	allowed_roles = list("Medical Doctor","Chief Medical Officer","Chemist","Search and Rescue","Paramedic","Geneticist", "Psychiatrist")
-
-/datum/gear/uniform/parameduniskirtdark
-	display_name = "Paramedic Skirt - Dark"
-	path = /obj/item/clothing/under/parameduniskirtdark
-	allowed_roles = list("Medical Doctor","Chief Medical Officer","Chemist","Search and Rescue","Paramedic","Geneticist", "Psychiatrist")
-
-/datum/gear/uniform/suit/bartenderbtc
-	display_name = "Bartender Uniform - BTC"
-	path = /obj/item/clothing/under/btcbartender
-	allowed_roles = list("Bartender")
-
-/datum/gear/uniform/paramedunilight
-	display_name = "Paramedic Uniform - Light"
-	path = /obj/item/clothing/under/paramedunilight
-	allowed_roles = list("Medical Doctor","Chief Medical Officer","Chemist","Search and Rescue","Paramedic","Geneticist", "Psychiatrist")
-
-/datum/gear/uniform/parameduniskirtdark
-	display_name = "Paramedic Skirt - Light"
-	path = /obj/item/clothing/under/parameduniskirtlight
-	allowed_roles = list("Medical Doctor","Chief Medical Officer","Chemist","Search and Rescue","Paramedic","Geneticist", "Psychiatrist")
-
 datum/gear/uniform/dutchsuit
-	display_name = "Civilian Western Suit"
+	name = "Western Suit"
 	path = /obj/item/clothing/under/dutchuniform
 
 datum/gear/uniform/victorianredshirt
-	display_name = "Civilian Red Shirt Victorian Suit"
+	name = "Red Shirt Victorian Suit"
 	path = /obj/item/clothing/under/victorianblred
 
 datum/gear/uniform/victorianredvest
-	display_name = "Civilian Red Vested Victorian Suit"
+	name = "Red Vested Victorian Suit"
 	path = /obj/item/clothing/under/victorianredvest
 
 datum/gear/uniform/victoriansuit
-	display_name = "Civilian Victorian Suit"
+	name = "Victorian Suit"
 	path = /obj/item/clothing/under/victorianvest
 
 datum/gear/uniform/victorianbluesuit
-	display_name = "Civilian Blue Shirted Victorian Suit"
+	name = "Blue Shirted Victorian Suit"
 	path = /obj/item/clothing/under/victorianlightfire
 
 datum/gear/uniform/victorianreddress
-	display_name = "Civilian Victorian Red Dress"
+	name = "Victorian Red Dress"
 	path = /obj/item/clothing/under/victorianreddress
 
 datum/gear/uniform/victorianblackdress
-	display_name = "Civilian Victorian Black Dress"
+	name = "Victorian Black Dress"
 	path = /obj/item/clothing/under/victorianblackdress
 
-datum/gear/uniform/bridgeofficer
-	display_name = "Bridge Officer Skirt"
-	path = /obj/item/clothing/under/bridgeofficerskirt
-	allowed_roles = list("Command Secretary")
-
 datum/gear/uniform/fiendsuit
-	display_name = "Civilian Fiendish Suit"
+	name = "Fiendish Suit"
 	path = /obj/item/clothing/under/fiendsuit
 
 datum/gear/uniform/fienddress
-	display_name = "Civilian Fiendish Dress"
+	name = "Fiendish Dress"
 	path = /obj/item/clothing/under/fienddress
 
 datum/gear/uniform/leotard
-	display_name = "Civilian Black Leotard"
+	name = "Black Leotard"
 	path = /obj/item/clothing/under/leotard
 
 datum/gear/uniform/leotardcolor
-	display_name = "Civilian Colored Leotard"
+	name = "Colored Leotard"
 	path = /obj/item/clothing/under/leotardcolor
 
 /datum/gear/uniform/leotardcolor/New()
@@ -746,95 +518,58 @@ datum/gear/uniform/leotardcolor
 	gear_tweaks += gear_tweak_free_color_choice
 
 datum/gear/uniform/verglasdress
-	display_name = "Civilian Verglas Dress"
+	name = "Verglas Dress"
 	path = /obj/item/clothing/under/verglasdress
 
 datum/gear/uniform/fashionminiskirt
-	display_name = "Civilian Fashionable Miniskirt"
+	name = "Fashionable Miniskirt"
 	path = /obj/item/clothing/under/fashionminiskirt
 
 /datum/gear/uniform/fashionminiskirt/New()
 	..()
 	gear_tweaks += gear_tweak_free_color_choice
 
+datum/gear/uniform/bodysuit
+	name = "Standard Bodysuit"
+	path = /obj/item/clothing/under/bodysuit
+
 datum/gear/uniform/bodysuiteva
-	display_name = "Civilian EVA Bodysuit"
+	name = "EVA Bodysuit"
 	path = /obj/item/clothing/under/bodysuit/bodysuiteva
-
-datum/gear/uniform/bodysuitemt
-	display_name = "Medical Bodysuit EMT"
-	path = /obj/item/clothing/under/bodysuit/bodysuitemt
-	allowed_roles = list("Medical Doctor","Chief Medical Officer","Chemist","Search and Rescue","Paramedic","Geneticist", "Psychiatrist")
-
-
-datum/gear/uniform/bodysuitexplocom
-	display_name = "Exploration Command Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitexplocom
-	allowed_roles = list("Research Director","Pathfinder")
-
-datum/gear/uniform/bodysuitexplo
-	display_name = "Exploration Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitexplo
-	allowed_roles = list("Reasearch Director","Pathfinder","Scientist","Roboticist","Xenobiologist","Explorer","Search and Rescue")
-
-datum/gear/uniform/bodysuitminer
-	display_name = "Mining Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitminer
-	allowed_roles = list("Cargo Technician","Shaft Miner")
-
-datum/gear/uniform/bodysuithazard
-	display_name = "Engineering Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuithazard
-	allowed_roles = list("Chief Engineer","Atmospheric Technician","Station Engineer","Shaft Miner")
-
-datum/gear/uniform/bodysuitsec
-	display_name = "Security Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitsec
-	allowed_roles = list("Security Officer","Head of Security","Warden","Detective")
-
-datum/gear/uniform/bodysuitseccom
-	display_name = "Security Command Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitseccom
-	allowed_roles = list("Head of Security","Warden")
-
-datum/gear/uniform/bodysuitcommand
-	display_name = "Command Bodysuit"
-	path = /obj/item/clothing/under/bodysuit/bodysuitcommand
-	allowed_roles = list("Head of Security","Facility Director","Head of Personnel","Chief Engineer","Research Director","Chief Medical Officer")
 
 // And after nearly successfully hanging myself, this is where the real game begins
 /datum/gear/uniform/future_fashion_light_blue_striped
-	display_name = "Futuristic Light Blue-Striped Jumpsuit"
+	name = "Futuristic Light Blue-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_light_blue_striped
 
 /datum/gear/uniform/future_fashion_dark_blue_striped
-	display_name = "Futuristic Dark Blue-Striped Jumpsuit"
+	name = "Futuristic Dark Blue-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_dark_blue_striped
 
 /datum/gear/uniform/future_fashion_red_striped
-	display_name = "Futuristic Red-Striped Jumpsuit"
+	name = "Futuristic Red-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_red_striped
 
 /datum/gear/uniform/future_fashion_green_striped
-	display_name = "Futuristic Green-Striped Jumpsuit"
+	name = "Futuristic Green-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_green_striped
 
 /datum/gear/uniform/future_fashion_orange_striped
-	display_name = "Futuristic Orange-Striped Jumpsuit"
+	name = "Futuristic Orange-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_orange_striped
 
 /datum/gear/uniform/future_fashion_purple_striped
-	display_name = "Futuristic Purple-Striped Jumpsuit"
+	name = "Futuristic Purple-Striped Jumpsuit"
 	path = /obj/item/clothing/under/future_fashion_purple_striped
 
 /datum/gear/uniform/suit/permit
-	display_name = "Civilian Nudity Permit"
+	name = "Nudity Permit"
 	path = /obj/item/clothing/under/permit
 /*
 // Polaris overrides
-/datum/gear/uniform/solgov/pt/sifguard
-	display_name = "pt uniform, planetside sec"
-	path = /obj/item/clothing/under/solgov/pt/sifguard
+/datum/gear/uniform/solgov/pt/sysguard
+	name = "pt uniform, planetside sec"
+	path = /obj/item/clothing/under/solgov/pt/sysguard
 */
 
 
@@ -843,7 +578,7 @@ Swimsuits
 */
 
 /datum/gear/uniform/swimsuits
-	display_name = "Swimsuits Selection"
+	name = "Swimsuits Selection"
 	path = /obj/item/storage/box/fluff/swimsuit
 
 /datum/gear/uniform/swimsuits/New()
@@ -855,47 +590,83 @@ Swimsuits
 	gear_tweaks += new/datum/gear_tweak/path(sortTim(swimsuits, /proc/cmp_text_asc))
 
 /datum/gear/uniform/suit/gnshorts
-	display_name = "Civilian GN Shorts"
+	name = "GN Shorts"
 	path = /obj/item/clothing/under/fluff/gnshorts
 
 // Latex maid dress
 /datum/gear/uniform/latexmaid
-	display_name = "Civilian Latex Maid Dress"
+	name = "Latex Maid Dress"
 	path = /obj/item/clothing/under/fluff/latexmaid
 
 //Tron Siren outfit
 /datum/gear/uniform/siren
-	display_name = "Civilian Jumpsuit - Siren"
+	name = "Jumpsuit - Siren"
 	path = /obj/item/clothing/under/fluff/siren
 
 /datum/gear/uniform/suit/v_nanovest
-	display_name = "Civilian Varmacorp Nanovest"
+	name = "Varmacorp Nanovest"
 	path = /obj/item/clothing/under/fluff/v_nanovest
 
-// Uniform slot
-/datum/gear/uniform/pilot
-	display_name = "Pilot Uniform"
-	path = /obj/item/clothing/under/rank/pilot2
-	allowed_roles = list("Pilot")
-
-/datum/gear/uniform/uniform_janitor_starcon
-	display_name = "Janitor Jumpsuit - Alt"
-	path = /obj/item/clothing/under/rank/janitor/starcon
-	allowed_roles = list("Janitor")
-
 /datum/gear/uniform/greyskirt_female
-	display_name = "Civilian Grey Skirt"
+	name = "Grey Skirt"
 	path = /obj/item/clothing/under/greyskirt_female
 
 /datum/gear/uniform/highwayman_clothes
-	display_name = "Civilian Highwayman Outfit"
+	name = "Highwayman Outfit"
 	path = /obj/item/clothing/under/highwayman_clothes
 
 /datum/gear/uniform/businessskirt
-	display_name = "Civilian Business Skirt"
+	name = "Business Skirt"
 	path = /obj/item/clothing/under/businessskirt_female
 
 /datum/gear/uniform/simpledress
-	display_name = "Civilian Simple Dress"
+	name = "Simple Dress"
 	path = /obj/item/clothing/under/simpledress
 
+/datum/gear/uniform/formalredcoat
+	name = "Formal Coat - Red"
+	path = /obj/item/clothing/under/redcoatformal
+
+/datum/gear/uniform/vice
+	name = "Vice Officer's Jumpsuit"
+	path = /obj/item/clothing/under/rank/vice
+
+/datum/gear/uniform/saare
+	name = "SAARE Uniform"
+	path = /obj/item/clothing/under/saare
+
+/datum/gear/uniform/hawaiianpink
+	name = "Suit - Pink Hawaiian"
+	path = /obj/item/clothing/under/hawaiian
+
+/datum/gear/uniform/geisha
+	name = "Geisha Outfit"
+	path = /obj/item/clothing/under/geisha
+
+/datum/gear/uniform/blueshift
+	name = "Suit - Light Blue"
+	path = /obj/item/clothing/under/blueshift
+
+/datum/gear/uniform/office_worker
+	name = "Suit - Office Worker"
+	path = /obj/item/clothing/under/office_worker
+
+/datum/gear/uniform/tracksuit_blue
+	name = "Tracksuit - Blue"
+	path = /obj/item/clothing/under/tracksuit_blue
+
+/datum/gear/uniform/tribal_tunic
+	name = "Tunic - Simple"
+	path = /obj/item/clothing/under/tribal_tunic
+
+/datum/gear/uniform/druidic_gown
+	name = "Tunic - Flowered"
+	path = /obj/item/clothing/under/druidic_gown
+
+/datum/gear/uniform/laconic
+	name = "Laconic Field Suit"
+	path = /obj/item/clothing/under/laconic
+
+/datum/gear/uniform/bountyskin
+	name = "Bounty Hunter's Skinsuit"
+	path = /obj/item/clothing/under/bountyskin

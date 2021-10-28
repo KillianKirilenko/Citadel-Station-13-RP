@@ -17,7 +17,7 @@
 	rarity_value = 5
 	blood_color = "#FC2BC5"
 
-	flags = NO_SCAN | NO_MINOR_CUT
+	flags = NO_SCAN | NO_MINOR_CUT | CONTAMINATION_IMMUNE
 	spawn_flags = SPECIES_IS_WHITELISTED | SPECIES_CAN_JOIN | SPECIES_WHITELIST_SELECTABLE
 	appearance_flags = HAS_EYE_COLOR
 
@@ -96,9 +96,12 @@
 	H.equip_to_slot_or_del(new /obj/item/clothing/mask/breath(H), slot_wear_mask)
 
 	switch(H.mind?.assigned_role)
-		if("Security Officer","Detective")
+		if("Security Officer")
 			suit=/obj/item/clothing/suit/space/plasman/sec
 			helm=/obj/item/clothing/head/helmet/space/plasman/sec
+		if("Detective")
+			suit=/obj/item/clothing/suit/space/plasman/sec/detective
+			helm=/obj/item/clothing/head/helmet/space/plasman/sec/detective
 		if("Warden")
 			suit=/obj/item/clothing/suit/space/plasman/sec/warden
 			helm=/obj/item/clothing/head/helmet/space/plasman/sec
@@ -162,6 +165,9 @@
 		if("Internal Affairs Agent","Command Secretary")
 			suit=/obj/item/clothing/suit/space/plasman/fancy
 			helm=/obj/item/clothing/head/helmet/space/plasman/fancy
+		if("Visitor")
+			suit=/obj/item/clothing/suit/space/plasman/assistant
+			helm=/obj/item/clothing/head/helmet/space/plasman/assistant
 		if("Clown")
 			suit=/obj/item/clothing/suit/space/plasman/clown
 			helm=/obj/item/clothing/head/helmet/space/plasman/clown

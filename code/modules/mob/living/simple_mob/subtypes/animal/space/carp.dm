@@ -37,6 +37,7 @@
 	faction = "carp"
 	maxHealth = 25
 	health = 25
+	randomized = TRUE
 	movement_cooldown = 0 // Carp go fast
 	hovering = TRUE
 
@@ -87,8 +88,13 @@
 
 	pixel_x = -16
 	default_pixel_x = -16
+	icon_expected_width = 64
+	icon_expected_height = 32
 
 	meat_amount = 5
+
+	mod_min = 90
+	mod_max = 140
 
 
 /mob/living/simple_mob/animal/space/carp/large/huge
@@ -108,6 +114,8 @@
 
 	pixel_y = -16
 	default_pixel_y = -16
+	icon_expected_width = 64
+	icon_expected_height = 64
 
 	meat_amount = 10
 
@@ -127,7 +135,7 @@
 
 	mob_class = MOB_CLASS_PHOTONIC // Xeno-taser won't work on this as its not a 'real' carp.
 
-/mob/living/simple_mob/animal/space/carp/holographic/Initialize()
+/mob/living/simple_mob/animal/space/carp/holographic/Initialize(mapload)
 	set_light(2) // Hologram lighting.
 	return ..()
 

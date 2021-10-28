@@ -14,6 +14,8 @@
 	throw_range = 5
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	usesound = 'sound/items/screwdriver.ogg'
+	drop_sound = 'sound/items/drop/screwdriver.ogg'
+	pickup_sound = 'sound/items/pickup/screwdriver.ogg'
 	matter = list(DEFAULT_WALL_MATERIAL = 75)
 	attack_verb = list("stabbed")
 	sharp  = 1
@@ -22,11 +24,12 @@
 
 /obj/item/tool/screwdriver/suicide_act(mob/user)
 	var/datum/gender/TU = gender_datums[user.get_visible_gender()]
-	viewers(user) << pick("<span class='danger'>\The [user] is stabbing the [src.name] into [TU.his] temple! It looks like [TU.hes] trying to commit suicide.</span>", \
-						"<span class='danger'>\The [user] is stabbing the [src.name] into [TU.his] heart! It looks like [TU.hes] trying to commit suicide.</span>")
+	user.visible_message(pick("<span class='danger'>\The [user] is stabbing the [src.name] into [TU.his] temple! It looks like [TU.hes] trying to commit suicide.</span>", \
+						"<span class='danger'>\The [user] is stabbing the [src.name] into [TU.his] heart! It looks like [TU.hes] trying to commit suicide.</span>"))
 	return(BRUTELOSS)
 
-/obj/item/tool/screwdriver/New()
+/obj/item/tool/screwdriver/Initialize(mapload)
+	. = ..()
 	if(random_color)
 		switch(pick("red","blue","purple","brown","green","cyan","yellow"))
 			if ("red")
@@ -53,7 +56,6 @@
 
 	if (prob(75))
 		src.pixel_y = rand(0, 16)
-	..()
 
 /obj/item/tool/screwdriver/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
 	if(!istype(M) || user.a_intent == "help")
@@ -134,8 +136,8 @@
 	random_color = FALSE
 	var/obj/item/tool/wrench/power/counterpart = null
 
-/obj/item/tool/screwdriver/power/New(newloc, no_counterpart = TRUE)
-	..(newloc)
+/obj/item/tool/screwdriver/power/Initialize(mapload, no_counterpart = TRUE)
+	. = ..()
 	if(!counterpart && no_counterpart)
 		counterpart = new(src, FALSE)
 		counterpart.counterpart = src

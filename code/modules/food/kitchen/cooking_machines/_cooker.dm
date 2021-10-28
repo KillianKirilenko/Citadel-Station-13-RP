@@ -1,11 +1,11 @@
 /obj/machinery/appliance/cooker
 	var/temperature = T20C
 	var/min_temp = 80 + T0C	//Minimum temperature to do any cooking
-	var/optimal_temp = 200 + T0C	//Temperature at which we have 100% efficiency. efficiency is lowered on either side of this
+	var/optimal_temp = 200 + T0C	//Temperature at which we have 100% efficiency. - Edit, efficiency is not lowered anymore for being too hot, because why would that slow down cooking?
 	var/optimal_power = 0.1//cooking power at 100%
 
 	var/loss = 1	//Temp lost per proc when equalising
-	var/resistance = 320000	//Resistance to heating. combines with active power usage to determine how long heating takes
+	var/resistance = 81000	//Resistance to heating. combines with active power usage to determine how long heating takes
 
 	var/light_x = 0
 	var/light_y = 0
@@ -13,15 +13,16 @@
 
 /obj/machinery/appliance/cooker/examine(var/mob/user)
 	. = ..()
-	if (.)	//no need to duplicate adjacency check
-		if (!stat)
-			if (temperature < min_temp)
-				to_chat(user, span("warning", "\The [src] is still heating up and is too cold to cook anything yet."))
+	if(.)	//no need to duplicate adjacency check
+		if(!stat)
+			if(temperature < min_temp)
+				. += span("warning", "\The [src] is still heating up and is too cold to cook anything yet.")
 			else
-				to_chat(user, span("notice", "It is running at [round(get_efficiency(), 0.1)]% efficiency!"))
-			to_chat(user, "Temperature: [round(temperature - T0C, 0.1)]C / [round(optimal_temp - T0C, 0.1)]C")
+				. += span("notice", "It is running at [round(get_efficiency(), 0.1)]% efficiency!")
+			. += "Temperature: [round(temperature - T0C, 0.1)]C / [round(optimal_temp - T0C, 0.1)]C"
 		else
-			to_chat(user, span("warning", "It is switched off."))
+			if(stat)
+				. += span("warning", "It is switched off.")
 
 /obj/machinery/appliance/cooker/list_contents(var/mob/user)
 	if (cooking_objs.len)
@@ -40,7 +41,7 @@
 	//RefreshParts()
 	return (cooking_power / optimal_power) * 100
 
-/obj/machinery/appliance/cooker/New()
+/obj/machinery/appliance/cooker/Initialize(mapload, newdir)
 	. = ..()
 	loss = (active_power_usage / resistance)*0.5
 	cooking_objs = list()
@@ -61,7 +62,7 @@
 	light.pixel_y = light_y
 	add_overlay(light)
 
-/obj/machinery/appliance/cooker/process()
+/obj/machinery/appliance/cooker/process(delta_time)
 	if (!stat)
 		heat_up()
 	else
@@ -88,8 +89,11 @@
 			else
 				temp_scale = 1 - (temp_scale - 1)
 
+	if(temperature > optimal_temp)
+		cooking_power = optimal_power
+	else
+		cooking_power = optimal_power * temp_scale
 
-	cooking_power = optimal_power * temp_scale
 	//RefreshParts()
 
 /obj/machinery/appliance/cooker/proc/heat_up()
@@ -98,7 +102,7 @@
 			playsound(src, 'sound/machines/click.ogg', 20, 1)
 			use_power = 2.//If we're heating we use the active power
 			update_icon()
-		temperature += active_power_usage / resistance
+		temperature += active_power_usage / (resistance/2)
 		update_cooking_power()
 		return 1
 	else

@@ -37,7 +37,7 @@
 	update_icon()
 
 //If reset is set, then assume the client has none of our overlays, otherwise we only send new overlays.
-/obj/item/t_scanner/process()
+/obj/item/t_scanner/process(delta_time)
 	if(!on) return
 
 	//handle clients changing
@@ -131,6 +131,7 @@
 	user_client = new_client
 
 /obj/item/t_scanner/dropped(mob/user)
+	. = ..()
 	set_user_client(null)
 
 /obj/item/t_scanner/upgraded

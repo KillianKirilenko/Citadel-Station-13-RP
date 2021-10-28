@@ -9,7 +9,7 @@
 	icon_opened = "base"
 	req_one_access = list(access_armory)
 
-/obj/structure/closet/secure_closet/guncabinet/Initialize()
+/obj/structure/closet/secure_closet/guncabinet/Initialize(mapload)
 	. = ..()
 	update_icon()
 
@@ -70,7 +70,7 @@
 		/obj/item/ammo_magazine/clip/c762/hunter = 9,
 		/obj/item/gun/projectile/shotgun/pump/rifle = 2)
 
-/obj/structure/closet/secure_closet/guncabinet/rifle/Initialize()
+/obj/structure/closet/secure_closet/guncabinet/rifle/Initialize(mapload)
 	if(prob(85))
 		starts_with += /obj/item/gun/projectile/shotgun/pump/rifle
 	else
@@ -85,3 +85,7 @@
 		/obj/item/gun/energy/phasegun = 2,
 		/obj/item/cell/device/weapon = 2,
 		/obj/item/clothing/accessory/permit/gun/planetside)
+
+/obj/structure/closet/secure_closet/guncabinet/robotics
+	name = "exosuit equipment cabinet"
+	req_one_access = list(access_robotics,access_research)

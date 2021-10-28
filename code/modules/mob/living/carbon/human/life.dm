@@ -4,6 +4,7 @@
 #define HUMAN_MAX_OXYLOSS 1 //Defines how much oxyloss humans can get per tick. A tile with no air at all (such as space) applies this value, otherwise it's a percentage of it.
 #define HUMAN_CRIT_MAX_OXYLOSS ( 2.0 / 6) //The amount of damage you'll get when in critical condition. We want this to be a 5 minute deal = 300s. There are 50HP to get through, so (1/6)*last_tick_duration per second. Breaths however only happen every 4 ticks. last_tick_duration = ~2.0 on average
 
+#define HEAT_DAMAGE_SYNTH 1.5 //Amount of damage applied for synths experiencing heat just above 360.15k such as space walking
 #define HEAT_DAMAGE_LEVEL_1 5 //Amount of damage applied when your body temperature just passes the 360.15k safety point
 #define HEAT_DAMAGE_LEVEL_2 10 //Amount of damage applied when your body temperature passes the 400K point
 #define HEAT_DAMAGE_LEVEL_3 20 //Amount of damage applied when your body temperature passes the 1000K point
@@ -32,6 +33,8 @@
 	var/temperature_alert = 0
 	var/in_stasis = 0
 	var/heartbeat = 0
+	var/last_synthcooling_message = 0 		// to whoever is looking at git blame in the future, i'm not the author, and this is shitcode, but what came before i changed it
+	// made me vomit
 
 /mob/living/carbon/human/Life()
 
@@ -129,10 +132,21 @@
 			var/obj/item/clothing/suit/space/S = wear_suit
 			if(S.can_breach && S.damage)
 				pressure_adjustment_coefficient += S.damage * 0.1
-
+	//check for EVA capable uniforms
 	else
-		// Missing key protection
-		pressure_adjustment_coefficient = 1
+		if(w_uniform && w_uniform.max_pressure_protection != null && w_uniform.min_pressure_protection != null)
+			pressure_adjustment_coefficient = 0
+			// Pressure is too high
+			if(w_uniform.max_pressure_protection < pressure)
+				// Protection scales down from 100% at the boundary to 0% at 10% in excess of the boundary
+				pressure_adjustment_coefficient += round((pressure - w_uniform.max_pressure_protection) / (w_uniform.max_pressure_protection/10))
+
+			// Pressure is too low
+			if(w_uniform.min_pressure_protection > pressure)
+				pressure_adjustment_coefficient += round((w_uniform.min_pressure_protection - pressure) / (w_uniform.min_pressure_protection/10))
+		else
+			// Missing key protection
+			pressure_adjustment_coefficient = 1
 
 	// Check hat
 	if(head && head.max_pressure_protection != null && head.min_pressure_protection != null)
@@ -155,13 +169,13 @@
 // Calculate how much of the enviroment pressure-difference affects the human.
 /mob/living/carbon/human/calculate_affecting_pressure(var/pressure)
 	var/pressure_difference
-
 	// First get the absolute pressure difference.
 	if(pressure < species.safe_pressure) // We are in an underpressure.
 		pressure_difference = species.safe_pressure - pressure
 
 	else //We are in an overpressure or standard atmosphere.
 		pressure_difference = pressure - species.safe_pressure
+
 
 	if(pressure_difference < 5) // If the difference is small, don't bother calculating the fraction.
 		pressure_difference = 0
@@ -355,7 +369,7 @@
 			if(!rig.offline && (rig.air_supply && internal == rig.air_supply))
 				rig_supply = rig.air_supply
 
-		if ((!rig_supply && !contents.Find(internal)) || !((wear_mask && (wear_mask.item_flags & AIRTIGHT)) || (head && (head.item_flags & AIRTIGHT))))
+		if ((!rig_supply && !contents.Find(internal)) || !((wear_mask && (wear_mask.item_flags & ALLOWINTERNALS)) || (head && (head.item_flags & ALLOWINTERNALS))))
 			internal = null
 
 		if(internal)
@@ -593,7 +607,7 @@
 
 		if (temp_adj > BODYTEMP_HEATING_MAX) temp_adj = BODYTEMP_HEATING_MAX
 		if (temp_adj < BODYTEMP_COOLING_MAX) temp_adj = BODYTEMP_COOLING_MAX
-		//world << "Breath: [breath.temperature], [src]: [bodytemperature], Adjusting: [temp_adj]"
+		//to_chat(world, "Breath: [breath.temperature], [src]: [bodytemperature], Adjusting: [temp_adj]")
 		bodytemperature += temp_adj
 
 	else if(breath.temperature >= species.heat_discomfort_level)
@@ -610,6 +624,45 @@
 	//Stuff like the xenomorph's plasma regen happens here.
 	species.handle_environment_special(src)
 
+	if(is_incorporeal())
+		return
+
+	if(isSynthetic()) // synth specific temperature values in the absence of a synthetic species
+		var/mob/living/carbon/human/H = src
+		if(H.species.name == "Protean")
+			return // dont modify protean heat levels
+
+		else
+			species.heat_level_1 = 400
+			species.heat_level_2 = 420 // haha nice
+			species.heat_level_3 = 1000
+			species.cold_level_1 = 275
+			species.cold_level_2 = 250
+			species.cold_level_3 = 200
+			species.cold_discomfort_level = 290
+			species.heat_discomfort_level = 380
+			species.heat_discomfort_strings = list(
+				"You feel heat within your wiring.",
+				"You feel uncomfortably warm.",
+				"Your internal sensors chime at the increase in temperature."
+				)
+			species.cold_discomfort_strings = list(
+				"A small heating element begins warming your system.",
+				"Your focus is briefly stolen by the chill of the air.",
+				"You feel uncomfortably cold.",
+				"You feel a chill within your wiring."
+				)
+			if(bodytemperature > species.heat_discomfort_level)
+				if(world.time >= last_synthcooling_message || last_synthcooling_message == 0)
+					if(src.nutrition <= 50) // do they have enough energy for this?
+						to_chat(src, "<font color='red' face='fixedsys'>Warning: Temperature at critically high levels.</font>")
+						to_chat(src, "<font color='red' face='fixedsys'>Warning: Power critical. Unable to deploy cooling systems.</font>")
+						return
+					else
+						to_chat(src, "<font color='red' face='fixedsys'>Warning: Temperature at critically high levels.</font>")
+						add_modifier(/datum/modifier/synthcooling, 15 SECONDS) // enable cooling systems at cost of energy
+						src.nutrition -= 50
+					last_synthcooling_message = world.time + 60 SECONDS
 	//Moved pressure calculations here for use in skip-processing check.
 	var/pressure = environment.return_pressure()
 	var/adjusted_pressure = calculate_affecting_pressure(pressure)
@@ -633,7 +686,8 @@
 			var/obj/mecha/M = loc
 			loc_temp =  M.return_temperature()
 		else if(istype(loc, /obj/machinery/atmospherics/unary/cryo_cell))
-			loc_temp = loc:air_contents.temperature
+			var/obj/machinery/atmospherics/unary/cryo_cell/CC = loc
+			loc_temp = CC.air_contents.temperature
 		else
 			loc_temp = environment.temperature
 
@@ -673,7 +727,10 @@
 				else
 					burn_dam = HEAT_DAMAGE_LEVEL_2
 			else
-				burn_dam = HEAT_DAMAGE_LEVEL_1
+				if(isSynthetic())
+					burn_dam = HEAT_DAMAGE_SYNTH
+				else
+					burn_dam = HEAT_DAMAGE_LEVEL_1
 
 		take_overall_damage(burn=burn_dam, used_weapon = "High Body Temperature")
 		fire_alert = max(fire_alert, 2)
@@ -781,18 +838,18 @@
 		if(nutrition >= 2) //If we are very, very cold we'll use up quite a bit of nutriment to heat us up.
 			nutrition -= 2
 		var/recovery_amt = max((body_temperature_difference / BODYTEMP_AUTORECOVERY_DIVISOR), BODYTEMP_AUTORECOVERY_MINIMUM)
-		//world << "Cold. Difference = [body_temperature_difference]. Recovering [recovery_amt]"
+		//to_chat(world, "Cold. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 //				log_debug("Cold. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 		bodytemperature += recovery_amt
 	else if(species.cold_level_1 <= bodytemperature && bodytemperature <= species.heat_level_1)
 		var/recovery_amt = body_temperature_difference / BODYTEMP_AUTORECOVERY_DIVISOR
-		//world << "Norm. Difference = [body_temperature_difference]. Recovering [recovery_amt]"
+		//to_chat(world, "Norm. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 //				log_debug("Norm. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 		bodytemperature += recovery_amt
 	else if(bodytemperature > species.heat_level_1) //360.15 is 310.15 + 50, the temperature where you start to feel effects.
 		//We totally need a sweat system cause it totally makes sense...~
 		var/recovery_amt = min((body_temperature_difference / BODYTEMP_AUTORECOVERY_DIVISOR), -BODYTEMP_AUTORECOVERY_MINIMUM)	//We're dealing with negative numbers
-		//world << "Hot. Difference = [body_temperature_difference]. Recovering [recovery_amt]"
+		//to_chat(world, "Hot. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 //				log_debug("Hot. Difference = [body_temperature_difference]. Recovering [recovery_amt]")
 		bodytemperature += recovery_amt
 
@@ -875,18 +932,13 @@
 			for(var/obj/item/I in src)
 				if(I.contaminated)
 					if(check_belly(I)) continue //VOREStation Edit
-					if(src.species && src.species.get_bodytype() != "Vox" && src.species.get_bodytype() != "Shadekin")	//VOREStation Edit: shadekin
+					if(src.species && !(src.species.flags & CONTAMINATION_IMMUNE))	//VOREStation Edit: shadekin; CitadelRP: Black-Eyed Shadekin don't get afflicted from contaminated clothing
 						// This is hacky, I'm so sorry.
 						if(I != l_hand && I != r_hand)	//If the item isn't in your hands, you're probably wearing it. Full damage for you.
 							total_phoronloss += loss_per_part
-						else if(I == l_hand)	//If the item is in your hands, but you're wearing protection, you might be alright.
-							var/l_hand_blocked = 0
-							l_hand_blocked = 1-(100-getarmor(BP_L_HAND, "bio"))/100	//This should get a number between 0 and 1
-							total_phoronloss += loss_per_part * l_hand_blocked
-						else if(I == r_hand)	//If the item is in your hands, but you're wearing protection, you might be alright.
-							var/r_hand_blocked = 0
-							r_hand_blocked = 1-(100-getarmor(BP_R_HAND, "bio"))/100	//This should get a number between 0 and 1
-							total_phoronloss += loss_per_part * r_hand_blocked
+						else if((I == l_hand | I == r_hand) && !((src.wear_suit.body_parts_covered & HANDS) | src.gloves | (src.w_uniform.body_parts_covered & HANDS)))	//If the item is in your hands, but you're wearing protection, you might be alright.
+							//If you hold it in hand, and your hands arent covered by anything
+							total_phoronloss += loss_per_part
 			if(total_phoronloss)
 				if(!(status_flags & GODMODE))
 					adjustToxLoss(total_phoronloss)
@@ -936,7 +988,7 @@
 	return //TODO: DEFERRED
 
 //DO NOT CALL handle_statuses() from this proc, it's called from living/Life() as long as this returns a true value.
-/mob/living/carbon/human/handle_regular_status_updates()
+/mob/living/carbon/human/handle_regular_UI_updates()
 	if(!handle_some_updates())
 		return 0
 
@@ -1085,7 +1137,7 @@
 			drowsyness = max(0, drowsyness - 1)
 			eye_blurry = max(2, eye_blurry)
 			if (prob(5))
-				sleeping += 1
+				Sleeping(1)
 				Paralyse(5)
 
 		// If you're dirty, your gloves will become dirty, too.
@@ -1094,8 +1146,8 @@
 
 	return 1
 
-/mob/living/carbon/human/proc/set_stat(var/new_stat)
-	stat = new_stat
+/mob/living/carbon/human/set_stat(var/new_stat)
+	. = ..()
 	if(stat)
 		update_skin(1)
 
@@ -1110,7 +1162,7 @@
 
 	..()
 
-	client.screen.Remove(GLOB.global_hud.blurry, GLOB.global_hud.druggy, GLOB.global_hud.vimpaired, GLOB.global_hud.darkMask, GLOB.global_hud.nvg, GLOB.global_hud.thermal, GLOB.global_hud.meson, GLOB.global_hud.science, GLOB.global_hud.material, GLOB.global_hud.whitense)
+	client.screen.Remove(GLOB.global_hud.blurry, GLOB.global_hud.druggy, GLOB.global_hud.vimpaired, GLOB.global_hud.darkMask, GLOB.global_hud.nvg, GLOB.global_hud.thermal, GLOB.global_hud.meson, GLOB.global_hud.science, GLOB.global_hud.material, GLOB.global_hud.yellow, GLOB.global_hud.blue, GLOB.global_hud.pink, GLOB.global_hud.beige, GLOB.global_hud.orange, GLOB.global_hud.whitense)
 
 	if(istype(client.eye,/obj/machinery/camera))
 		var/obj/machinery/camera/cam = client.eye
@@ -1215,6 +1267,15 @@
 				if(150 to 250)					nutrition_icon.icon_state = "nutrition3"
 				else							nutrition_icon.icon_state = "nutrition4"
 
+		if(synthbattery_icon)
+			switch(nutrition)
+				if(350 to INFINITY)				synthbattery_icon.icon_state = "charge4"
+				if(250 to 350)					synthbattery_icon.icon_state = "charge3"
+				if(100 to 250)					synthbattery_icon.icon_state = "charge2"
+				else							synthbattery_icon.icon_state = "charge1"
+			if(stat == DEAD)
+				synthbattery_icon.icon_state = "charge0"
+
 		if(pressure)
 			pressure.icon_state = "pressure[pressure_alert]"
 
@@ -1263,7 +1324,6 @@
 						bodytemp.icon_state = "temp1"
 					else
 						bodytemp.icon_state = "temp0"
-
 				else if (bodytemperature < base_temperature)
 					temp_step = (base_temperature - species.cold_level_1)/4
 
@@ -1277,9 +1337,17 @@
 						bodytemp.icon_state = "temp-1"
 					else
 						bodytemp.icon_state = "temp0"
+		if(blinded)
+			overlay_fullscreen("blind", /obj/screen/fullscreen/blind)
 
-		if(blinded)		overlay_fullscreen("blind", /obj/screen/fullscreen/blind)
-		else			clear_fullscreens()
+		else
+			clear_fullscreens()
+
+		if(blinded)
+			overlay_fullscreen("blind", /obj/screen/fullscreen/blind)
+
+		else if(!machine)
+			clear_fullscreens()
 
 		if(disabilities & NEARSIGHTED)	//this looks meh but saves a lot of memory by not requiring to add var/prescription
 			if(glasses)					//to every /obj/item
@@ -1358,7 +1426,7 @@
 			see_in_dark = species.darksight
 			see_invisible = see_in_dark>2 ? SEE_INVISIBLE_LEVEL_ONE : see_invisible_default
 
-		var/tmp/glasses_processed = 0
+		var/glasses_processed = 0
 		var/obj/item/rig/rig = back
 		if(istype(rig) && rig.visor)
 			if(!rig.helmet || (head && rig.helmet == head))
@@ -1660,7 +1728,7 @@
 
 		if(heartbeat >= rate)
 			heartbeat = 0
-			src << sound('sound/effects/singlebeat.ogg',0,0,0,50)
+			SEND_SOUND(src, sound('sound/effects/singlebeat.ogg',0,0,0,50))
 		else
 			heartbeat++
 
@@ -1670,7 +1738,7 @@
 	This proc below is only called when those HUD elements need to change as determined by the mobs hud_updateflag.
 */
 /mob/living/carbon/human/proc/handle_hud_list()
-	if (CHECK_BITFIELD(hud_updateflag, HEALTH_HUD))
+	if (BITTEST(hud_updateflag, HEALTH_HUD))
 		var/image/holder = grab_hud(HEALTH_HUD)
 		if(stat == DEAD)
 			holder.icon_state = "-100" 	// X_X
@@ -1678,7 +1746,7 @@
 			holder.icon_state = RoundHealth((health-config_legacy.health_threshold_crit)/(getMaxHealth()-config_legacy.health_threshold_crit)*100)
 		apply_hud(HEALTH_HUD, holder)
 
-	if (CHECK_BITFIELD(hud_updateflag, LIFE_HUD))
+	if (BITTEST(hud_updateflag, LIFE_HUD))
 		var/image/holder = grab_hud(LIFE_HUD)
 		if(isSynthetic())
 			holder.icon_state = "hudrobo"
@@ -1688,7 +1756,7 @@
 			holder.icon_state = "hudhealthy"
 		apply_hud(LIFE_HUD, holder)
 
-	if (CHECK_BITFIELD(hud_updateflag, STATUS_HUD))
+	if (BITTEST(hud_updateflag, STATUS_HUD))
 		var/foundVirus = 0
 		for (var/ID in virus2)
 			if (ID in virusDB)
@@ -1721,7 +1789,7 @@
 		apply_hud(STATUS_HUD, holder)
 		apply_hud(STATUS_HUD_OOC, holder2)
 
-	if (CHECK_BITFIELD(hud_updateflag, ID_HUD))
+	if (BITTEST(hud_updateflag, ID_HUD))
 		var/image/holder = grab_hud(ID_HUD)
 		if(wear_id)
 			var/obj/item/card/id/I = wear_id.GetID()
@@ -1734,7 +1802,7 @@
 
 		apply_hud(ID_HUD, holder)
 
-	if (CHECK_BITFIELD(hud_updateflag, WANTED_HUD))
+	if (BITTEST(hud_updateflag, WANTED_HUD))
 		var/image/holder = grab_hud(WANTED_HUD)
 		holder.icon_state = "hudblank"
 		var/perpname = name
@@ -1761,9 +1829,9 @@
 
 		apply_hud(WANTED_HUD, holder)
 
-	if (  CHECK_BITFIELD(hud_updateflag, IMPLOYAL_HUD) \
-	   || CHECK_BITFIELD(hud_updateflag,  IMPCHEM_HUD) \
-	   || CHECK_BITFIELD(hud_updateflag, IMPTRACK_HUD))
+	if (  BITTEST(hud_updateflag, IMPLOYAL_HUD) \
+	   || BITTEST(hud_updateflag,  IMPCHEM_HUD) \
+	   || BITTEST(hud_updateflag, IMPTRACK_HUD))
 
 		var/image/holder1 = grab_hud(IMPTRACK_HUD)
 		var/image/holder2 = grab_hud(IMPLOYAL_HUD)
@@ -1787,7 +1855,7 @@
 		apply_hud(IMPLOYAL_HUD, holder2)
 		apply_hud(IMPCHEM_HUD, holder3)
 
-	if (CHECK_BITFIELD(hud_updateflag, SPECIALROLE_HUD))
+	if (BITTEST(hud_updateflag, SPECIALROLE_HUD))
 		var/image/holder = grab_hud(SPECIALROLE_HUD)
 		holder.icon_state = "hudblank"
 		if(mind && mind.special_role)
@@ -1829,21 +1897,21 @@
 /mob/living/carbon/human/proc/handle_hud_list_vr()
 
 	//Right-side status hud updates with left side one.
-	if (CHECK_BITFIELD(hud_updateflag, STATUS_HUD))
+	if (BITTEST(hud_updateflag, STATUS_HUD))
 		var/image/other_status = hud_list[STATUS_HUD]
 		var/image/status_r = grab_hud(STATUS_R_HUD)
 		status_r.icon_state = other_status.icon_state
 		apply_hud(STATUS_R_HUD, status_r)
 
 	//Our custom health bar HUD
-	if (CHECK_BITFIELD(hud_updateflag, HEALTH_HUD))
+	if (BITTEST(hud_updateflag, HEALTH_HUD))
 		var/image/other_health = hud_list[HEALTH_HUD]
 		var/image/health_us = grab_hud(HEALTH_VR_HUD)
 		health_us.icon_state = other_health.icon_state
 		apply_hud(HEALTH_VR_HUD, health_us)
 
 	//Backup implant hud status
-	if (CHECK_BITFIELD(hud_updateflag, BACKUP_HUD))
+	if (BITTEST(hud_updateflag, BACKUP_HUD))
 		var/image/holder = grab_hud(BACKUP_HUD)
 
 		holder.icon_state = "hudblank"
@@ -1862,7 +1930,7 @@
 		apply_hud(BACKUP_HUD, holder)
 
 	//VOREStation Antag Hud
-	if (CHECK_BITFIELD(hud_updateflag, VANTAG_HUD))
+	if (BITTEST(hud_updateflag, VANTAG_HUD))
 		var/image/vantag = grab_hud(VANTAG_HUD)
 		if(vantag_pref)
 			vantag.icon_state = vantag_pref

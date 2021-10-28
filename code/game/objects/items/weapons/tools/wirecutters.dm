@@ -16,16 +16,18 @@
 	attack_verb = list("pinched", "nipped")
 	hitsound = 'sound/items/wirecutter.ogg'
 	usesound = 'sound/items/wirecutter.ogg'
+	drop_sound = 'sound/items/drop/wirecutter.ogg'
+	pickup_sound = 'sound/items/pickup/wirecutter.ogg'
 	sharp = 1
 	edge = 1
 	toolspeed = 1
 	var/random_color = TRUE
 
-/obj/item/tool/wirecutters/New()
+/obj/item/tool/wirecutters/Initialize(mapload)
+	. = ..()
 	if(random_color && prob(50))
 		icon_state = "cutters-y"
 		item_state = "cutters_yellow"
-	..()
 
 /obj/item/tool/wirecutters/attack(mob/living/carbon/C as mob, mob/user as mob)
 	if(istype(C) && user.a_intent == INTENT_HELP && (C.handcuffed) && (istype(C.handcuffed, /obj/item/handcuffs/cable)))
@@ -100,8 +102,8 @@
 	random_color = FALSE
 	var/obj/item/tool/crowbar/power/counterpart = null
 
-/obj/item/tool/wirecutters/power/New(newloc, no_counterpart = TRUE)
-	..(newloc)
+/obj/item/tool/wirecutters/power/Initialize(mapload, no_counterpart = TRUE)
+	. = ..()
 	if(!counterpart && no_counterpart)
 		counterpart = new(src, FALSE)
 		counterpart.counterpart = src

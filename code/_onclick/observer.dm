@@ -44,9 +44,16 @@
 
 // Oh by the way this didn't work with old click code which is why clicking shit didn't spam you
 /atom/proc/attack_ghost(mob/observer/dead/user as mob)
+	if(IsAdminGhost(user))		// admin AI interact
+		AdminAIInteract(user)
+		return
 	if(user.client && user.client.inquisitive_ghost)
 		user.examinate(src)
 	return
+
+// defaults to just attack_ai
+/atom/proc/AdminAIInteract(mob/user)
+	return attack_ai(user)
 
 // ---------------------------------------
 // And here are some good things for free:
@@ -86,3 +93,26 @@
 	attack_hand(user)
 
 */
+
+//VR FILE MERGE
+/obj/item/paicard/attack_ghost(mob/user as mob)
+	if(src.pai != null) //Have a person in them already?
+		user.examinate(src)
+		return
+	var/choice = input(user, "You sure you want to inhabit this PAI?") in list("Yes", "No")
+	var/pai_name = input(user, "Choose your character's name", "Character Name") as text
+	var/actual_pai_name = sanitize_name(pai_name)
+	var/pai_key
+	if (isnull(pai_name))
+		return
+	if(choice == "Yes")
+		pai_key = user.key
+	else
+		return
+	var/turf/location = get_turf(src)
+	var/obj/item/paicard/card = new(location)
+	var/mob/living/silicon/pai/pai = new(card)
+	qdel(src)
+	pai.key = pai_key
+	card.setPersonality(pai)
+	pai.SetName(actual_pai_name)

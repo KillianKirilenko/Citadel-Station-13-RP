@@ -34,7 +34,7 @@
 	adjustToxLoss(-(rads))
 	return
 
-/mob/living/carbon/alien/handle_regular_status_updates()
+/mob/living/carbon/alien/handle_regular_UI_updates()
 
 	if(status_flags & GODMODE)	return 0
 
@@ -59,7 +59,7 @@
 			adjustHalLoss(-3)
 			if (mind)
 				if(mind.active && client != null)
-					sleeping = max(sleeping-1, 0)
+					AdjustSleeping(-1)
 			blinded = 1
 			stat = UNCONSCIOUS
 		else if(resting)

@@ -86,13 +86,14 @@ var/obj/screen/robot_inventory
 	action_intent = using
 
 //Cell
-	mymob:cells = new /obj/screen()
-	mymob:cells.icon = ui_style
-	mymob:cells.icon_state = "charge-empty"
-	mymob:cells.alpha = ui_alpha
-	mymob:cells.name = "cell"
-	mymob:cells.screen_loc = ui_toxin
-	src.other += mymob:cells
+	using = new /obj/screen()
+	using.icon = ui_style
+	using.icon_state = "charge-empty"
+	using.alpha = ui_alpha
+	using.name = "cell"
+	using.screen_loc = ui_toxin
+	src.other += using
+	target.cells = using
 
 //Health
 	mymob.healths = new /obj/screen()
@@ -195,7 +196,7 @@ var/obj/screen/robot_inventory
 
 	mymob.client.screen = list()
 
-	mymob.client.screen += list( mymob.throw_icon, mymob.zone_sel, mymob.oxygen, mymob.fire, mymob.hands, mymob.healths, mymob:cells, mymob.pullin, robot_inventory, mymob.gun_setting_icon)
+	mymob.client.screen += list( mymob.throw_icon, mymob.zone_sel, mymob.oxygen, mymob.fire, mymob.hands, mymob.healths, using, mymob.pullin, robot_inventory, mymob.gun_setting_icon)
 	mymob.client.screen += src.adding + src.other
 	mymob.client.screen += mymob.client.void
 
@@ -276,6 +277,14 @@ var/obj/screen/robot_inventory
 		r.client.screen -= r.robot_modules_background
 
 /mob/living/silicon/robot/update_hud()
+	if(modtype)
+		hands.icon_state = lowertext(modtype)
+	..()
+
+//VR FILE MERGE
+/mob/living/silicon/robot/update_hud()
+	if(ui_style_vr)
+		hands.icon = 'icons/mob/screen1_robot_vr.dmi'
 	if(modtype)
 		hands.icon_state = lowertext(modtype)
 	..()

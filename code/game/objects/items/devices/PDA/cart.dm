@@ -51,6 +51,8 @@ var/list/civilian_cartridges = list(
 	icon_state = "cart"
 	item_state = "electronic"
 	w_class = ITEMSIZE_TINY
+	drop_sound = 'sound/items/drop/component.ogg'
+	pickup_sound = 'sound/items/pickup/component.ogg'
 
 	var/obj/item/integated_radio/radio = null
 	var/access_security = 0
@@ -109,7 +111,7 @@ var/list/civilian_cartridges = list(
 	icon_state = "cart-s"
 	access_security = 1
 
-/obj/item/cartridge/security/Initialize()
+/obj/item/cartridge/security/Initialize(mapload)
 	radio = new /obj/item/integated_radio/beepsky(src)
 	. = ..()
 
@@ -165,7 +167,7 @@ var/list/civilian_cartridges = list(
 	access_reagent_scanner = 1
 	access_atmos = 1
 
-/obj/item/cartridge/signal/Initialize()
+/obj/item/cartridge/signal/Initialize(mapload)
     radio = new /obj/item/integated_radio/signal(src)
     . = ..()
 
@@ -199,7 +201,7 @@ var/list/civilian_cartridges = list(
 	access_status_display = 1
 	access_security = 1
 
-/obj/item/cartridge/hos/Initialize()
+/obj/item/cartridge/hos/Initialize(mapload)
 	radio = new /obj/item/integated_radio/beepsky(src)
 	. = ..()
 
@@ -224,7 +226,7 @@ var/list/civilian_cartridges = list(
 	access_reagent_scanner = 1
 	access_atmos = 1
 
-/obj/item/cartridge/rd/Initialize()
+/obj/item/cartridge/rd/Initialize(mapload)
 	radio = new /obj/item/integated_radio/signal(src)
 	. = ..()
 
@@ -497,7 +499,7 @@ var/list/civilian_cartridges = list(
 			BucketData[++BucketData.len] = list("x" = 0, "y" = 0, dir=null, status = null)
 
 		var/CbotData[0]
-		for(var/mob/living/bot/cleanbot/B in mob_list)
+		for(var/mob/living/bot/cleanbot/B in GLOB.mob_list)
 			var/turf/bl = get_turf(B)
 			if(bl)
 				if(bl.z != cl.z)

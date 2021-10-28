@@ -1,9 +1,22 @@
 // Parrots can talk, and may repeat things it hears.
+
+/datum/category_item/catalogue/fauna/parrot
+	name = "Parrot"
+	desc = "An Earthling tropical bird, parrots have been companions on \
+	nautical vessels for many years. Parrots are considered intelligent, \
+	due largely to the curvature of their beaks allowing them to form human \
+	words. Capable of learning and repeating spoken phrases, parrots are often \
+	sought after for morale purposes."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /mob/living/simple_mob/animal/passive/bird/parrot
 	name = "parrot"
 	description_info = "You can give it a headset by clicking on it with a headset. \
 	To remove it, click the bird while on grab intent."
 	has_langs = list("Galactic Common", "Bird")
+	catalogue_data = list(/datum/category_item/catalogue/fauna/parrot)
+
+	randomized = TRUE
 
 	ai_holder_type = /datum/ai_holder/simple_mob/passive/parrot
 
@@ -90,11 +103,11 @@
 		my_headset = null
 
 /mob/living/simple_mob/animal/passive/bird/parrot/examine(mob/user)
-	..()
+	. = ..()
 	if(my_headset)
-		to_chat(user, "It is wearing \a [my_headset].")
+		. += "It is wearing \a [my_headset]."
 
-/mob/living/simple_mob/animal/passive/bird/parrot/Initialize()
+/mob/living/simple_mob/animal/passive/bird/parrot/Initialize(mapload)
 	if(my_headset)
 		my_headset = new my_headset(src)
 	return ..()
@@ -111,6 +124,7 @@
 	tt_desc = "E Ara macao"
 	my_headset = /obj/item/radio/headset/headset_eng
 	say_list_type = /datum/say_list/bird/polly
+	randomized = FALSE
 
 // Best Bird with best headset.
 /mob/living/simple_mob/animal/passive/bird/parrot/polly/ultimate
@@ -134,7 +148,7 @@
 	icon_dead = "eclectus-dead"
 	tt_desc = "E Eclectus roratus"
 
-/mob/living/simple_mob/animal/passive/bird/parrot/eclectus/Initialize()
+/mob/living/simple_mob/animal/passive/bird/parrot/eclectus/Initialize(mapload)
 	gender = pick(MALE, FEMALE)
 	if(gender == FEMALE)
 		icon_state = "eclectusf"

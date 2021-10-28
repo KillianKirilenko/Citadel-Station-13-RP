@@ -13,6 +13,12 @@
 /turf/space/CanZPass(atom, direction)
 	return 1
 
+/turf/proc/multiz_turf_del(turf/T, dir)
+	SEND_SIGNAL(src, COMSIG_TURF_MULTIZ_DEL, T, dir)
+
+/turf/proc/multiz_turf_new(turf/T, dir)
+	SEND_SIGNAL(src, COMSIG_TURF_MULTIZ_NEW, T, dir)
+
 //
 // Open Space - "empty" turf that lets stuff fall thru it to the layer below
 //
@@ -25,8 +31,8 @@
 	density = 0
 	plane = OPENSPACE_PLANE_START
 	pathweight = 100000		// Seriously, don't try and path over this one numbnuts
-	dynamic_lighting = 0	// Someday lets do proper lighting z-transfer.  Until then we are leaving this off so it looks nicer.
 	can_build_into_floor = TRUE
+	allow_gas_overlays = FALSE
 
 	var/turf/below
 
@@ -34,7 +40,7 @@
 	..()
 	update()
 
-/turf/simulated/open/Initialize()
+/turf/simulated/open/Initialize(mapload)
 	. = ..()
 	ASSERT(HasBelow(z))
 	update()
@@ -66,12 +72,12 @@
 	for(var/obj/O in src)
 		O.hide(0)
 
-/turf/simulated/open/examine(mob/user, distance, infix, suffix)
-	if(..(user, 2))
-		var/depth = 1
-		for(var/T = GetBelow(src); isopenspace(T); T = GetBelow(T))
-			depth += 1
-		to_chat(user, "It is about [depth] levels deep.")
+/turf/simulated/open/examine(mob/user)
+	. = ..()
+	var/depth = 1
+	for(var/T = GetBelow(src); isopenspace(T); T = GetBelow(T))
+		depth += 1
+	. += "It is about [depth] levels deep."
 
 /**
 * Update icon and overlays of open space to be that of the turf below, plus any visible objects on that turf.

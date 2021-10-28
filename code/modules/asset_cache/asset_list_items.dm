@@ -1,48 +1,29 @@
 //DEFINITIONS FOR ASSET DATUMS START HERE.
-/datum/asset/simple/nanoui
-	keep_local_name = TRUE
 
-/datum/asset/simple/nanoui/register()
-	var/list/asset_dirs = list(
-		"nano/css/",
-		"nano/images/",
-		"nano/images/status_icons/",
-		"nano/images/modular_computers/",
-		"nano/js/",
-		"nano/templates/"
-	)
 
-	var/list/filenames = null
-	for (var/path in asset_dirs)
-		filenames = flist(path)
-		for(var/filename in filenames)
-			if(copytext(filename, length(filename)) == "/") // filenames which end in "/" are actually directories, which we want to ignore
-				continue
-			if(fexists(path + filename))
-				assets[filename] = file(path + filename)
-	. = ..()
+//DEFINITIONS FOR ASSET DATUMS START HERE.
 
-/*
 /datum/asset/simple/tgui_common
 	keep_local_name = TRUE
 	assets = list(
-		"tgui-common.chunk.js" = 'tgui/packages/tgui/public/tgui-common.chunk.js',
+		"tgui-common.chunk.js" = 'tgui/public/tgui-common.bundle.js',
 	)
 
 /datum/asset/simple/tgui
 	keep_local_name = TRUE
 	assets = list(
-		"tgui.bundle.js" = 'tgui/packages/tgui/public/tgui.bundle.js',
-		"tgui.bundle.css" = 'tgui/packages/tgui/public/tgui.bundle.css',
+		"tgui.bundle.js" = 'tgui/public/tgui.bundle.js',
+		"tgui.bundle.css" = 'tgui/public/tgui.bundle.css',
 	)
 
 /datum/asset/simple/tgui_panel
 	keep_local_name = TRUE
 	assets = list(
-		"tgui-panel.bundle.js" = 'tgui/packages/tgui/public/tgui-panel.bundle.js',
-		"tgui-panel.bundle.css" = 'tgui/packages/tgui/public/tgui-panel.bundle.css',
+		"tgui-panel.bundle.js" = 'tgui/public/tgui-panel.bundle.js',
+		"tgui-panel.bundle.css" = 'tgui/public/tgui-panel.bundle.css',
 	)
 
+/*
 /datum/asset/simple/headers
 	assets = list(
 		"alarm_green.gif" = 'icons/program_icons/alarm_green.gif',
@@ -148,28 +129,6 @@
 	)
 */
 
-/datum/asset/group/goonchat
-	children = list(
-		/datum/asset/simple/jquery,
-		/datum/asset/simple/goonchat//,
-	//	/datum/asset/spritesheet/goonchat
-	)
-
-/datum/asset/simple/goonchat
-	legacy = TRUE
-	assets = list(
-		"json2.min.js"             = 'code/modules/goonchat/browserassets/js/json2.min.js',
-		"errorHandler.js"          = 'code/modules/goonchat/browserassets/js/errorHandler.js',
-		"browserOutput.js"         = 'code/modules/goonchat/browserassets/js/browserOutput.js',
-		"fontawesome-webfont.eot"  = 'tgui/assets/fonts/fontawesome-webfont.eot',
-		"fontawesome-webfont.svg"  = 'tgui/assets/fonts/fontawesome-webfont.svg',
-		"fontawesome-webfont.ttf"  = 'tgui/assets/fonts/fontawesome-webfont.ttf',
-		"fontawesome-webfont.woff" = 'tgui/assets/fonts/fontawesome-webfont.woff',
-		"font-awesome.css"	       = 'code/modules/goonchat/browserassets/css/font-awesome.css',
-		"browserOutput.css"	       = 'code/modules/goonchat/browserassets/css/browserOutput.css',
-	)
-
-
 /datum/asset/simple/namespaced/changelog
 	assets = list(
 		"88x31.png" = 'html/88x31.png',
@@ -194,13 +153,45 @@
 	)
 	parents = list("changelog.html" = 'html/changelog.html')
 
+/datum/asset/simple/namespaced/nanoui
+	keep_local_name = TRUE
+
+/datum/asset/simple/namespaced/nanoui/register()
+	var/list/static_dirs = list(
+		"nano/css/",
+		"nano/images/",
+		"nano/images/status_icons/",
+		"nano/images/modular_computers/",
+	)
+
+	var/list/parent_dirs = list(
+		"nano/js/",
+		"nano/templates/"
+	)
+
+	var/list/filenames = null
+	for(var/path in static_dirs)
+		filenames = flist(path)
+		for(var/filename in filenames)
+			if(copytext(filename, length(filename)) == "/") // filenames which end in "/" are actually directories, which we want to ignore
+				continue
+			if(fexists(path + filename))
+				assets[filename] = file(path + filename)
+	for(var/path in parent_dirs)
+		filenames = flist(path)
+		for(var/filename in filenames)
+			if(copytext(filename, length(filename)) == "/") // filenames which end in "/" are actually directories, which we want to ignore
+				continue
+			if(fexists(path + filename))
+				parents[filename] = file(path + filename)
+	. = ..()
 
 /datum/asset/simple/jquery
 	legacy = TRUE
 	assets = list(
 		"jquery.min.js" = 'html/jquery.min.js',
 	)
-/*
+
 /datum/asset/simple/namespaced/fontawesome
 	legacy = TRUE
 	assets = list(
@@ -212,6 +203,13 @@
 	)
 	parents = list("font-awesome.css" = 'html/font-awesome/css/all.min.css')
 
+/datum/asset/simple/namespaced/tgfont
+	assets = list(
+		"tgfont.eot" = 'tgui/packages/tgfont/dist/tgfont.eot',
+		"tgfont.woff2" = 'tgui/packages/tgfont/dist/tgfont.woff2',
+	)
+	parents = list("tgfont.css" = 'tgui/packages/tgfont/dist/tgfont.css')
+
 /datum/asset/spritesheet/chat
 	name = "chat"
 
@@ -219,6 +217,7 @@
 	InsertAll("emoji", 'icons/emoji.dmi')
 	InsertAll("emoji", 'icons/emoji_32.dmi')
 
+/*
 	// pre-loading all lanugage icons also helps to avoid meta
 	InsertAll("language", 'icons/misc/language.dmi')
 	// catch languages which are pulling icons from another file
@@ -228,8 +227,11 @@
 		if (icon != 'icons/misc/language.dmi')
 			var/icon_state = initial(L.icon_state)
 			Insert("language-[icon_state]", icon, icon_state=icon_state)
+*/
+
 	..()
 
+/*
 /datum/asset/simple/lobby
 	assets = list(
 		"playeroptions.css" = 'html/browser/playeroptions.css'
@@ -513,18 +515,18 @@
 	assets = list(
 		"view_variables.css" = 'html/admin/view_variables.css'
 	)
+*/
 
 /datum/asset/spritesheet/sheetmaterials
 	name = "sheetmaterials"
 
 /datum/asset/spritesheet/sheetmaterials/register()
-	InsertAll("", 'icons/obj/stack_objects.dmi')
+	InsertAll("", 'icons/obj/stacks.dmi')
 
-	// Special case to handle Bluespace Crystals
-	Insert("polycrystal", 'icons/obj/telescience.dmi', "polycrystal")
 	..()
 
 
+/*
 /datum/asset/spritesheet/mafia
 	name = "mafia"
 
@@ -533,3 +535,43 @@
 	..()
 
 */
+
+//Pill sprites for UIs
+/datum/asset/simple/namespaced/chem_master
+	keep_local_name = TRUE
+
+/datum/asset/simple/namespaced/chem_master/register()
+	for(var/i = 1 to 24)
+		assets["pill[i].png"] = icon('icons/obj/chemical.dmi', "pill[i]")
+
+	for(var/i = 1 to 4)
+		assets["bottle-[i].png"] = icon('icons/obj/chemical.dmi', "bottle-[i]")
+
+	return ..()
+
+// Nanomaps
+/datum/asset/simple/nanomaps
+	// It REALLY doesnt matter too much if these arent up to date
+	// They are relatively big
+	assets = list(
+		// VOREStation Edit: We don't need Southern Cross
+		// "southern_cross_nanomap_z1.png"		= 'icons/_nanomaps/southern_cross_nanomap_z1.png',
+		// "southern_cross_nanomap_z10.png"	= 'icons/_nanomaps/southern_cross_nanomap_z10.png',
+		// "southern_cross_nanomap_z2.png"		= 'icons/_nanomaps/southern_cross_nanomap_z2.png',
+		// "southern_cross_nanomap_z3.png"		= 'icons/_nanomaps/southern_cross_nanomap_z3.png',
+		// "southern_cross_nanomap_z5.png"		= 'icons/_nanomaps/southern_cross_nanomap_z5.png',
+		// "southern_cross_nanomap_z6.png"		= 'icons/_nanomaps/southern_cross_nanomap_z6.png',
+		"tether_nanomap_z1.png"				= 'icons/_nanomaps/tether_nanomap_z1.png',
+		"tether_nanomap_z2.png"				= 'icons/_nanomaps/tether_nanomap_z2.png',
+		"tether_nanomap_z3.png"				= 'icons/_nanomaps/tether_nanomap_z3.png',
+		"tether_nanomap_z4.png"				= 'icons/_nanomaps/tether_nanomap_z4.png',
+		"tether_nanomap_z5.png"				= 'icons/_nanomaps/tether_nanomap_z5.png',
+		"tether_nanomap_z6.png"				= 'icons/_nanomaps/tether_nanomap_z6.png',
+		"tether_nanomap_z7.png"				= 'icons/_nanomaps/tether_nanomap_z7.png',
+		"tether_nanomap_z8.png"				= 'icons/_nanomaps/tether_nanomap_z8.png',
+		"tether_nanomap_z9.png"				= 'icons/_nanomaps/tether_nanomap_z9.png',
+		"tether_nanomap_z10.png"			= 'icons/_nanomaps/tether_nanomap_z10.png',
+		"tether_nanomap_z13.png"			= 'icons/_nanomaps/tether_nanomap_z13.png',
+		"tether_nanomap_z14.png"			= 'icons/_nanomaps/tether_nanomap_z14.png',
+		// VOREStation Edit End
+	)

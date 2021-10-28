@@ -251,30 +251,30 @@
 	addtimer(CALLBACK(src, .proc/update), 5)
 
 /obj/machinery/power/apc/examine(mob/user)
-	if(..(user, 1))
+	. = ..()
+	if(Adjacent(user))
 		if(stat & BROKEN)
-			to_chat(user,"This APC is broken.")
+			. += "This APC is broken."
 			return
 		if(opened)
 			if(has_electronics && terminal)
-				to_chat(user,"The cover is [opened==2?"removed":"open"] and [ cell ? "a power cell is installed" : "the power cell is missing"].")
+				. += "The cover is [opened==2?"removed":"open"] and [ cell ? "a power cell is installed" : "the power cell is missing"]."
 			else if (!has_electronics && terminal)
-				to_chat(user,"The frame is wired, but the electronics are missing.")
+				. += "The frame is wired, but the electronics are missing."
 			else if (has_electronics && !terminal)
-				to_chat(user,"The electronics are installed, but not wired.")
-			else /* if (!has_electronics && !terminal) */
-				to_chat(user,"It's just an empty metal frame.")
+				. += "The electronics are installed, but not wired."
+			else
+				. += "It's just an empty metal frame."
 
 		else
 			if (wiresexposed)
-				to_chat(user,"The cover is closed and the wires are exposed.")
+				. += "The cover is closed and the wires are exposed."
 			else if ((locked && emagged) || hacker) //Some things can cause locked && emagged. Malf AI causes hacker.
-				to_chat(user,"The cover is closed, but the panel is unresponsive.")
+				. += "The cover is closed, but the panel is unresponsive."
 			else if(!locked && emagged) //Normal emag does this.
-				to_chat(user,"The cover is closed, but the panel is flashing an error.")
+				. += "The cover is closed, but the panel is flashing an error."
 			else
-				to_chat(user,"The cover is closed.")
-
+				. += "The cover is closed."
 
 // update the APC icon to show the three base states
 // also add overlays for indicator lights
@@ -688,6 +688,18 @@
 
 // attack with hand - remove cell (if cover open) or interact with the APC
 
+//Altclick APCs to toggle the controlls
+/obj/machinery/power/apc/AltClick(mob/user)
+	if(user.Adjacent(src))
+		if(src.allowed(usr) && !isWireCut(APC_WIRE_IDSCAN))
+			locked = !locked
+			to_chat(user,"You [ locked ? "lock" : "unlock"] the APC interface.")
+			update_icon()
+		else
+			to_chat(user,"<span class='warning'>Access denied.</span>")
+
+
+
 /obj/machinery/power/apc/emag_act(var/remaining_charges, var/mob/user)
 	if (!(emagged || hacker))		// trying to unlock with an emag card
 		if(opened)
@@ -759,6 +771,10 @@
 	// do APC interaction
 	src.interact(user)
 
+/obj/machinery/power/apc/attack_ai(mob/user)
+	add_hiddenprint(user)
+	ui_interact(user)
+
 /obj/machinery/power/apc/interact(mob/user)
 	if(!user)
 		return
@@ -769,8 +785,123 @@
 
 	return ui_interact(user)
 
+/obj/machinery/power/apc/ui_interact(mob/user, datum/tgui/ui = null)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "APC", name) // 510, 460
+		ui.open()
 
-/obj/machinery/power/apc/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/power/apc/ui_data(mob/user)
+	var/list/data = list(
+		"locked" = locked,
+		"normallyLocked" = locked,
+		"emagged" = emagged,
+		"isOperating" = operating,
+		"externalPower" = main_status,
+		"powerCellStatus" = cell ? cell.percent() : null,
+		"chargeMode" = chargemode,
+		"chargingStatus" = charging,
+		"totalLoad" = round(lastused_total),
+		"totalCharging" = round(lastused_charging),
+		"failTime" = failure_timer * 2,
+		"gridCheck" = grid_check,
+		"coverLocked" = coverlocked,
+		"siliconUser" = issilicon(user) || (isobserver(user) && is_admin(user)), //I add observer here so admins can have more control, even if it makes 'siliconUser' seem inaccurate.
+
+		"powerChannels" = list(
+			list(
+				"title" = "Equipment",
+				"powerLoad" = lastused_equip,
+				"status" = equipment,
+				"topicParams" = list(
+					"auto" = list("eqp" = 3),
+					"on"   = list("eqp" = 2),
+					"off"  = list("eqp" = 1)
+				)
+			),
+			list(
+				"title" = "Lighting",
+				"powerLoad" = round(lastused_light),
+				"status" = lighting,
+				"topicParams" = list(
+					"auto" = list("lgt" = 3),
+					"on"   = list("lgt" = 2),
+					"off"  = list("lgt" = 1)
+				)
+			),
+			list(
+				"title" = "Environment",
+				"powerLoad" = round(lastused_environ),
+				"status" = environ,
+				"topicParams" = list(
+					"auto" = list("env" = 3),
+					"on"   = list("env" = 2),
+					"off"  = list("env" = 1)
+				)
+			)
+		)
+	)
+
+	return data
+
+/obj/machinery/power/apc/ui_act(action, params)
+	if(..() || !can_use(usr, TRUE))
+		return TRUE
+
+	// There's a handful of cases where we want to allow users to bypass the `locked` variable.
+	// If can_admin_interact() wasn't only defined on observers, this could just be part of a single-line
+	// conditional.
+	var/locked_exception = FALSE
+	if(issilicon(usr) || action == "nightshift")
+		locked_exception = TRUE
+	if(isobserver(usr))
+		var/mob/observer/dead/D = usr
+		if(D.can_admin_interact())
+			locked_exception = TRUE
+
+	if(locked && !locked_exception)
+		return
+
+	. = TRUE
+	switch(action)
+		if("lock")
+			if(locked_exception) // Yay code reuse
+				if(emagged || (stat & (BROKEN|MAINT)))
+					to_chat(usr, "The APC does not respond to the command.")
+					return
+				locked = !locked
+				update_icon()
+		if("cover")
+			coverlocked = !coverlocked
+		if("breaker")
+			toggle_breaker()
+		if("charge")
+			chargemode = !chargemode
+			if(!chargemode)
+				charging = 0
+				update_icon()
+		if("channel")
+			if(params["eqp"])
+				equipment = setsubsystem(text2num(params["eqp"]))
+				update_icon()
+				update()
+			else if(params["lgt"])
+				lighting = setsubsystem(text2num(params["lgt"]))
+				update_icon()
+				update()
+			else if(params["env"])
+				environ = setsubsystem(text2num(params["env"]))
+				update_icon()
+				update()
+		if("reboot")
+			failure_timer = 0
+			update_icon()
+			update()
+		if("overload")
+			if(locked_exception) // Reusing for simplicity!
+				overload_lighting()
+/*
+/obj/machinery/power/apc/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	if(!user)
 		return
 
@@ -835,7 +966,7 @@
 		ui.open()
 		// auto update every Master Controller tick
 		ui.set_auto_update(1)
-
+*/
 /obj/machinery/power/apc/proc/report()
 	return "[area.name] : [equipment]/[lighting]/[environ] ([lastused_equip+lastused_light+lastused_environ]) : [cell? cell.percent() : "N/C"] ([charging])"
 
@@ -846,24 +977,23 @@
 		area.power_environ = (environ >= POWERCHAN_ON)
 //		if (area.name == "AI Chamber")
 //			spawn(10)
-//				world << " [area.name] [area.power_equip]"
+//				to_chat(world, " [area.name] [area.power_equip]")
 	else
 		area.power_light = 0
 		area.power_equip = 0
 		area.power_environ = 0
 //		if (area.name == "AI Chamber")
-//			world << "[area.power_equip]"
+//			to_chat(world, "[area.power_equip]")
 	area.power_change()
 
 /obj/machinery/power/apc/proc/isWireCut(var/wireIndex)
 	return wires.IsIndexCut(wireIndex)
 
-
 /obj/machinery/power/apc/proc/can_use(mob/user as mob, var/loud = 0) //used by attack_hand() and Topic()
 	if(!user.client)
 		return 0
-	if(isobserver(user) && is_admin(user) ) //This is to allow nanoUI interaction by ghost admins.
-		return 1
+	if(IsAdminGhost(user)) //This is to allow nanoUI interaction by ghost admins.
+		return TRUE
 	if (user.stat)
 		return 0
 	if(inoperable())
@@ -1019,7 +1149,7 @@
 	else
 		return 0
 
-/obj/machinery/power/apc/process()
+/obj/machinery/power/apc/process(delta_time)
 
 	if(stat & (BROKEN|MAINT))
 		return
@@ -1265,6 +1395,10 @@ obj/machinery/power/apc/proc/autoset(var/cur_state, var/on)
 					L.broken()
 				sleep(1)
 
+/obj/machinery/power/apc/proc/flicker_lights(var/chance = 100)
+	for(var/obj/machinery/light/L in area)
+		L.flicker(rand(15,25))
+
 /obj/machinery/power/apc/proc/setsubsystem(val)
 	if(cell && cell.charge > 0)
 		return (val==1) ? 0 : val
@@ -1347,5 +1481,15 @@ obj/machinery/power/apc/proc/autoset(var/cur_state, var/on)
 	spawn(15 MINUTES) // Protection against someone deconning the grid checker after a grid check happens, preventing infinte blackout.
 		if(src && grid_check == TRUE)
 			grid_check = FALSE
+
+/obj/machinery/power/apc/proc/update_area()//From apc_vr.dm
+	var/area/NA = get_area(src)
+	if(!(NA == area))
+		if(area.apc == src)
+			area.apc = null
+		NA.apc = src
+		area = NA
+		name = "[area.name] APC"
+	update()
 
 #undef APC_UPDATE_ICON_COOLDOWN

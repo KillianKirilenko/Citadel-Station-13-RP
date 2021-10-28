@@ -16,8 +16,8 @@ Barricades
 	var/maxhealth = 100
 	var/datum/material/material
 
-/obj/structure/barricade/New(var/newloc, var/material_name)
-	..(newloc)
+/obj/structure/barricade/Initialize(mapload, material_name)
+	. = ..()
 	if(!material_name)
 		material_name = "wood"
 	material = get_material_by_name("[material_name]")
@@ -56,7 +56,7 @@ Barricades
 				health -= W.force * 1
 			if("brute")
 				health -= W.force * 0.75
-		if(material == (get_material_by_name(MAT_WOOD) || get_material_by_name(MAT_SIFWOOD)))
+		if(material == (get_material_by_name(MAT_WOOD) || get_material_by_name(MAT_SIFWOOD) || get_material_by_name(MAT_HARDWOOD)))
 			playsound(loc, 'sound/effects/woodcutting.ogg', 100, 1)
 		else
 			playsound(src, 'sound/weapons/smash.ogg', 50, 1)
@@ -77,7 +77,7 @@ Barricades
 	visible_message("<span class='danger'>[user] [attack_verb] the [src]!</span>")
 	if(material == get_material_by_name("resin"))
 		playsound(loc, 'sound/effects/attackblob.ogg', 100, 1)
-	else if(material == (get_material_by_name(MAT_WOOD) || get_material_by_name(MAT_SIFWOOD)))
+	else if(material == (get_material_by_name(MAT_WOOD) || get_material_by_name(MAT_SIFWOOD) || get_material_by_name(MAT_HARDWOOD)))
 		playsound(loc, 'sound/effects/woodcutting.ogg', 100, 1)
 	else
 		playsound(src, 'sound/weapons/smash.ogg', 50, 1)
@@ -125,9 +125,11 @@ Barricades
 	var/locked = 0.0
 //	req_access = list(access_maint_tunnels)
 
-/obj/machinery/deployable/barrier/New()
-	..()
+/obj/machinery/deployable/barrier/Initialize(mapload, newdir)
+	. = ..()
+	update_icon()
 
+/obj/machinery/deployable/barrier/update_icon_state()
 	icon_state = "barrier[locked]"
 
 /obj/machinery/deployable/barrier/attackby(obj/item/W as obj, mob/user as mob)

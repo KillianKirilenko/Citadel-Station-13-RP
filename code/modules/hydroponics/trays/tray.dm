@@ -156,16 +156,16 @@
 		if(weedlevel > 0)
 			nymph.reagents.add_reagent("glucose", weedlevel)
 			weedlevel = 0
-			nymph.visible_message("<font color='blue'><b>[nymph]</b> begins rooting through [src], ripping out weeds and eating them noisily.</font>","<font color='blue'>You begin rooting through [src], ripping out weeds and eating them noisily.</font>")
+			nymph.visible_message("<font color=#4F49AF><b>[nymph]</b> begins rooting through [src], ripping out weeds and eating them noisily.</font>","<font color=#4F49AF>You begin rooting through [src], ripping out weeds and eating them noisily.</font>")
 		else if(nymph.nutrition > 100 && nutrilevel < 10)
 			nymph.nutrition -= ((10-nutrilevel)*5)
 			nutrilevel = 10
-			nymph.visible_message("<font color='blue'><b>[nymph]</b> secretes a trickle of green liquid, refilling [src].</font>","<font color='blue'>You secrete a trickle of green liquid, refilling [src].</font>")
+			nymph.visible_message("<font color=#4F49AF><b>[nymph]</b> secretes a trickle of green liquid, refilling [src].</font>","<font color=#4F49AF>You secrete a trickle of green liquid, refilling [src].</font>")
 		else
-			nymph.visible_message("<font color='blue'><b>[nymph]</b> rolls around in [src] for a bit.</font>","<font color='blue'>You roll around in [src] for a bit.</font>")
+			nymph.visible_message("<font color=#4F49AF><b>[nymph]</b> rolls around in [src] for a bit.</font>","<font color=#4F49AF>You roll around in [src] for a bit.</font>")
 		return
 
-/obj/machinery/portable_atmospherics/hydroponics/Initialize()
+/obj/machinery/portable_atmospherics/hydroponics/Initialize(mapload)
 	. = ..()
 	temp_chem_holder = new()
 	temp_chem_holder.create_reagents(10)
@@ -221,7 +221,6 @@
 	. = ..()
 	if(istype(mover) && mover.checkpass(PASSTABLE))
 		return TRUE
-	return FALSE
 
 /obj/machinery/portable_atmospherics/hydroponics/proc/check_health()
 	if(seed && !dead && health <= 0)
@@ -295,7 +294,7 @@
 		return
 
 	if(closed_system)
-		if(user) user << "You can't harvest from the plant while the lid is shut."
+		if(user) to_chat(user, "You can't harvest from the plant while the lid is shut.")
 		return
 
 	if(user)
@@ -594,32 +593,30 @@
 	else if(dead)
 		remove_dead(user)
 
-/obj/machinery/portable_atmospherics/hydroponics/examine()
-
-	..()
-
+/obj/machinery/portable_atmospherics/hydroponics/examine(mob/user)
+	. = ..()
 	if(seed)
-		to_chat(usr, "<span class='notice'>[seed.display_name] are growing here.</span>")
+		. += "<span class='notice'>[seed.display_name] are growing here.</span>"
 	else
-		to_chat(usr, "[src] is empty.")
+		. += "[src] is empty."
 
-	if(!Adjacent(usr))
+	if(!Adjacent(user))
 		return
 
-	to_chat(usr, "Water: [round(waterlevel,0.1)]/100")
-	to_chat(usr, "Nutrient: [round(nutrilevel,0.1)]/10")
+	. += "Water: [round(waterlevel,0.1)]/100"
+	. += "Nutrient: [round(nutrilevel,0.1)]/10"
 
 	if(seed)
 		if(weedlevel >= 5)
-			to_chat(usr, "\The [src] is <span class='danger'>infested with weeds</span>!")
+			. += "\The [src] is <span class='danger'>infested with weeds</span>!"
 		if(pestlevel >= 5)
-			to_chat(usr, "\The [src] is <span class='danger'>infested with tiny worms</span>!")
+			. += "\The [src] is <span class='danger'>infested with tiny worms</span>!"
 		if(dead)
-			to_chat(usr, "<span class='danger'>The plant is dead.</span>")
+			. += "<span class='danger'>The plant is dead.</span>"
 		else if(health <= (seed.get_trait(TRAIT_ENDURANCE)/ 2))
-			to_chat(usr, "The plant looks <span class='danger'>unhealthy</span>.")
+			. += "The plant looks <span class='danger'>unhealthy</span>."
 	if(frozen == 1)
-		to_chat(usr, "<span class='notice'>It is cryogenically frozen.</span>")
+		. += "<span class='notice'>It is cryogenically frozen.</span>"
 	if(mechanical)
 		var/turf/T = loc
 		var/datum/gas_mixture/environment
@@ -642,7 +639,7 @@
 			var/light_available = T.get_lumcount() * 5
 			light_string = "a light level of [light_available] lumens"
 
-		to_chat(usr, "The tray's sensor suite is reporting [light_string] and a temperature of [environment.temperature]K at [environment.return_pressure()] kPa in the [environment_type] environment")
+		. += "The tray's sensor suite is reporting [light_string] and a temperature of [environment.temperature]K at [environment.return_pressure()] kPa in the [environment_type] environment"
 
 /obj/machinery/portable_atmospherics/hydroponics/verb/close_lid_verb()
 	set name = "Toggle Tray Lid"

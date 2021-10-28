@@ -70,6 +70,15 @@
 	// Only slot_l_hand/slot_r_hand are implemented at the moment. Others to be implemented as needed.
 	var/list/item_icons = list()
 
+	//Dimensions of the icon file used when this item is worn, eg: hats.dmi
+	//eg: 32x32 sprite, 64x64 sprite, etc.
+	//allows inhands/worn sprites to be of any size, but still centered on a mob properly
+	var/worn_x_dimension = 32
+	var/worn_y_dimension = 32
+	//Same as above but for inhands, uses the lefthand_ and righthand_ file vars
+	var/inhand_x_dimension = 32
+	var/inhand_y_dimension = 32
+
 	//** These specify item/icon overrides for _species_
 
 	/* Species-specific sprites, concept stolen from Paradise//vg/.
@@ -92,6 +101,16 @@
 
 	var/icon/default_worn_icon	//Default on-mob icon
 	var/worn_layer				//Default on-mob layer
+
+	// Pickup/Drop/Equip/Throw Sounds
+	///Used when thrown into a mob
+	var/mob_throw_hit_sound
+	// Sound used when equipping the items into a valid slot.
+	var/equip_sound
+	// pickup sound - this is the default
+	var/pickup_sound = 'sound/items/pickup/device.ogg'
+	// drop sound - this is the default
+	var/drop_sound = 'sound/items/drop/device.ogg'
 
 	var/deploytype = null	//Deploytype for switchtools. Only really used on switchtool subtype items, but this is on a general item level in case admins want to do some wierd fucky shit with custom switchtools.
 /obj/item/Initialize(mapload)
@@ -205,7 +224,8 @@
 	src.loc = T
 
 // See inventory_sizes.dm for the defines.
-/obj/item/examine(mob/user, var/distance = -1)
+/obj/item/examine(mob/user)
+	. = ..()
 	var/size
 	switch(src.w_class)
 		if(ITEMSIZE_TINY)
@@ -218,7 +238,7 @@
 			size = "bulky"
 		if(ITEMSIZE_HUGE)
 			size = "huge"
-	return ..(user, distance, "", "It is a [size] item.")
+	. += "It is a [size] item."
 
 /obj/item/attack_hand(mob/living/user as mob)
 	if (!user) return
@@ -284,16 +304,56 @@
 /obj/item/proc/moved(mob/user as mob, old_loc as turf)
 	return
 
-// apparently called whenever an item is removed from a slot, container, or anything else.
-/obj/item/proc/dropped(mob/user as mob)
+/obj/item/proc/get_volume_by_throwforce_and_or_w_class() // This is used for figuring out how loud our sounds are for throwing.
+	if(throwforce && w_class)
+		return clamp((throwforce + w_class) * 5, 30, 100)// Add the item's throwforce to its weight class and multiply by 5, then clamp the value between 30 and 100
+	else if(w_class)
+		return clamp(w_class * 8, 20, 100) // Multiply the item's weight class by 8, then clamp the value between 20 and 100
+	else
+		return 0
+
+/obj/item/throw_impact(atom/hit_atom)
 	..()
+	if(isliving(hit_atom)) //Living mobs handle hit sounds differently.
+		var/volume = get_volume_by_throwforce_and_or_w_class()
+		if (throwforce > 0)
+			if (mob_throw_hit_sound)
+				playsound(hit_atom, mob_throw_hit_sound, volume, TRUE, -1)
+			else if(hitsound)
+				playsound(hit_atom, hitsound, volume, TRUE, -1)
+			else
+				playsound(hit_atom, 'sound/weapons/genhit.ogg', volume, TRUE, -1)
+		else
+			playsound(hit_atom, 'sound/weapons/throwtap.ogg', 1, volume, -1)
+	else
+		playsound(src, drop_sound, 30, preference = /datum/client_preference/drop_sounds)
+
+/// Called when a mob drops an item.
+/obj/item/proc/dropped(mob/user, silent = FALSE)
+	SHOULD_CALL_PARENT(TRUE)
+/*
+	for(var/X in actions)
+		var/datum/action/A = X
+		A.Remove(user)
+	if(item_flags & DROPDEL)
+		qdel(src)
+	item_flags &= ~IN_INVENTORY
+*/
+	SEND_SIGNAL(src, COMSIG_ITEM_DROPPED, user)
+	// if(!silent)
+	// 	playsound(src, drop_sound, DROP_SOUND_VOLUME, ignore_walls = FALSE)
+	// user?.update_equipment_speed_mods()
 	if(zoom)
 		zoom() //binoculars, scope, etc
 	appearance_flags &= ~NO_CLIENT_COLOR
 
 // called just as an item is picked up (loc is not yet changed)
 /obj/item/proc/pickup(mob/user)
-	return
+	SHOULD_CALL_PARENT(TRUE)
+	SEND_SIGNAL(src, COMSIG_ITEM_PICKUP, user)
+	pixel_x = initial(pixel_x)
+	pixel_y = initial(pixel_y)
+	// item_flags |= IN_INVENTORY
 
 // called when this item is removed from a storage item, which is passed on as S. The loc variable is already set to the new destination before this is called.
 /obj/item/proc/on_exit_storage(obj/item/storage/S as obj)
@@ -317,6 +377,13 @@
 	user.position_hud_item(src,slot)
 	if(user.client)	user.client.screen |= src
 	if(user.pulling == src) user.stop_pulling()
+	if((slot_flags & slot))
+		if(equip_sound)
+			playsound(src, equip_sound, 30)
+		else
+			playsound(src, drop_sound, 30)
+	else if(slot == slot_l_hand || slot == slot_r_hand)
+		playsound(src, pickup_sound, 20, preference = /datum/client_preference/pickup_sounds)
 	return
 
 //Defines which slots correspond to which slot flags
@@ -637,7 +704,7 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 //Looking through a scope or binoculars should /not/ improve your periphereal vision. Still, increase viewsize a tiny bit so that sniping isn't as restricted to NSEW
 
 // this is shitcode holy crap
-/obj/item/proc/zoom(tileoffset = 14, viewsize = 9, mob/user = usr) //tileoffset is client view offset in the direction the user is facing. viewsize is how far out this thing zooms. 7 is normal view
+/obj/item/proc/zoom(tileoffset = 14, viewsize = 9, mob/user = usr, wornslot = FALSE) //tileoffset is client view offset in the direction the user is facing. viewsize is how far out this thing zooms. 7 is normal view. slot determines whether the item needs to be held in-hand (by being set to FALSE) OR worn on a specific slot to look through
 
 	var/devicename
 
@@ -651,11 +718,14 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 	if((user.stat && !zoom) || !(istype(user,/mob/living/carbon/human)))
 		to_chat(user, "You are unable to focus through the [devicename]")
 		cannotzoom = 1
-	else if(!zoom && GLOB.global_hud.darkMask[1] in user.client.screen)
+	else if(!zoom && (GLOB.global_hud.darkMask[1] in user.client.screen))
 		to_chat(user, "Your visor gets in the way of looking through the [devicename]")
 		cannotzoom = 1
-	else if(!zoom && user.get_active_hand() != src)
+	else if(!zoom && user.get_active_hand() != src && wornslot == FALSE)
 		to_chat(user, "You are too distracted to look through the [devicename], perhaps if it was in your active hand this might work better")
+		cannotzoom = 1
+	else if(!zoom && user.get_equipped_item(wornslot) != src && wornslot != FALSE)
+		to_chat(user, "You need to wear the [devicename] to look through it properly")
 		cannotzoom = 1
 
 	//We checked above if they are a human and returned already if they weren't.
@@ -749,6 +819,7 @@ modules/mob/living/carbon/human/life.dm if you die, you will be zoomed out.
 		apply_addblends(icon2use,standing_icon)		//Some items have ICON_ADD blend shaders
 
 	var/image/standing = image(standing_icon)
+	standing = center_image(standing, inhands ? inhand_x_dimension : worn_x_dimension, inhands ? inhand_y_dimension : worn_y_dimension)
 	standing.alpha = alpha
 	standing.color = color
 	standing.layer = layer2use

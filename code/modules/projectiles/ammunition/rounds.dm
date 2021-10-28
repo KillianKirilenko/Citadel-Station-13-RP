@@ -448,7 +448,7 @@
 	name = "rocket shell"
 	desc = "A high explosive designed to be fired from a launcher."
 	icon_state = "rocketshell"
-	projectile_type = /obj/item/missile
+	projectile_type = /obj/item/projectile/bullet/srmrocket
 	caliber = "rocket"
 	matter = list(DEFAULT_WALL_MATERIAL = 10000)
 
@@ -465,3 +465,11 @@
 	icon_state = "s-casing-spent"
 	BB = null
 	projectile_type = null
+
+/obj/item/ammo_casing/organic
+	name = "biomatter globule"
+	desc = "Globular biomatter rendered and ready for compression."
+	caliber = "organic"
+	icon_state = "globule"
+	projectile_type = /obj/item/projectile/bullet/organic
+	matter = list("flesh" = 100)

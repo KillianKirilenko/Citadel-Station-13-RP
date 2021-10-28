@@ -1,11 +1,24 @@
+/datum/category_item/catalogue/fauna/cat
+	name = "Cat"
+	desc = "Felines are a popular domestic animal hailing from Earth. \
+	Sharing common ancestry with Earth's 'big cats', the housecats retain \
+	much of those primitive instincts. Although generally docile around \
+	their owners and larger creatures, cats are frequently employed for pest \
+	control on interstellar facilities. They are a popular subject for photography \
+	and film on the Exonet."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /mob/living/simple_mob/animal/passive/cat
 	name = "cat"
 	desc = "A domesticated, feline pet. Has a tendency to adopt crewmembers."
 	tt_desc = "E Felis silvestris catus"
 	icon_state = "cat2"
 	item_state = "cat2"
+	catalogue_data = list(/datum/category_item/catalogue/fauna/cat)
 
 	movement_cooldown = 0.5 SECONDS
+
+	randomized = TRUE
 
 	see_in_dark = 6 // Not sure if this actually works.
 	response_help  = "pets"
@@ -21,7 +34,7 @@
 	var/named = FALSE //have I been named yet?
 	var/friend_name = null //VOREStation Edit - Lock befriending to this character
 
-/mob/living/simple_mob/animal/passive/cat/Initialize()
+/mob/living/simple_mob/animal/passive/cat/Initialize(mapload)
 	icon_living = "[initial(icon_state)]"
 	icon_dead = "[initial(icon_state)]_dead"
 	icon_rest = "[initial(icon_state)]_rest"
@@ -103,6 +116,7 @@
 	item_state = "cat"
 	named = TRUE
 	makes_dirt = 0 //Vorestation Edit
+	randomized = FALSE
 
 /mob/living/simple_mob/animal/passive/cat/kitten
 	name = "kitten"
@@ -112,7 +126,7 @@
 	gender = NEUTER
 	holder_type = /obj/item/holder/cat/kitten //VOREStation Edit
 
-/mob/living/simple_mob/animal/passive/cat/kitten/Initialize()
+/mob/living/simple_mob/animal/passive/cat/kitten/Initialize(mapload)
 	if(gender == NEUTER)
 		gender = pick(MALE, FEMALE)
 	return ..()
@@ -136,6 +150,7 @@
 	item_state = "cat3"
 	named = TRUE
 	holder_type = /obj/item/holder/cat/fluff/bones
+	randomized = FALSE
 
 // VOREStation Edit - Adds generic tactical kittens
 /obj/item/holder/cat/kitten

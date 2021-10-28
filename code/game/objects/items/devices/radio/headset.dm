@@ -20,6 +20,9 @@
 	var/ks1type = null
 	var/ks2type = null
 
+	drop_sound = 'sound/items/drop/component.ogg'
+	pickup_sound = 'sound/items/pickup/component.ogg'
+
 /obj/item/radio/headset/Initialize(mapload)
 	. = ..()
 	internal_channels.Cut()
@@ -40,11 +43,12 @@
 	return list_secure_channels()
 
 /obj/item/radio/headset/examine(mob/user)
-	if(!(..(user, 1) && radio_desc))
+	. = ..()
+	if(!radio_desc)
 		return
 
-	to_chat(user, "The following channels are available:")
-	to_chat(user, radio_desc)
+	. += "The following channels are available:"
+	. += radio_desc
 
 /obj/item/radio/headset/handle_message_mode(mob/living/M as mob, message, channel)
 	if (channel == "special")
@@ -95,9 +99,20 @@
 	syndie = 1
 	ks1type = /obj/item/encryptionkey/raider
 
-/obj/item/radio/headset/raider/Initialize()
+/obj/item/radio/headset/raider/Initialize(mapload)
 	. = ..()
 	set_frequency(RAID_FREQ)
+
+/obj/item/radio/headset/trader
+	name = "trade headset"
+	origin_tech = list(TECH_ILLEGAL = 2)
+	syndie = 1
+	adhoc_fallback = TRUE
+	ks1type = /obj/item/encryptionkey/trader
+
+/obj/item/radio/headset/trader/Initialize(mapload)
+	. = ..()
+	set_frequency(TRADE_FREQ)
 
 /obj/item/radio/headset/binary
 	origin_tech = list(TECH_ILLEGAL = 3)
@@ -113,6 +128,7 @@
 	name = "security bowman headset"
 	desc = "This is used by your elite security force."
 	icon_state = "sec_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/headset_sec
 
 /obj/item/radio/headset/headset_eng
@@ -173,6 +189,7 @@
 	name = "command bowman headset"
 	desc = "A headset with a commanding channel."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/headset_com
 
 
@@ -186,6 +203,7 @@
 	name = "Facility Director's bowman headset"
 	desc = "The headset of the boss."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/captain
 
 /obj/item/radio/headset/heads/captain/sfr
@@ -219,6 +237,7 @@
 	name = "research director's bowman headset"
 	desc = "Headset of the researching God."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/rd
 
 /obj/item/radio/headset/heads/hos
@@ -231,6 +250,7 @@
 	name = "head of security's bowman headset"
 	desc = "The headset of the man who protects your worthless lifes."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/hos
 
 /obj/item/radio/headset/heads/ce
@@ -243,6 +263,7 @@
 	name = "chief engineer's bowman headset"
 	desc = "The headset of the guy who is in charge of morons"
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/ce
 
 /obj/item/radio/headset/heads/cmo
@@ -255,6 +276,7 @@
 	name = "chief medical officer's bowman headset"
 	desc = "The headset of the highly trained medical chief."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/cmo
 
 /obj/item/radio/headset/heads/hop
@@ -267,6 +289,7 @@
 	name = "head of personnel's bowman headset"
 	desc = "The headset of the guy who will one day be Facility Director."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 	ks2type = /obj/item/encryptionkey/heads/hop
 
 /obj/item/radio/headset/headset_mine
@@ -306,6 +329,7 @@
 	name = "emergency response team bowman headset"
 	desc = "The headset of the boss's boss."
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 //	freerange = 1
 	ks2type = /obj/item/encryptionkey/ert
 
@@ -429,18 +453,10 @@
 
 
 	for (var/ch_name in channels)
-		if(!radio_controller)
-			sleep(30) // Waiting for the radio_controller to be created.
-		if(!radio_controller)
-			src.name = "broken radio headset"
-			return
-
 		secure_radio_connections[ch_name] = radio_controller.add_object(src, radiochannels[ch_name],  RADIO_CHAT)
 
 	if(setDescription)
 		setupRadioDescription()
-
-	return
 
 /obj/item/radio/headset/proc/setupRadioDescription()
 	var/radio_text = ""
@@ -465,6 +481,7 @@
 /obj/item/radio/headset/centcom/alt
 	name = "centcom bowman headset"
 	icon_state = "com_headset_alt"
+	ear_protection = 1
 
 /obj/item/radio/headset/nanotrasen
 	name = "\improper NT radio headset"
@@ -486,7 +503,7 @@
 		return ..(freq, level)
 
 
-/obj/item/radio/headset/mob_headset/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/state = interactive_state)
+/obj/item/radio/headset/mob_headset/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/state = interactive_state)
 	ui = new(user, src, ui_key, "radio_basic.tmpl", "[name]", 400, 430, state = interactive_state)
 	..()
 
@@ -542,6 +559,19 @@
 	desc = "A bowman headset for search and rescue."
 	icon_state = "sar_headset_alt"
 
+/obj/item/radio/headset/pathfinder
+	name = "pathfinder's headset"
+	desc = "Headset used by Pathfinders for coordinating and executing expeditions."
+	icon_state = "exp_headset_path"
+	adhoc_fallback = TRUE
+	ks2type = /obj/item/encryptionkey/pathfinder
+
+/obj/item/radio/headset/pathfinder/alt
+	name = "pathfinder's bowman headset"
+	desc = "Headset used by Pathfinders for coordinating and executing expeditions."
+	icon_state = "exp_headset_path_alt"
+	//ear_protection = 1 removed because fuck you
+
 //Headset SC _vr files
 /obj/item/radio/headset/volunteer
 	name = "volunteer's headset"
@@ -549,3 +579,10 @@
 	icon_state = "pilot_headset"
 	adhoc_fallback = TRUE
 	ks2type = /obj/item/encryptionkey/pilot
+
+/obj/item/radio/headset/talon
+	name = "talon headset"
+	desc = "A headset for communication between the crew of the ITV Talon."
+	adhoc_fallback = TRUE
+	icon_state = "pilot_headset"
+	ks2type = /obj/item/encryptionkey/talon

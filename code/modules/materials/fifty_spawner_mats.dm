@@ -84,13 +84,21 @@
 	name = "stack of alien wood"
 	type_to_spawn = /obj/item/stack/material/wood/sif
 
+/obj/fiftyspawner/hardwood
+	name = "stack of hardwood"
+	type_to_spawn = /obj/item/stack/material/wood/hard
+
 /obj/fiftyspawner/log
 	name = "stack of logs"
 	type_to_spawn = /obj/item/stack/material/log
 
-/obj/fiftyspawner/log
+/obj/fiftyspawner/siflog
 	name = "stack of alien logs"
 	type_to_spawn = /obj/item/stack/material/log/sif
+
+/obj/fiftyspawner/hardlog
+	name = "stack of hardwood logs"
+	type_to_spawn = /obj/item/stack/material/log/hard
 
 /obj/fiftyspawner/cloth
 	name = "stack of cloth"
@@ -128,8 +136,17 @@
 //Sandbag port
 /obj/fiftyspawner/emptysandbag
 	name = "stack of empty sandbags"
-	type_to_spawn = /obj/item/stack/material/emptysandbag
+	type_to_spawn = /obj/item/stack/emptysandbag
 
 /obj/fiftyspawner/sandbags
 	name = "stack of sandbags"
-	type_to_spawn = /obj/item/stack/material/sandbags
+	type_to_spawn = /obj/item/stack/sandbags
+
+//Vaudium products
+/obj/fiftyspawner/bananium
+	name = "stack of bananium"
+	type_to_spawn = /obj/item/stack/material/bananium
+
+/obj/fiftyspawner/silencium
+	name = "stack of silencium"
+	type_to_spawn = /obj/item/stack/material/silencium

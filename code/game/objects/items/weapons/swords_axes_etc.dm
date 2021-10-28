@@ -16,6 +16,8 @@
 	item_state = "classic_baton"
 	slot_flags = SLOT_BELT
 	force = 10
+	drop_sound = 'sound/items/drop/crowbar.ogg'
+	pickup_sound = 'sound/items/pickup/crowbar.ogg'
 
 /obj/item/melee/classic_baton/attack(mob/M as mob, mob/living/user as mob)
 	if ((CLUMSY in user.mutations) && prob(50))
@@ -42,6 +44,8 @@
 	var/off_force = 3
 	var/on_force = 15
 	var/on_pain_force = 30
+	drop_sound = 'sound/items/drop/crowbar.ogg'
+	pickup_sound = 'sound/items/pickup/crowbar.ogg'
 
 /obj/item/melee/telebaton/attack_self(mob/user as mob)
 	on = !on
@@ -150,3 +154,34 @@
 			slot_r_hand_str = 'icons/mob/items/righthand_material.dmi',
 			)
 	item_state = "switchblade_open"
+
+//DONATOR ITEM
+//okay I know making a stool a weapon is real cringe but the chair material code is fucking bad and I'm tired of fucking with it
+
+/obj/item/melee/stool/faiza
+	name = "Faiza's Stool"
+	desc = "Apply munchkin cat."
+	icon = 'icons/obj/furniture.dmi'
+	icon_state = "cn_stool_c"
+	force = 10
+	throwforce = 10
+	w_class = ITEMSIZE_SMALL
+	var/on =  0
+	slot_flags = null
+	force = 0
+	hitsound = "sound/items/bikehorn.ogg"
+
+/obj/item/melee/stool/faiza/attack_self(mob/user as mob)
+
+	if(on == 0)
+		user.visible_message("<span class='notice'>In a quick motion, [user] extends their collapsible stool.</span>")
+		icon_state = "cn_stool"
+		w_class = ITEMSIZE_HUGE
+		on = 1
+	else
+		user.visible_message("<span class='notice'>\ [user] collapses their stool.</span>")
+		icon_state = "cn_stool_c"
+		w_class = ITEMSIZE_SMALL
+		on = 0
+
+	playsound(src.loc, 'sound/weapons/empty.ogg', 50, 1)

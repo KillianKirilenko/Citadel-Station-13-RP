@@ -57,8 +57,8 @@
 	desc = "Simple rocket nozzle, expelling gas at hypersonic velocities to propell the ship."
 	icon = 'icons/turf/shuttle_parts.dmi'
 	icon_state = "nozzle"
-	opacity = 1
-	density = 1
+	opacity = TRUE
+	density = TRUE
 	can_atmos_pass = ATMOS_PASS_NO
 	connect_types = CONNECT_TYPE_REGULAR|CONNECT_TYPE_FUEL
 
@@ -68,20 +68,17 @@
 
 	use_power = USE_POWER_OFF
 	power_channel = EQUIP
-	idle_power_usage = 21600 //6 Wh per tick for default 2 capacitor. Gives them a reason to turn it off, really to nerf backup battery
+	idle_power_usage = 1000
 
 	var/datum/ship_engine/gas_thruster/controller
 	var/thrust_limit = 1		//Value between 1 and 0 to limit the resulting thrust
 	var/volume_per_burn = 15	//20 litres(with bin)
-	var/charge_per_burn = 36000	//10Wh for default 2 capacitor, chews through that battery power! Makes a trade off of fuel efficient vs energy efficient
+	var/charge_per_burn = 3600
 	var/boot_time = 35
 	var/next_on
 	var/blockage
 
-/obj/machinery/atmospherics/unary/engine/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
-	return 0
-
-/obj/machinery/atmospherics/unary/engine/Initialize()
+/obj/machinery/atmospherics/unary/engine/Initialize(mapload)
 	. = ..()
 	controller = new(src)
 	update_nearby_tiles(need_rebuild=1)
@@ -103,18 +100,17 @@
 	. = list()
 	.+= "Location: [get_area(src)]."
 	if(stat & NOPOWER)
-		.+= "<span class='average'>Insufficient power to operate.</span>"
+		.+= list(list("Insufficient power to operate.", "bad"))
 	if(!check_fuel())
-		.+= "<span class='average'>Insufficient fuel for a burn.</span>"
+		.+= list(list("Insufficient fuel for a burn.", "bad"))
 	if(stat & BROKEN)
-		.+= "<span class='average'>Inoperable engine configuration.</span>"
+		.+= list(list("Inoperable engine configuration.", "bad"))
 	if(blockage)
-		.+= "<span class='average'>Obstruction of airflow detected.</span>"
+		.+= list(list("Obstruction of airflow detected.", "bad"))
 
 	.+= "Propellant total mass: [round(air_contents.get_mass(),0.01)] kg."
 	.+= "Propellant used per burn: [round(air_contents.get_mass() * volume_per_burn * thrust_limit / air_contents.volume,0.01)] kg."
 	.+= "Propellant pressure: [round(air_contents.return_pressure()/1000,0.1)] MPa."
-	. = jointext(.,"<br>")
 
 /obj/machinery/atmospherics/unary/engine/power_change()
 	. = ..()
@@ -150,7 +146,7 @@
 /obj/machinery/atmospherics/unary/engine/proc/burn()
 	if(!is_on())
 		return 0
-	if(!check_fuel() || (0 < use_power_oneoff(charge_per_burn)) || check_blockage())
+	if(!check_fuel() || (use_power_oneoff(charge_per_burn) < charge_per_burn) || check_blockage())
 		audible_message(src,"<span class='warning'>[src] coughs once and goes silent!</span>")
 		update_use_power(USE_POWER_OFF)
 		return 0
@@ -159,7 +155,7 @@
 	if(!removed)
 		return 0
 	. = calculate_thrust(removed)
-	playsound(loc, 'sound/machines/thruster.ogg', 100 * thrust_limit, 0, world.view * 4, 0.1)
+	playsound(src, 'sound/machines/thruster.ogg', 100 * thrust_limit, 0, world.view * 4, 0.1)
 	if(network)
 		network.update = 1
 
@@ -191,11 +187,13 @@
 	light_color = "#ed9200"
 	anchored = 1
 
-/obj/effect/engine_exhaust/New(var/turf/nloc, var/ndir, var/flame)
-	..(nloc)
+/obj/effect/engine_exhaust/Initialize(mapload, ndir, flame)
+	. = ..(mapload)
 	if(flame)
 		icon_state = "exhaust"
-		nloc.hotspot_expose(1000,125)
+		var/turf/T = loc
+		if(istype(T))
+			T.hotspot_expose(1000,125)
 		set_light(0.5, 3)
 	setDir(ndir)
 	QDEL_IN(src, 20)

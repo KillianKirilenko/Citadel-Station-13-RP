@@ -119,7 +119,16 @@
 	var/modifier_type_to_apply = null // If set, will apply a modifier to mobs that are hit by this projectile.
 	var/modifier_duration = null // How long the above modifier should last for. Leave null to be permanent.
 	var/excavation_amount = 0 // How much, if anything, it drills from a mineral turf.
+	/// If this projectile is holy. Silver bullets, etc. Currently no effects.
 	var/holy = FALSE
+
+	// Antimagic
+	/// Should we check for antimagic effects?
+	var/antimagic_check = FALSE
+	/// Antimagic charges to use, if any
+	var/antimagic_charges_used = 0
+	/// Multiplier for damage if antimagic is on the target
+	var/antimagic_damage_factor = 0
 
 	embed_chance = 0	//Base chance for a projectile to embed
 
@@ -220,12 +229,8 @@
 	Range()
 
 /obj/item/projectile/Crossed(atom/movable/AM) //A mob moving on a tile with a projectile is hit by it.
-	//VOREStation Edit begin: SHADEKIN
-	var/mob/SK = AM
-	if(istype(SK))
-		if(SK.shadekin_phasing_check())
-			return
-	//VOREStation Edit end: SHADEKIN
+	if(AM.is_incorporeal())
+		return
 	..()
 	if(isliving(AM) && !(pass_flags & PASSMOB))
 		var/mob/living/L = AM
@@ -253,7 +258,7 @@
 	if(prob(50))
 		homing_offset_y = -homing_offset_y
 
-/obj/item/projectile/process()
+/obj/item/projectile/process(delta_time)
 	last_process = world.time
 	if(!loc || !fired || !trajectory)
 		fired = FALSE
@@ -450,7 +455,7 @@
 
 /obj/item/projectile/proc/vol_by_damage()
 	if(damage)
-		return clamp((damage) * 0.67, 30, 100)// Multiply projectile damage by 0.67, then CLAMP the value between 30 and 100
+		return clamp((damage) * 0.67, 30, 100)// Multiply projectile damage by 0.67, then clamp the value between 30 and 100
 	else
 		return 50 //if the projectile doesn't do damage, play its hitsound at 50% volume.
 
@@ -582,8 +587,10 @@
 
 //TODO: make it so this is called more reliably, instead of sometimes by bullet_act() and sometimes not
 /obj/item/projectile/proc/on_hit(atom/target, blocked = 0, def_zone)
-	if(blocked >= 100)		return 0//Full block
-	if(!isliving(target))	return 0
+	if(blocked >= 100)
+		return 0//Full block
+	if(!isliving(target))
+		return 0
 //	if(isanimal(target))	return 0
 	var/mob/living/L = target
 	L.apply_effects(stun, weaken, paralyze, irradiate, stutter, eyeblur, drowsy, agony, blocked, incendiary, flammability) // add in AGONY!
@@ -749,3 +756,31 @@
 
 	preparePixelProjectile(target, get_turf(src), params, forced_spread)
 	return fire(angle_override, direct_target)
+
+/**
+ * Standard proc to determine damage when impacting something. This does not affect the special damage variables/effect variables, only damage and damtype.
+ * May or may not be called before/after armor calculations.
+ *
+ * @params
+ * - target The atom hit
+ *
+ * @return Damage to apply to target.
+ */
+/obj/item/projectile/proc/run_damage_vulnerability(atom/target)
+	var/final_damage = damage
+	if(isliving(target))
+		var/mob/living/L = target
+		if(issimple(target))
+			var/mob/living/simple_mob/SM = L
+			if(SM.mob_class & SA_vulnerability)
+				final_damage += SA_bonus_damage
+		if(L.anti_magic_check(TRUE, TRUE, antimagic_charges_used, FALSE))
+			final_damage *= antimagic_damage_factor
+	return final_damage
+
+/**
+ * Probably isn't needed but saves me the time and I can regex this later:
+ * Gets the final `damage` that should be used on something
+ */
+/obj/item/projectile/proc/get_final_damage(atom/target)
+	return run_damage_vulnerability(target)

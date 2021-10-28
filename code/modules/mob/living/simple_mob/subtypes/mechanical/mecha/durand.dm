@@ -4,7 +4,7 @@
 
 /datum/category_item/catalogue/technology/durand
 	name = "Exosuit - Durand"
-	desc = "The Durand is an old combat exosuit, that was once the most durable exosuit ever developed by humans. \
+	desc = "The Durand is an old combat exosuit; once the most durable exosuit ever developed by humans. \
 	In modern times, this exosuit has been dethroned from that title, yet it remains one of the more well built and armored \
 	exosuits, despite its age.\
 	<br><br>\
@@ -62,6 +62,6 @@
 	set_defense_mode(!defense_mode)
 
 // Variant that starts in defense mode, perhaps for PoIs.
-/mob/living/simple_mob/mechanical/mecha/combat/durand/defensive/Initialize()
+/mob/living/simple_mob/mechanical/mecha/combat/durand/defensive/Initialize(mapload)
 	set_defense_mode(TRUE)
 	return ..()

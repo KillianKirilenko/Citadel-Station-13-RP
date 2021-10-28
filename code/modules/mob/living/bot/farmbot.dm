@@ -3,6 +3,13 @@
 #define FARMBOT_UPROOT 3
 #define FARMBOT_NUTRIMENT 4
 
+/datum/category_item/catalogue/technology/bot/farmbot
+	name = "Bot - Farmbot"
+	desc = "Farmbots are the fusion of mobile water tanks with sophisticated \
+	cultivation routines. Designed to ease the burden of maintaining Hydroponics \
+	gardens - often a vital face of life in space - these bots are always in demand."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /mob/living/bot/farmbot
 	name = "Farmbot"
 	desc = "The botanist's best friend."
@@ -11,6 +18,7 @@
 	health = 50
 	maxHealth = 50
 	req_one_access = list(access_robotics, access_hydroponics, access_xenobiology)	//TFF 11/7/19 - adds Xenobio access on behalf of Nalarac
+	catalogue_data = list(/datum/category_item/catalogue/technology/bot/farmbot)
 
 	var/action = "" // Used to update icon
 	var/waters_trays = 1
@@ -19,17 +27,14 @@
 	var/replaces_nutriment = 0
 	var/collects_produce = 0
 	var/removes_dead = 0
-	var/times_idle = 0 //VOREStation Add
 	var/obj/structure/reagent_dispensers/watertank/tank
 
-
-/mob/living/bot/farmbot/New(var/newloc, var/newTank)
-	..(newloc)
+/mob/living/bot/farmbot/Initialize(mapload, newTank)
+	. = ..(mapload)
 	if(!newTank)
 		newTank = new /obj/structure/reagent_dispensers/watertank(src)
 	tank = newTank
 	tank.forceMove(src)
-
 
 /mob/living/bot/farmbot/attack_hand(var/mob/user as mob)
 	. = ..()
@@ -52,7 +57,7 @@
 		dat += "Weed plants: <A href='?src=\ref[src];weed=1'>[uproots_weeds ? "Yes" : "No"]</A><BR>"
 		dat += "<br>Nutriment controls:<br>"
 		dat += "Replace fertilizer: <A href='?src=\ref[src];replacenutri=1'>[replaces_nutriment ? "Yes" : "No"]</A><BR>"
-		/* VOREStation Removal - No whole-job lag-bot automation.
+		/*VOREStation Removal - No whole-job lag-bot automation.
 		dat += "<br>Plant controls:<br>"
 		dat += "Collect produce: <A href='?src=\ref[src];collect=1'>[collects_produce ? "Yes" : "No"]</A><BR>"
 		dat += "Remove dead plants: <A href='?src=\ref[src];removedead=1'>[removes_dead ? "Yes" : "No"]</A><BR>"
@@ -123,20 +128,16 @@
 	if(emagged)
 		for(var/mob/living/carbon/human/H in view(7, src))
 			target = H
-			times_idle = 0 //VOREStation Add - Idle shutoff time
 			return
 	else
 		for(var/obj/machinery/portable_atmospherics/hydroponics/tray in view(7, src))
 			if(confirmTarget(tray))
 				target = tray
-				times_idle = 0 //VOREStation Add - Idle shutoff time
 				return
 		if(!target && refills_water && tank && tank.reagents.total_volume < tank.reagents.maximum_volume)
 			for(var/obj/structure/sink/source in view(7, src))
 				target = source
-				times_idle = 0 //VOREStation Add - Idle shutoff time
 				return
-	if(++times_idle == 150) turn_off() //VOREStation Add - Idle shutoff time
 /mob/living/bot/farmbot/calcTargetPath() // We need to land NEXT to the tray, because the tray itself is impassable
 	for(var/trayDir in list(NORTH, SOUTH, EAST, WEST))
 		target_path = AStar(get_turf(loc), get_step(get_turf(target), trayDir), /turf/proc/CardinalTurfsWithAccess, /turf/proc/Distance, 0, max_target_dist, id = botcard)
@@ -321,8 +322,8 @@
 	w_class = ITEMSIZE_NORMAL
 
 
-/obj/item/farmbot_arm_assembly/New(var/newloc, var/theTank)
-	..(newloc)
+/obj/item/farmbot_arm_assembly/Initialize(mapload, theTank)
+	. = ..(mapload)
 	if(!theTank) // If an admin spawned it, it won't have a watertank it, so lets make one for em!
 		tank = new /obj/structure/reagent_dispensers/watertank(src)
 	else

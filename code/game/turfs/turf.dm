@@ -2,6 +2,7 @@
 	icon = 'icons/turf/floors.dmi'
 	layer = TURF_LAYER
 	plane = TURF_PLANE
+	luminosity = 1
 	level = 1
 	var/holy = 0
 
@@ -18,6 +19,8 @@
 	var/temperature = T20C		// Initial turf temperature.
 	var/blocks_air = 0			// Does this turf contain air/let air through?
 
+	var/changing_turf = FALSE
+
 	// General properties.
 	var/icon_old = null
 	var/pathweight = 1			// How much does it cost to pathfind over this turf?
@@ -32,22 +35,71 @@
 	var/block_tele = FALSE			 // If true, most forms of teleporting to or from this turf tile will fail.
 	var/can_build_into_floor = FALSE // Used for things like RCDs (and maybe lattices/floor tiles in the future), to see if a floor should replace it.
 	var/list/dangerous_objects		 // List of 'dangerous' objs that the turf holds that can cause something bad to happen when stepped on, used for AI mobs.
+	var/noshield = 0				// For if you explicitly want a turf to not be affected by shield generators
 
 /turf/Initialize(mapload)
-	. = ..()
+	if(flags & INITIALIZED)
+		stack_trace("Warning: [src]([type]) initialized multiple times!")
+	flags |= INITIALIZED
+
+	// by default, vis_contents is inherited from the turf that was here before
+	vis_contents.Cut()
+
+	//atom color stuff
+	if(color)
+		add_atom_colour(color, FIXED_COLOUR_PRIORITY)
+
+/*
+	if (canSmoothWith)
+		canSmoothWith = typelist("canSmoothWith", canSmoothWith)
+*/
+
 	for(var/atom/movable/AM in src)
 		Entered(AM)
 
-	//Lighting related
-	luminosity = !(dynamic_lighting)
-	has_opaque_atom = (opacity)
+	var/area/A = loc
+	if(!IS_DYNAMIC_LIGHTING(src) && IS_DYNAMIC_LIGHTING(A))
+		add_overlay(/obj/effect/fullbright)
+
+	if (light_power && light_range)
+		update_light()
+
+	if (opacity)
+		has_opaque_atom = TRUE
 
 	//Pathfinding related
 	if(movement_cost && pathweight == 1)	// This updates pathweight automatically.
 		pathweight = movement_cost
 
-/turf/Destroy()
+	ComponentInitialize()
+
+	return INITIALIZE_HINT_NORMAL
+
+/turf/Destroy(force)
 	. = QDEL_HINT_IWILLGC
+	if(!changing_turf)
+		stack_trace("Incorrect turf deletion")
+	changing_turf = FALSE
+/*
+	var/turf/T = SSmapping.get_turf_above(src)
+	if(T)
+		T.multiz_turf_del(src, DOWN)
+	T = SSmapping.get_turf_below(src)
+	if(T)
+		T.multiz_turf_del(src, UP)
+*/
+	if(force)
+		..()
+		//this will completely wipe turf state
+		var/turf/B = new world.turf(src)
+		for(var/A in B.contents)
+			qdel(A)
+		return
+	// SSair.remove_from_active(src)
+	// visibilityChanged()
+	// QDEL_LIST(blueprint_data)
+	flags &= ~INITIALIZED
+	// requires_activation = FALSE
 	..()
 
 /turf/ex_act(severity)
@@ -65,7 +117,32 @@
 
 /turf/attack_hand(mob/user)
 	. = ..()
-	user.move_pulled_towards(src)
+	//QOL feature, clicking on turf can toggle doors, unless pulling something
+	if(!user.pulling)
+		var/obj/machinery/door/airlock/AL = locate(/obj/machinery/door/airlock) in src.contents
+		if(AL)
+			AL.attack_hand(user)
+			return TRUE
+		var/obj/machinery/door/firedoor/FD = locate(/obj/machinery/door/firedoor) in src.contents
+		if(FD)
+			FD.attack_hand(user)
+			return TRUE
+
+	if(!(user.canmove) || user.restrained() || !(user.pulling))
+		return 0
+	if(user.pulling.anchored || !isturf(user.pulling.loc))
+		return 0
+	if(user.pulling.loc != user.loc && get_dist(user, user.pulling) > 1)
+		return 0
+	if(ismob(user.pulling))
+		var/mob/M = user.pulling
+		var/atom/movable/t = M.pulling
+		M.stop_pulling()
+		step(user.pulling, get_dir(user.pulling.loc, src))
+		M.start_pulling(t)
+	else
+		step(user.pulling, get_dir(user.pulling.loc, src))
+	return 1
 
 /turf/attackby(obj/item/W as obj, mob/user as mob)
 	if(istype(W, /obj/item/storage))
@@ -259,8 +336,15 @@
 		return TRUE
 	return FALSE
 
-/**
-  * Returns if things have gravity on us
-  */
-/turf/has_gravity(turf/T)
-	return loc.has_gravity(src)
+// We're about to be the A-side in a turf translation
+/turf/proc/pre_translate_A(var/turf/B)
+	return
+// We're about to be the B-side in a turf translation
+/turf/proc/pre_translate_B(var/turf/A)
+	return
+// We were the the A-side in a turf translation
+/turf/proc/post_translate_A(var/turf/B)
+	return
+// We were the the B-side in a turf translation
+/turf/proc/post_translate_B(var/turf/A)
+	return

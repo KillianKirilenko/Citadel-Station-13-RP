@@ -164,7 +164,7 @@
 	else if(istype(target, /mob/living/carbon/))
 	//	for (var/mob/V in viewers(src))
 	//		V.show_message("The radiation beam dissipates harmlessly through [M]", 3)
-		M.show_message("<font color='blue'>The radiation beam dissipates harmlessly through your body.</font>")
+		M.show_message("<font color=#4F49AF>The radiation beam dissipates harmlessly through your body.</font>")
 	else
 		return 1
 
@@ -197,7 +197,7 @@
 		if((H.species.flags & IS_PLANT) && (M.nutrition < 500))
 			M.nutrition += 30
 	else if (istype(target, /mob/living/carbon/))
-		M.show_message("<font color='blue'>The radiation beam dissipates harmlessly through your body.</font>")
+		M.show_message("<font color=#4F49AF>The radiation beam dissipates harmlessly through your body.</font>")
 	else
 		return 1
 
@@ -287,7 +287,7 @@
 			var/armor_special = 0
 
 			if(target_armor >= 60)
-				var/turf/T = get_step(H, pick(alldirs - src.dir))
+				var/turf/T = get_step(H, pick(GLOB.alldirs - src.dir))
 				H.throw_at(T, 1, 1, src)
 				H.apply_damage(20, BURN, def_zone)
 				if(target_limb)
@@ -336,3 +336,38 @@
 		W.shatter()
 		return 0
 	..()
+
+/obj/item/projectile/bullet/honker
+	damage = 0
+	nodamage = TRUE
+	hitsound = 'sound/items/bikehorn.ogg'
+	icon = 'icons/obj/items.dmi'
+	icon_state = "banana"
+	range = 200
+
+/obj/item/projectile/bullet/honker/Initialize(mapload)
+	. = ..()
+	SpinAnimation()
+
+/obj/item/projectile/bullet/honker/lethal
+	damage = 20
+	nodamage = FALSE
+	damage_type = BRUTE
+
+/obj/item/projectile/bullet/honker/lethal/Initialize(mapload)
+	. = ..()
+	SpinAnimation()
+
+/obj/item/projectile/bullet/honker/lethal/light
+	damage = 10
+
+/obj/item/projectile/bullet/honker/lethal/heavy
+	damage = 40
+
+//Bio-Organic
+/obj/item/projectile/bullet/organic
+	damage = 10
+	damage_type = BRUTE
+	check_armour = "bullet"
+	hitsound = 'sound/effects/splat.ogg'
+	icon_state = "organic"

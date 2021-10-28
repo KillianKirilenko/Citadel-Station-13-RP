@@ -1,8 +1,8 @@
 #define SAVE_RESET -1
 
-var/list/preferences_datums = list()
+GLOBAL_LIST_EMPTY(preferences_datums)
 
-datum/preferences
+/datum/preferences
 	//doohickeys for savefiles
 	var/path
 	var/default_slot = 1				//Holder so it doesn't default to slot 1, rather the last one used
@@ -21,9 +21,13 @@ datum/preferences
 	var/loadcharcooldown
 
 	//game-preferences
+	var/tgui_fancy = TRUE
+	var/tgui_lock = TRUE
 	var/lastchangelog = ""				//Saved changlog filesize to detect if there was a change
 	var/ooccolor = "#010000"			//Whatever this is set to acts as 'reset' color and is thus unusable as an actual custom color
 	var/be_special = 0					//Special role selection
+	/// Event role prefs flag
+	var/be_event_role = NONE
 	var/UI_style = "Midnight"
 	var/UI_style_color = "#ffffff"
 	var/UI_style_alpha = 255
@@ -47,6 +51,7 @@ datum/preferences
 	var/r_grad = 0						//Gradient color
 	var/g_grad = 0						//Gradient color
 	var/b_grad = 0						//Gradient color
+	var/grad_wingstyle = "None"			//Gradient style
 	var/f_style = "Shaved"				//Face hair type
 	var/r_facial = 0					//Face hair color
 	var/g_facial = 0					//Face hair color
@@ -81,7 +86,14 @@ datum/preferences
 	var/antag_vis = "Hidden"			//How visible antag association is to others.
 
 		//Mob preview
-	var/icon/preview_icon = null
+	var/list/char_render_holders		//Should only be a key-value list of north/south/east/west = obj/screen.
+	var/static/list/preview_screen_locs = list(
+		"1" = "character_preview_map:2,7",
+		"2" = "character_preview_map:2,5",
+		"4"  = "character_preview_map:2,3",
+		"8"  = "character_preview_map:2,1",
+		"BG" = "character_preview_map:1,1 to 3,8"
+	)
 
 		//Jobs, uses bitflags
 	var/job_civilian_high = 0
@@ -96,6 +108,10 @@ datum/preferences
 	var/job_engsec_med = 0
 	var/job_engsec_low = 0
 
+	var/job_talon_high = 0
+	var/job_talon_med = 0
+	var/job_talon_low = 0
+
 	//Keeps track of preferrence for not getting any wanted jobs
 	var/alternate_option = 1
 
@@ -107,6 +123,7 @@ datum/preferences
 	// will probably not be able to do this for head and torso ;)
 	var/list/organ_data = list()
 	var/list/rlimb_data = list()
+	var/regen_limbs = 0 //set to 1 when altering limb states. fix for prosthetic > normal changes not working on preview.
 	var/list/player_alt_titles = new()		// the default name of a job like "Medical Doctor"
 
 	var/list/body_markings = list() // "name" = "#rgbcolor"
@@ -121,6 +138,7 @@ datum/preferences
 	var/gen_record = ""
 	var/exploit_record = ""
 	var/disabilities = 0
+	var/mirror = TRUE
 
 	var/economic_status = "Average"
 
@@ -145,7 +163,15 @@ datum/preferences
 	var/lastnews // Hash of last seen lobby news content.
 
 	var/show_in_directory = 1	//TFF 5/8/19 - show in Character Directory
+	var/directory_tag = "Unset" //Sorting tag to use in character directory
+	var/directory_erptag = "Unset"	//ditto, but for non-vore scenes
+	var/directory_ad = ""		//Advertisement stuff to show in character directory.
 	var/sensorpref = 5			//TFF 5/8/19 - set character's suit sensor level
+
+	// Should we automatically fit the viewport?
+	var/auto_fit_viewport = TRUE
+	// Should we be in the widescreen mode set by the config?
+	var/widescreenpref = FALSE	// Doesn't exist... Yet.
 
 /datum/preferences/New(client/C)
 	player_setup = new(src)
@@ -168,6 +194,10 @@ datum/preferences
 
 	key_bindings = deepCopyList(GLOB.hotkey_keybinding_list_by_key) // give them default keybinds and update their movement keys
 	C?.update_movement_keys(src)
+
+/datum/preferences/Destroy()
+	. = ..()
+	QDEL_LIST_ASSOC_VAL(char_render_holders)
 
 /datum/preferences/proc/ZeroSkills(var/forced = 0)
 	for(var/V in SKILLS) for(var/datum/skill/S in SKILLS[V])
@@ -222,12 +252,17 @@ datum/preferences
 			return "God"
 
 /datum/preferences/proc/ShowChoices(mob/user)
-	if(!user || !user.client)	return
+	if(!user || !user.client)
+		return
 
 	if(!get_mob_by_key(client_ckey))
 		to_chat(user, "<span class='danger'>No mob exists for the given client!</span>")
 		close_load_dialog(user)
 		return
+
+	if(!char_render_holders)
+		update_preview_icon()
+	show_character_previews()
 
 	var/dat = "<html><body><center>"
 
@@ -249,9 +284,50 @@ datum/preferences
 
 	dat += "</html></body>"
 	//user << browse(dat, "window=preferences;size=635x736")
-	var/datum/browser/popup = new(user, "Character Setup","Character Setup", 800, 800, src)
+	winshow(user, "preferences_window", TRUE)
+	var/datum/browser/popup = new(user, "preferences_browser", "Character Setup", 800, 800)
 	popup.set_content(dat)
-	popup.open()
+	popup.open(FALSE) // Skip registring onclose on the browser pane
+	onclose(user, "preferences_window", src) // We want to register on the window itself
+
+/datum/preferences/proc/update_character_previews(mutable_appearance/MA)
+	if(!client)
+		return
+
+	var/obj/screen/setup_preview/bg/BG= LAZYACCESS(char_render_holders, "BG")
+	if(!BG)
+		BG = new
+		BG.plane = TURF_PLANE
+		BG.icon = 'icons/effects/setup_backgrounds_vr.dmi'
+		BG.pref = src
+		LAZYSET(char_render_holders, "BG", BG)
+		client.screen |= BG
+	BG.icon_state = bgstate
+	BG.screen_loc = preview_screen_locs["BG"]
+
+	for(var/D in GLOB.cardinal)
+		var/obj/screen/setup_preview/O = LAZYACCESS(char_render_holders, "[D]")
+		if(!O)
+			O = new
+			O.pref = src
+			LAZYSET(char_render_holders, "[D]", O)
+			client.screen |= O
+		O.appearance = MA
+		O.dir = D
+		O.screen_loc = preview_screen_locs["[D]"]
+
+/datum/preferences/proc/show_character_previews()
+	if(!client || !char_render_holders)
+		return
+	for(var/render_holder in char_render_holders)
+		client.screen |= char_render_holders[render_holder]
+
+/datum/preferences/proc/clear_character_previews()
+	for(var/index in char_render_holders)
+		var/obj/screen/S = char_render_holders[index]
+		client?.screen -= S
+		qdel(S)
+	char_render_holders = null
 
 /datum/preferences/proc/process_link(mob/user, list/href_list)
 	if(!user)	return
@@ -301,6 +377,10 @@ datum/preferences
 		overwrite_character(text2num(href_list["overwrite"]))
 		sanitize_preferences()
 		close_load_dialog(usr)
+	else if(href_list["close"])
+		// User closed preferences window, cleanup anything we need to.
+		clear_character_previews()
+		return 1
 	else
 		return 0
 

@@ -155,9 +155,28 @@
 	// contained in a cage
 	var/in_stasis = 0
 
-/mob/living/simple_mob/Initialize()
+	//Randomization code base
+	var/mod_min = 70
+	var/mod_max = 130
+	var/randomized = FALSE
+
+//randomization code.
+/mob/living/simple_mob/proc/randomize()
+	if(randomized == TRUE)
+		var/mod = rand(mod_min,mod_max)/100
+		size_multiplier = mod
+		maxHealth = round(maxHealth*mod)
+		health = round(health*mod)
+		melee_damage_lower = round(melee_damage_lower*mod)
+		melee_damage_upper = round(melee_damage_upper*mod)
+		movement_cooldown = round(movement_cooldown*mod)
+		meat_amount = round(meat_amount*mod)
+		update_icons()
+
+/mob/living/simple_mob/Initialize(mapload)
 	verbs -= /mob/verb/observe
 	health = maxHealth
+	randomize()
 
 	for(var/L in has_langs)
 		languages |= GLOB.all_languages[L]
@@ -167,7 +186,6 @@
 	if(has_eye_glow)
 		add_eyes()
 	return ..()
-
 
 /mob/living/simple_mob/Destroy()
 	default_language = null
@@ -263,14 +281,14 @@
 	update_icon()
 
 
-/mob/living/simple_mob/say(var/message,var/datum/language/language)
-	var/verb = "says"
+/mob/living/simple_mob/say(var/message, var/datum/language/speaking = null, var/verb="says", var/alt_name="", var/whispering = 0)
+	verb = "says"
 	if(speak_emote.len)
 		verb = pick(speak_emote)
 
 	message = sanitize(message)
 
-	..(message, null, verb)
+	return ..()
 
 /mob/living/simple_mob/get_speech_ending(verb, var/ending)
 	return verb
@@ -290,7 +308,6 @@
 		else
 			user.visible_message("<span class='danger'>[user] butchers \the [src] messily!</span>")
 			gib()
-
 
 /mob/living/simple_mob/is_sentient()
 	return mob_class & MOB_CLASS_HUMANOID|MOB_CLASS_ANIMAL|MOB_CLASS_SLIME // Update this if needed.

@@ -60,13 +60,14 @@
 	var/recoil = 0		//screen shake
 	var/silenced = 0
 	var/muzzle_flash = 3
-	var/accuracy = 0   //Accuracy is measured in percents. +15 accuracy means that everything is effectively one tile closer for the purpose of miss chance, -15 means the opposite. launchers are not supported, at the moment.
+	var/accuracy = 65   //Accuracy is measured in percents. +15 accuracy means that everything is effectively one tile closer for the purpose of miss chance, -15 means the opposite. launchers are not supported, at the moment.
 	var/scoped_accuracy = null
 	var/list/burst_accuracy = list(0) //allows for different accuracies for each shot in a burst. Applied on top of accuracy
 	var/list/dispersion = list(0)
 	var/mode_name = null
 	var/projectile_type = /obj/item/projectile	//On ballistics, only used to check for the cham gun
 	var/holy = FALSE //For Divinely blessed guns
+	var/obj/item/ammo_casing/chambered = null
 
 	var/wielded_item_state
 	var/one_handed_penalty = 0 // Penalty applied if someone fires a two-handed gun with one hand.
@@ -124,8 +125,8 @@
 	update_icon()
 //VOREStation Add End
 
-/obj/item/gun/New()
-	..()
+/obj/item/gun/Initialize(mapload)
+	. = ..()
 	for(var/i in 1 to firemodes.len)
 		firemodes[i] = new /datum/firemode(src, firemodes[i])
 
@@ -656,7 +657,7 @@
 	mouthshoot = 1
 	M.visible_message("<font color='red'>[user] sticks their gun in their mouth, ready to pull the trigger...</font>")
 	if(!do_after(user, 40))
-		M.visible_message("<font color='blue'>[user] decided life was worth living</font>")
+		M.visible_message("<font color=#4F49AF>[user] decided life was worth living</font>")
 		mouthshoot = 0
 		return
 	var/obj/item/projectile/in_chamber = consume_next_projectile()
@@ -698,22 +699,22 @@
 			recoil = round(recoil*zoom_amount+1) //recoil is worse when looking through a scope
 
 //make sure accuracy and recoil are reset regardless of how the item is unzoomed.
-/obj/item/gun/zoom()
+/obj/item/gun/zoom(tileoffset = 14, viewsize = 9, mob/user = usr)
 	..()
 	if(!zoom)
 		accuracy = initial(accuracy)
 		recoil = initial(recoil)
 
 /obj/item/gun/examine(mob/user)
-	..(user)
+	. = ..()
 	if(!no_pin_required)
 		if(pin)
-			to_chat(user, "It has \a [pin] installed.")
+			. += "It has \a [pin] installed."
 		else
-			to_chat(user, "It doesn't have a firing pin installed, and won't fire.")
+			. += "It doesn't have a firing pin installed, and won't fire."
 	if(firemodes.len > 1)
 		var/datum/firemode/current_mode = firemodes[sel_mode]
-		to_chat(user, "The fire selector is set to [current_mode.name].")
+		. += "The fire selector is set to [current_mode.name]."
 
 /obj/item/gun/proc/switch_firemodes(mob/user)
 	if(firemodes.len <= 1)

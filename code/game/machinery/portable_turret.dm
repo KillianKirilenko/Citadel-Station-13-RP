@@ -262,7 +262,7 @@
 		if(istype(M.wear_suit, /obj/item/clothing/suit/bluetag) && check_weapons) // Checks if they are a blue player
 			return TURRET_PRIORITY_TARGET
 
-/obj/machinery/porta_turret/lasertag/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/porta_turret/lasertag/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	var/data[0]
 	data["access"] = !isLocked(user)
 	data["locked"] = locked
@@ -300,7 +300,7 @@
 
 		return 1
 
-/obj/machinery/porta_turret/Initialize()
+/obj/machinery/porta_turret/Initialize(mapload)
 	//Sets up a spark system
 	spark_system = new /datum/effect_system/spark_spread
 	spark_system.set_up(5, 0, src)
@@ -416,15 +416,15 @@
 	if(isLocked(user))
 		return
 
-	ui_interact(user)
+	nano_ui_interact(user)
 
 /obj/machinery/porta_turret/attack_hand(mob/user)
 	if(isLocked(user))
 		return
 
-	ui_interact(user)
+	nano_ui_interact(user)
 
-/obj/machinery/porta_turret/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/porta_turret/nano_ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	var/data[0]
 	data["access"] = !isLocked(user)
 	data["locked"] = locked
@@ -458,14 +458,14 @@
 /obj/machinery/porta_turret/CanUseTopic(var/mob/user)
 	if(HasController())
 		to_chat(user, "<span class='notice'>Turrets can only be controlled using the assigned turret controller.</span>")
-		return STATUS_CLOSE
+		return UI_CLOSE
 
 	if(isLocked(user))
-		return STATUS_CLOSE
+		return UI_CLOSE
 
 	if(!anchored)
 		to_chat(user, "<span class='notice'>\The [src] has to be secured first!</span>")
-		return STATUS_CLOSE
+		return UI_CLOSE
 
 	return ..()
 
@@ -685,7 +685,7 @@
 	spark_system.start()	//creates some sparks because they look cool
 	update_icon()
 
-/obj/machinery/porta_turret/process()
+/obj/machinery/porta_turret/process(delta_time)
 	//the main machinery process
 
 	if(stat & (NOPOWER|BROKEN))

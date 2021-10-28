@@ -27,6 +27,7 @@
 
 	maxHealth = 50
 	health = 50
+	randomized = TRUE
 	has_hands = TRUE
 	humanoid_hands = TRUE
 
@@ -149,7 +150,7 @@
 		I.appearance_flags = RESET_COLOR
 		add_overlay(I)
 
-/mob/living/simple_mob/animal/sif/sakimm/Initialize()
+/mob/living/simple_mob/animal/sif/sakimm/Initialize(mapload)
 	. = ..()
 
 	verbs += /mob/living/proc/ventcrawl
@@ -213,7 +214,7 @@
 		I.attack_hand(holder)
 		lose_target()
 	if(istype(A,/mob/living) && holder.Adjacent(A))	// Not the dumbest tool in the shed. If we're fighting, we're gonna dance around them.
-		holder.IMove(get_step(holder, pick(alldirs)))
+		holder.IMove(get_step(holder, pick(GLOB.alldirs)))
 		holder.face_atom(A)
 		request_help()	// And we're going to call friends, too.
 

@@ -11,7 +11,7 @@
 	starts_with = list(
 		/obj/item/storage/backpack/dufflebag/captain,
 		/obj/item/clothing/head/helmet,
-		/obj/item/clothing/suit/armor/vest/capcarapace,
+		/obj/item/clothing/suit/storage/vest/capcarapace,
 		/obj/item/cartridge/captain,
 		/obj/item/storage/lockbox/medal,
 		/obj/item/radio/headset/heads/captain,
@@ -61,6 +61,7 @@
 
 	starts_with = list(
 		/obj/item/clothing/under/rank/head_of_personnel,
+		/obj/item/clothing/under/rank/head_of_personnel/skirt_pleated,
 		/obj/item/clothing/under/dress/dress_hop,
 		/obj/item/clothing/under/dress/dress_hr,
 		/obj/item/clothing/under/lawyer/female,
@@ -76,6 +77,7 @@
 		/obj/item/clothing/shoes/white,
 		/obj/item/clothing/under/rank/head_of_personnel_whimsy,
 		/obj/item/clothing/head/caphat/hop,
+		/obj/item/clothing/suit/storage/hooded/wintercoat/captain/hop,
 		/obj/item/clothing/under/gimmick/rank/head_of_personnel/suit,
 		/obj/item/clothing/under/gimmick/rank/head_of_personnel/suit/skirt,
 		/obj/item/clothing/glasses/sunglasses)
@@ -124,13 +126,13 @@
 		/obj/item/clothing/accessory/holster/waist,
 		/obj/item/melee/telebaton,
 		/obj/item/clothing/head/beret/sec/corporate/hos,
-		/obj/item/clothing/suit/storage/hooded/wintercoat/security,
+		/obj/item/clothing/suit/storage/hooded/wintercoat/security/hos,
 		/obj/item/clothing/shoes/boots/winter/security,
 		/obj/item/gps/security/hos,
 		/obj/item/flashlight/maglight,
 		/obj/item/clothing/mask/gas/half)
 
-/obj/structure/closet/secure_closet/hos/Initialize()
+/obj/structure/closet/secure_closet/hos/Initialize(mapload)
 	if(prob(50))
 		starts_with += /obj/item/storage/backpack/security
 	else
@@ -155,12 +157,19 @@
 	starts_with = list(
 		/obj/item/clothing/head/helmet/HoS,
 		/obj/item/clothing/head/helmet/HoS/hat,
+		/obj/item/clothing/head/beret/sec/corporate/hos,
 		/obj/item/clothing/suit/storage/vest/hos,
 		/obj/item/clothing/under/rank/head_of_security/jensen,
 		/obj/item/clothing/under/rank/head_of_security/corp,
-		/obj/item/clothing/under/solgov/mildress/marine/command,
+		/obj/item/clothing/under/rank/head_of_security/skirt_pleated,
+		/obj/item/clothing/under/rank/head_of_security/skirt_pleated/alt,
+		/obj/item/clothing/under/rank/head_of_security/turtleneck,
+		/obj/item/clothing/under/oricon/mildress/marine/command/fake,
 		/obj/item/clothing/suit/storage/vest/hoscoat/jensen,
 		/obj/item/clothing/suit/storage/vest/hoscoat,
+		/obj/item/clothing/suit/storage/vest/hos_overcoat,
+		/obj/item/clothing/suit/storage/hooded/wintercoat/security,
+		/obj/item/clothing/shoes/boots/winter/security,
 		/obj/item/clothing/suit/dress/marine/command/hos,
 		/obj/item/clothing/head/helmet/dermal,
 		/obj/item/radio/headset/heads/hos,
@@ -168,8 +177,6 @@
 		/obj/item/clothing/glasses/sunglasses/sechud,
 		/obj/item/storage/belt/security,
 		/obj/item/clothing/accessory/holster/waist,
-		/obj/item/clothing/head/beret/sec/corporate/hos,
-		/obj/item/clothing/suit/storage/hooded/wintercoat/security,
 		/obj/item/clothing/mask/gas/half,
 		/obj/item/clothing/under/bodysuit/bodysuitseccom)
 
@@ -198,13 +205,8 @@
 		/obj/item/melee/baton/loaded,
 		/obj/item/gun/energy/gun/multiphase,
 		/obj/item/melee/telebaton,
-		/obj/item/clothing/head/beret/sec/corporate/hos,
-		/obj/item/clothing/suit/storage/hooded/wintercoat/security,
-		/obj/item/clothing/shoes/boots/winter/security,
 		/obj/item/gps/security/hos,
-		/obj/item/flashlight/maglight,
-		/obj/item/clothing/under/rank/head_of_security/turtleneck)
-
+		/obj/item/flashlight/maglight)
 
 /obj/structure/closet/secure_closet/warden
 	name = "warden's locker"
@@ -220,6 +222,7 @@
 		/obj/item/clothing/suit/storage/vest/warden,
 		/obj/item/clothing/under/rank/warden,
 		/obj/item/clothing/under/rank/warden/corp,
+		/obj/item/clothing/under/rank/warden/skirt_pleated,
 		/obj/item/clothing/suit/storage/vest/wardencoat,
 		/obj/item/clothing/suit/storage/vest/wardencoat/alt,
 		/obj/item/clothing/head/helmet/dermal,
@@ -245,9 +248,10 @@
 		/obj/item/gps/security,
 		/obj/item/flashlight/maglight,
 		/obj/item/megaphone,
-		/obj/item/clothing/mask/gas/half)
+		/obj/item/clothing/mask/gas/half,
+		/obj/item/gun/projectile/shotgun/pump/combat/warden)
 
-/obj/structure/closet/secure_closet/warden/Initialize()
+/obj/structure/closet/secure_closet/warden/Initialize(mapload)
 	if(prob(50))
 		starts_with += /obj/item/storage/backpack/security
 	else
@@ -280,7 +284,7 @@
 		/obj/item/clothing/glasses/sunglasses/sechud,
 		/obj/item/barrier_tape_roll/police,
 		/obj/item/hailer,
-		/obj/item/flashlight/flare,
+		/obj/item/flashlight/glowstick,
 		/obj/item/clothing/accessory/storage/black_vest,
 		/obj/item/clothing/head/soft/sec/corp,
 		/obj/item/clothing/under/rank/security/corp,
@@ -293,7 +297,7 @@
 		/obj/item/clothing/shoes/boots/winter/security,
 		/obj/item/flashlight/maglight)
 
-/obj/structure/closet/secure_closet/security/Initialize()
+/obj/structure/closet/secure_closet/security/Initialize(mapload)
 	if(prob(50))
 		starts_with += /obj/item/storage/backpack/security
 	else
@@ -304,22 +308,22 @@
 		starts_with += /obj/item/contraband/poster/nanotrasen
 	return ..()
 
-/obj/structure/closet/secure_closet/security/cargo/Initialize()
+/obj/structure/closet/secure_closet/security/cargo/Initialize(mapload)
 	starts_with += /obj/item/clothing/accessory/armband/cargo
 	starts_with += /obj/item/encryptionkey/headset_cargo
 	return ..()
 
-/obj/structure/closet/secure_closet/security/engine/Initialize()
+/obj/structure/closet/secure_closet/security/engine/Initialize(mapload)
 	starts_with += /obj/item/clothing/accessory/armband/engine
 	starts_with += /obj/item/encryptionkey/headset_eng
 	return ..()
 
-/obj/structure/closet/secure_closet/security/science/Initialize()
+/obj/structure/closet/secure_closet/security/science/Initialize(mapload)
 	starts_with += /obj/item/clothing/accessory/armband/science
 	starts_with += /obj/item/encryptionkey/headset_sci
 	return ..()
 
-/obj/structure/closet/secure_closet/security/med/Initialize()
+/obj/structure/closet/secure_closet/security/med/Initialize(mapload)
 	starts_with += /obj/item/clothing/accessory/armband/medblue
 	starts_with += /obj/item/encryptionkey/headset_med
 	return ..()
@@ -347,9 +351,11 @@
 		/obj/item/storage/box/evidence,
 		/obj/item/radio/headset/headset_sec,
 		/obj/item/radio/headset/headset_sec/alt,
+		/obj/item/clothing/suit/storage/vest/,
 		/obj/item/clothing/suit/storage/vest/detective,
 		/obj/item/barrier_tape_roll/police,
 		/obj/item/clothing/accessory/holster/armpit,
+		/obj/item/clothing/accessory/holster/waist,
 		/obj/item/flashlight/maglight,
 		/obj/item/reagent_containers/food/drinks/flask/detflask,
 		/obj/item/storage/briefcase/crimekit,
@@ -480,7 +486,7 @@ GLOBAL_LIST_BOILERPLATE(all_brig_closets, /obj/structure/closet/secure_closet/br
 		/obj/item/clothing/shoes/boots/jackboots,
 		/obj/item/clothing/shoes/boots/jackboots/toeless)
 
-/obj/structure/closet/secure_closet/nanotrasen_security/Initialize()
+/obj/structure/closet/secure_closet/nanotrasen_security/Initialize(mapload)
 	if(prob(25))
 		starts_with += /obj/item/storage/backpack/security
 	else
@@ -534,7 +540,7 @@ GLOBAL_LIST_BOILERPLATE(all_brig_closets, /obj/structure/closet/secure_closet/br
 		/obj/item/clothing/shoes/boots/jackboots/toeless,
 		/obj/item/clothing/under/nanotrasen/security/commander)
 
-/obj/structure/closet/secure_closet/nanotrasen_commander/Initialize()
+/obj/structure/closet/secure_closet/nanotrasen_commander/Initialize(mapload)
 	if(prob(25))
 		starts_with += /obj/item/storage/backpack/security
 	else
@@ -580,7 +586,7 @@ GLOBAL_LIST_BOILERPLATE(all_brig_closets, /obj/structure/closet/secure_closet/br
 		/obj/item/clothing/shoes/boots/jackboots,
 		/obj/item/clothing/shoes/boots/jackboots/toeless)
 
-/obj/structure/closet/secure_closet/nanotrasen_warden/Initialize()
+/obj/structure/closet/secure_closet/nanotrasen_warden/Initialize(mapload)
 	if(prob(25))
 		new /obj/item/storage/backpack/security(src)
 	else

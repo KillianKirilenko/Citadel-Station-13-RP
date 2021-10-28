@@ -1,3 +1,11 @@
+/datum/category_item/catalogue/fauna/brain/assisted
+	name = "Heuristics - Assisted"
+	desc = "The Man Machine Interface, or MMI, is comparatively ancient \
+	technology. Originally designed to allow full interfacing between organic \
+	processors and ungoverned robotics, MMIs have been the center of vast sapient \
+	rights campaigns and ethical debates."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:32
 
 /obj/item/mmi
@@ -8,6 +16,7 @@
 	w_class = ITEMSIZE_NORMAL
 	can_speak = 1
 	origin_tech = list(TECH_BIO = 3)
+	catalogue_data = list(/datum/category_item/catalogue/fauna/brain/assisted)
 
 	req_access = list(access_robotics)
 
@@ -19,7 +28,8 @@
 	var/obj/mecha = null//This does not appear to be used outside of reference in mecha.dm.
 	var/obj/item/radio/headset/mmi_radio/radio = null//Let's give it a radio.
 
-/obj/item/mmi/New()
+/obj/item/mmi/Initialize(mapload)
+	. = ..()
 	radio = new(src)//Spawns a radio inside the MMI.
 
 /obj/item/mmi/verb/toggle_radio()
@@ -178,7 +188,8 @@
 	mecha = null//This does not appear to be used outside of reference in mecha.dm.
 	var/ghost_query_type = null
 
-/obj/item/mmi/digital/New()
+/obj/item/mmi/digital/Initialize(mapload)
+	. = ..()
 	src.brainmob = new(src)
 //	src.brainmob.add_language("Robot Talk")//No binary without a binary communication device
 	src.brainmob.add_language(LANGUAGE_GALCOM)
@@ -194,10 +205,9 @@
 	return	//Doesn't do anything right now because none of the things that can be done to a regular MMI make any sense for these
 
 /obj/item/mmi/digital/examine(mob/user)
-	if(!..(user))
-		return
+	. = ..()
 
-	var/msg = "<span class='info'>*---------*</span>\nThis is \icon[src] \a <EM>[src]</EM>!\n[desc]\n"
+	var/msg = "<span class='info'>*---------*</span>\nThis is [icon2html(thing = src, target = user)] \a <EM>[src]</EM>!\n[desc]\n"
 	msg += "<span class='warning'>"
 
 	if(src.brainmob && src.brainmob.key)
@@ -209,7 +219,7 @@
 	else
 		msg += "<span class='deadsay'>It appears to be completely inactive.</span>\n"
 	msg += "</span><span class='info'>*---------*</span>"
-	user << msg
+	. += msg
 	return
 
 /obj/item/mmi/digital/emp_act(severity)
@@ -238,7 +248,7 @@
 /obj/item/mmi/digital/attack_self(mob/user as mob)
 	if(brainmob && !brainmob.key && searching == 0)
 		//Start the process of searching for a new user.
-		to_chat(user, "<font color='blue'>You carefully locate the manual activation switch and start the [src]'s boot process.</font>")
+		to_chat(user, "<font color=#4F49AF>You carefully locate the manual activation switch and start the [src]'s boot process.</font>")
 		request_player()
 
 /obj/item/mmi/digital/proc/request_player()
@@ -262,7 +272,7 @@
 
 	var/turf/T = get_turf_or_move(src.loc)
 	for (var/mob/M in viewers(T))
-		M.show_message("<font color='blue'>\The [src] buzzes quietly, and the golden lights fade away. Perhaps you could try again?</font>")
+		M.show_message("<font color=#4F49AF>\The [src] buzzes quietly, and the golden lights fade away. Perhaps you could try again?</font>")
 
 /obj/item/mmi/digital/proc/transfer_personality(var/mob/candidate)
 	announce_ghost_joinleave(candidate, 0, "They are occupying a synthetic brain now.")
@@ -275,12 +285,12 @@
 	to_chat(src.brainmob, "<b>You are [src.name], brought into existence on [station_name()].</b>")
 	to_chat(src.brainmob, "<b>As a synthetic intelligence, you are designed with organic values in mind.</b>")
 	to_chat(src.brainmob, "<b>However, unless placed in a lawed chassis, you are not obligated to obey any individual crew member.</b>") //it's not like they can hurt anyone
-//	src.brainmob << "<b>Use say #b to speak to other artificial intelligences.</b>"
+//	to_chat(src.brainmob, "<b>Use say #b to speak to other artificial intelligences.</b>")
 	src.brainmob.mind.assigned_role = "Synthetic Brain"
 
 	var/turf/T = get_turf_or_move(src.loc)
 	for (var/mob/M in viewers(T))
-		M.show_message("<font color='blue'>\The [src] chimes quietly.</font>")
+		M.show_message("<font color=#4F49AF>\The [src] chimes quietly.</font>")
 
 /obj/item/mmi/digital/robot
 	name = "robotic intelligence circuit"
@@ -292,8 +302,8 @@
 	origin_tech = list(TECH_ENGINEERING = 4, TECH_MATERIAL = 3, TECH_DATA = 4)
 	ghost_query_type = /datum/ghost_query/drone_brain
 
-/obj/item/mmi/digital/robot/New()
-	..()
+/obj/item/mmi/digital/robot/Initialize(mapload)
+	. = ..()
 	src.brainmob.name = "[pick(list("ADA","DOS","GNU","MAC","WIN","NJS","SKS","DRD","IOS","CRM","IBM","TEX","LVM","BSD",))]-[rand(1000, 9999)]"
 	src.brainmob.real_name = src.brainmob.name
 
@@ -304,6 +314,15 @@
 	to_chat(brainmob, "<span class='notify'>You feel slightly disoriented. That's normal when you're little more than a complex circuit.</span>")
 	return
 
+/datum/category_item/catalogue/fauna/brain/posibrain
+	name = "Heuristics - Positronic"
+	desc = "Positronic brains, unlike their organic counterparts, are the \
+	products of intelligent design, rather than evolution. Crafted by various \
+	sapient species using a variety of design philosophies and languages, all \
+	positronic brains are considered fully Sapient creatures, just like their \
+	organic counterparts."
+	value = CATALOGUER_REWARD_TRIVIAL
+
 /obj/item/mmi/digital/posibrain
 	name = "positronic brain"
 	desc = "A cube of shining metal, four inches to a side and covered in shallow grooves."
@@ -313,6 +332,7 @@
 	w_class = ITEMSIZE_NORMAL
 	origin_tech = list(TECH_ENGINEERING = 4, TECH_MATERIAL = 4, TECH_BLUESPACE = 2, TECH_DATA = 4)
 	ghost_query_type = /datum/ghost_query/posi_brain
+	catalogue_data = list(/datum/category_item/catalogue/fauna/brain/posibrain)
 
 /obj/item/mmi/digital/posibrain/request_player()
 	icon_state = "posibrain-searching"
@@ -335,8 +355,8 @@
 	..()
 	icon_state = "posibrain"
 
-/obj/item/mmi/digital/posibrain/New()
-	..()
+/obj/item/mmi/digital/posibrain/Initialize(mapload)
+	. = ..()
 	src.brainmob.name = "[pick(list("PBU","HIU","SINA","ARMA","OSI"))]-[rand(100, 999)]"
 	src.brainmob.real_name = src.brainmob.name
 

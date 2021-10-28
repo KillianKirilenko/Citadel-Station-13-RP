@@ -1,6 +1,10 @@
 /obj
 	layer = OBJ_LAYER
 	plane = OBJ_PLANE
+
+	var/obj_flags = CAN_BE_HIT
+	var/set_obj_flags // ONLY FOR MAPPING: Sets flags from a string list, handled in Initialize. Usage: set_obj_flags = "EMAGGED;!CAN_BE_HIT" to set EMAGGED and clear CAN_BE_HIT.
+
 	//Used to store information about the contents of the object.
 	var/list/matter
 	var/w_class // Size of the object.
@@ -24,7 +28,16 @@
 /obj/Initialize(mapload)
 	if(register_as_dangerous_object)
 		register_dangerous_to_step()
-	return ..()
+	. = ..()
+	if (set_obj_flags)
+		var/flagslist = splittext(set_obj_flags,";")
+		var/list/string_to_objflag = GLOB.bitfields["obj_flags"]
+		for (var/flag in flagslist)
+			if(flag[1] == "!")
+				flag = copytext(flag, length(flag[1]) + 1) // Get all but the initial !
+				obj_flags &= ~string_to_objflag[flag]
+			else
+				obj_flags |= string_to_objflag[flag]
 
 /obj/Destroy()
 	STOP_PROCESSING(SSobj, src)
@@ -48,7 +61,7 @@
 
 	// In the far future no checks are made in an overriding Topic() beyond if(..()) return
 	// Instead any such checks are made in CanUseTopic()
-	if(CanUseTopic(usr, state, href_list) == STATUS_INTERACTIVE)
+	if(CanUseTopic(usr, state, href_list) == UI_INTERACTIVE)
 		CouldUseTopic(usr)
 		return 0
 
@@ -58,8 +71,8 @@
 /obj/CanUseTopic(var/mob/user, var/datum/topic_state/state = default_state)
 	if(user.CanUseObjTopic(src))
 		return ..()
-	to_chat(user, "<span class='danger'>\icon[src]Access Denied!</span>")
-	return STATUS_CLOSE
+	to_chat(user, "<span class='danger'>[icon2html(thing = src, target = user)] Access Denied!</span>")
+	return UI_CLOSE
 
 /mob/living/silicon/CanUseObjTopic(var/obj/O)
 	var/id = src.GetIdCard()
@@ -135,11 +148,8 @@
 			in_use = 0
 
 /obj/attack_ghost(mob/user)
-	ui_interact(user)
+	nano_ui_interact(user)
 	..()
-
-/obj/proc/interact(mob/user)
-	return
 
 /mob/proc/unset_machine()
 	src.machine = null
@@ -182,9 +192,6 @@
 /obj/proc/show_message(msg, type, alt, alt_type)//Message, type of message (1 or 2), alternative message, alt message type (1 or 2)
 	return
 
-/obj/proc/get_cell()
-	return
-
 // Used to mark a turf as containing objects that are dangerous to step onto.
 /obj/proc/register_dangerous_to_step()
 	var/turf/T = get_turf(src)
@@ -199,3 +206,18 @@
 // Test for if stepping on a tile containing this obj is safe to do, used for things like landmines and cliffs.
 /obj/proc/is_safe_to_step(mob/living/L)
 	return TRUE
+
+/obj/examine(mob/user)
+	. = ..()
+	if(matter)
+		if(!matter.len)
+			return
+		var/materials_list
+		var/i = 1
+		while(i<matter.len)
+			materials_list += lowertext(matter[i])
+			materials_list += ", "
+			i++
+		materials_list += matter[i]
+		. += "<u>It is made out of [materials_list]</u>."
+	return

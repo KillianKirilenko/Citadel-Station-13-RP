@@ -34,8 +34,10 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	origin_tech = list(TECH_MATERIAL = 1)
 	slot_flags = SLOT_EARS
 	attack_verb = list("burnt", "singed")
+	drop_sound = 'sound/items/drop/food.ogg'
+	pickup_sound = 'sound/items/pickup/food.ogg'
 
-/obj/item/flame/match/process()
+/obj/item/flame/match/process(delta_time)
 	if(isliving(loc))
 		var/mob/living/M = loc
 		M.IgniteMob()
@@ -91,7 +93,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	var/brand
 	blood_sprite_state = null //Can't bloody these
 
-/obj/item/clothing/mask/smokable/Initialize()
+/obj/item/clothing/mask/smokable/Initialize(mapload)
 	. = ..()
 	flags |= NOREACT // so it doesn't react until you light it
 	create_reagents(chem_volume) // making the cigarrete a chemical holder with a maximum volume of 15
@@ -110,7 +112,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 		else // else just remove some of the reagents
 			reagents.remove_any(REM)
 
-/obj/item/clothing/mask/smokable/process()
+/obj/item/clothing/mask/smokable/process(delta_time)
 	var/turf/location = get_turf(src)
 	smoke(1)
 	if(smoketime < 1)
@@ -138,21 +140,21 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	..()
 
 /obj/item/clothing/mask/smokable/examine(mob/user)
-	..()
+	. = ..()
 	if(is_pipe)
 		return
 	var/smoke_percent = round((smoketime / max_smoketime) * 100)
 	switch(smoke_percent)
 		if(90 to INFINITY)
-			to_chat(user, "[src] is still fresh.")
+			. += "[src] is still fresh."
 		if(60 to 90)
-			to_chat(user, "[src] has a good amount of burn time remaining.")
+			. += "[src] has a good amount of burn time remaining."
 		if(30 to 60)
-			to_chat(user, "[src] is about half finished.")
+			. += "[src] is about half finished."
 		if(10 to 30)
-			to_chat(user, "[src] is starting to burn low.")
+			. += "[src] is starting to burn low."
 		else
-			to_chat(user, "[src] is nearly burnt out!")
+			. += "[src] is nearly burnt out!"
 
 
 /obj/item/clothing/mask/smokable/proc/light(var/flavor_text = "[usr] lights the [name].")
@@ -280,7 +282,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	weldermes = "<span class='notice'>USER casually lights the NAME with FLAME.</span>"
 	ignitermes = "<span class='notice'>USER fiddles with FLAME, and manages to light their NAME.</span>"
 
-/obj/item/clothing/mask/smokable/cigarette/Initialize()
+/obj/item/clothing/mask/smokable/cigarette/Initialize(mapload)
 	. = ..()
 	if(nicotine_amt)
 		reagents.add_reagent("nicotine", nicotine_amt)
@@ -354,6 +356,27 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	chem_volume = 30
 	nicotine_amt = 10
 
+/obj/item/clothing/mask/smokable/cigarette/cigar/taj
+	name = "S'rendarr's Hand"
+	desc = "A Tajaran smokable herb similar to tobacco, produced at one of the countless plantations on Adhomai. It is known to have medicinal properties."
+	icon_state = "cigar3"
+
+/obj/item/clothing/mask/smokable/cigarette/cigar/taj/Initialize(mapload)
+	. = ..()
+	if(nicotine_amt)
+		reagents.add_reagent("bicaridine", nicotine_amt)
+
+/obj/item/clothing/mask/smokable/cigarette/cigar/taj/premium
+	name = "S'rendarr's Own"
+	desc = "A premium Tajaran cigar, licensed for export by Confederate Commonwealth of Adhomai representing the best product of all Tajaran nations."
+	icon_state = "cigar2"
+	nicotine_amt = 7
+
+/obj/item/clothing/mask/smokable/cigarette/cigar/taj/premium/Initialize(mapload)
+	. = ..()
+	if(nicotine_amt)
+		reagents.add_reagent("bicaridine", nicotine_amt)
+
 /obj/item/cigbutt
 	name = "cigarette butt"
 	desc = "A manky old cigarette butt."
@@ -363,7 +386,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	slot_flags = SLOT_EARS
 	throwforce = 1
 
-/obj/item/cigbutt/Initialize()
+/obj/item/cigbutt/Initialize(mapload)
 	. = ..()
 	pixel_x = rand(-10,10)
 	pixel_y = rand(-10,10)
@@ -398,7 +421,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	ignitermes = "<span class='notice'>USER fiddles with FLAME, and manages to light their NAME with the power of science.</span>"
 	is_pipe = 1
 
-/obj/item/clothing/mask/smokable/pipe/Initialize()
+/obj/item/clothing/mask/smokable/pipe/Initialize(mapload)
 	. = ..()
 	name = "empty [initial(name)]"
 
@@ -577,7 +600,7 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	else
 		..()
 
-/obj/item/flame/lighter/process()
+/obj/item/flame/lighter/process(delta_time)
 	var/turf/location = get_turf(src)
 	if(location)
 		location.hotspot_expose(700, 5)
@@ -649,4 +672,9 @@ CIGARETTE PACKETS ARE IN FANCY.DM
 	name = "\improper bullet lighter"
 	desc = "A lighter fashioned out of an old bullet casing."
 	icon_state = "bulletlighter"
+
+/obj/item/flame/lighter/zippo/taj
+	name = "\improper Adhomai lighter"
+	desc = "A brass mechanical lighter made on Adhomai. Its robust design made it a staple tool for Tajara on all sides of the civil war."
+	icon_state = "tajzippo"
 

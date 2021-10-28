@@ -6,9 +6,11 @@
 		////////////////
 		//ADMIN THINGS//
 		////////////////
+	///Contains admin info. Null if client is not an admin.
 	var/datum/admins/holder = null
 	var/datum/admins/deadmin_holder = null
 	var/buildmode		= 0
+	var/AI_Interact		= 0
 
 	var/last_message	= "" //Contains the last message sent by this client - used to protect against copy-paste spamming.
 	var/last_message_count = 0 //contins a number of how many times a message identical to last_message was sent.
@@ -35,11 +37,12 @@
 		//SECURITY//
 		////////////
 	// comment out the line below when debugging locally to enable the options & messages menu
-	//control_freak = CONTROL_FREAK_ALL
+	//control_freak = 1
 
 	var/received_irc_pm = -99999
 	var/irc_admin			//IRC admin that spoke with them last.
 	var/mute_irc = 0
+	var/ip_reputation = 0 //Do we think they're using a proxy/vpn? Only if IP Reputation checking is enabled in config.
 
 
 		////////////////////////////////////
@@ -50,7 +53,7 @@
 	var/related_accounts_cid = "(Requires database)"	//So admins know why it isn't working - Used to determine what other accounts previously logged in from this computer id
 	var/account_join_date = "(Requires database)"
 	var/account_age = "(Requires database)"
-	var/list/department_hours	// VOREStation Edit - Track hours of leave accured for each department.
+	var/list/department_hours = list()	// VOREStation Edit - Track hours of leave accured for each department.
 
 	preload_rsc = PRELOAD_RSC
 
@@ -58,9 +61,6 @@
 
 	var/lastping = 0
 	var/avgping = 0
-	var/connection_time //world.time they connected
-	var/connection_realtime //world.realtime they connected
-	var/connection_timeofday //world.timeofday they connected
 
 	var/list/topiclimiter
 	var/list/clicklimiter
@@ -74,3 +74,10 @@
 	/// Last asset send job id.
 	var/last_asset_job = 0
 	var/last_completed_asset_job = 0
+
+ 	///world.time they connected
+	var/connection_time
+ 	///world.realtime they connected
+	var/connection_realtime
+ 	///world.timeofday they connected
+	var/connection_timeofday

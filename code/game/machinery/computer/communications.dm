@@ -38,12 +38,12 @@
 	var/datum/lore/atc_controller/ATC
 	var/datum/announcement/priority/crew_announcement = new
 
-/obj/machinery/computer/communications/New()
-	..()
+/obj/machinery/computer/communications/Initialize(mapload)
+	. = ..()
 	ATC = GLOB.lore_atc
 	crew_announcement.newscast = 1
 
-/obj/machinery/computer/communications/process()
+/obj/machinery/computer/communications/process(delta_time)
 	if(..())
 		if(state != STATE_STATUSDISPLAY)
 			src.updateDialog()
@@ -84,7 +84,7 @@
 				var/old_level = security_level
 				if(!tmp_alertlevel) tmp_alertlevel = SEC_LEVEL_GREEN
 				if(tmp_alertlevel < SEC_LEVEL_GREEN) tmp_alertlevel = SEC_LEVEL_GREEN
-				if(tmp_alertlevel > SEC_LEVEL_BLUE) tmp_alertlevel = SEC_LEVEL_BLUE //Cannot engage delta with this
+				if(tmp_alertlevel > SEC_LEVEL_RED) tmp_alertlevel = SEC_LEVEL_BLUE //Cannot engage delta with this
 				set_security_level(tmp_alertlevel)
 				if(security_level != old_level)
 					//Only notify the admins if an actual change happened
@@ -93,14 +93,14 @@
 					switch(security_level)
 						if(SEC_LEVEL_GREEN)
 							feedback_inc("alert_comms_green",1)
+						if(SEC_LEVEL_BLUE)
+							feedback_inc("alert_comms_blue",1)
 						if(SEC_LEVEL_YELLOW)
 							feedback_inc("alert_comms_yellow",1)
 						if(SEC_LEVEL_VIOLET)
 							feedback_inc("alert_comms_violet",1)
 						if(SEC_LEVEL_ORANGE)
 							feedback_inc("alert_comms_orange",1)
-						if(SEC_LEVEL_BLUE)
-							feedback_inc("alert_comms_blue",1)
 				tmp_alertlevel = 0
 				state = STATE_DEFAULT
 
@@ -192,7 +192,7 @@
 				if(!input || !(usr in view(1,src)))
 					return
 				CentCom_announce(input, usr)
-				to_chat(usr, "<font color='blue'>Message transmitted.</font>")
+				to_chat(usr, "<font color=#4F49AF>Message transmitted.</font>")
 				log_game("[key_name(usr)] has made an IA [GLOB.using_map.boss_short] announcement: [input]")
 				centcomm_message_cooldown = 1
 				spawn(300)//10 minute cooldown
@@ -209,7 +209,7 @@
 				if(!input || !(usr in view(1,src)))
 					return
 				Syndicate_announce(input, usr)
-				to_chat(usr, "<font color='blue'>Message transmitted.</font>")
+				to_chat(usr, "<font color=#4F49AF>Message transmitted.</font>")
 				log_game("[key_name(usr)] has made an illegal announcement: [input]")
 				centcomm_message_cooldown = 1
 				spawn(300)//10 minute cooldown
@@ -362,12 +362,12 @@
 		if(STATE_ALERT_LEVEL)
 			dat += "Current alert level: [get_security_level()]<BR>"
 			if(security_level == SEC_LEVEL_DELTA)
-				dat += "<font color='red'><b>The self-destruct mechanism is active. Find a way to deactivate the mechanism to lower the alert level or evacuate.</b></font>"
+				dat += "<font color='red'><b>The ship is in immediate danger of destruction. Find a way to neutralize the threat to lower the alert level or evacuate.</b></font>"
 			else
-				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_BLUE]'>Blue</A><BR>"
 				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_ORANGE]'>Orange</A><BR>"
 				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_VIOLET]'>Violet</A><BR>"
 				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_YELLOW]'>Yellow</A><BR>"
+				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_BLUE]'>Blue</A><BR>"
 				dat += "<A HREF='?src=\ref[src];operation=securitylevel;newalertlevel=[SEC_LEVEL_GREEN]'>Green</A>"
 		if(STATE_CONFIRM_LEVEL)
 			dat += "Current alert level: [get_security_level()]<BR>"

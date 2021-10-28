@@ -19,6 +19,9 @@
 	if(istype(A, /turf))
 		inflate(user,A)
 
+/obj/item/inflatable/CtrlClick(mob/user)
+	inflate(user,src.loc)
+
 /obj/structure/inflatable
 	name = "inflatable wall"
 	desc = "An inflated membrane. Do not puncture."
@@ -32,9 +35,8 @@
 
 	var/health = 50.0
 
-
-/obj/structure/inflatable/New(location)
-	..()
+/obj/structure/inflatable/Initialize(mapload)
+	. = ..()
 	update_nearby_tiles(need_rebuild=1)
 
 /obj/structure/inflatable/Destroy()
@@ -102,7 +104,7 @@
 
 /obj/structure/inflatable/proc/deflate()
 	playsound(loc, 'sound/machines/hiss.ogg', 75, 1)
-	//user << "<span class='notice'>You slowly deflate the inflatable wall.</span>"
+	//to_chat(user, "<span class='notice'>You slowly deflate the inflatable wall.</span>")
 	visible_message("[src] slowly deflates.")
 	spawn(50)
 		var/obj/item/inflatable/R = new /obj/item/inflatable(loc)

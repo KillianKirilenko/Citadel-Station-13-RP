@@ -25,14 +25,15 @@
 	desc = "A banner with NanoTrasen's logo on it."
 	catalogue_data = list(/datum/category_item/catalogue/information/organization/nanotrasen)
 
-/obj/item/banner/solgov
-	name = "\improper SolGov banner"
+/obj/item/banner/oricon
+	name = "\improper the orion confederation banner"
 	icon_state = "banner-solgov"
-	desc = "A banner with the symbol of the Solar Confederate Government."
-	catalogue_data = list(/datum/category_item/catalogue/information/organization/solgov)
+	desc = "A banner with the symbol of The Orion Confederation Government."
+	catalogue_data = list(/datum/category_item/catalogue/information/organization/theorionconfederation)
 
 /obj/item/banner/virgov
 	name = "\improper VirGov banner"
 	icon_state = "banner-virgov"
 	desc = "A banner with the symbol of the local government, the Vir Governmental Authority, also known as VirGov."
 	//catalogue_data = list(/datum/category_item/catalogue/information/organization/virgov)
+	//This one can just be removed once we're off Virgo.

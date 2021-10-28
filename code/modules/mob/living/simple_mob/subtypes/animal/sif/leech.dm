@@ -36,6 +36,7 @@
 
 	maxHealth = 100
 	health = 100
+	randomized = TRUE
 
 	universal_understand = 1
 
@@ -114,8 +115,8 @@
 	emote_see = list("vibrates","looks around", "stares", "extends a proboscis")
 	emote_hear = list("chitters", "clicks", "gurgles")
 
-/mob/living/simple_mob/animal/sif/leech/Initialize()
-	..()
+/mob/living/simple_mob/animal/sif/leech/Initialize(mapload)
+	. = ..()
 
 	verbs += /mob/living/proc/ventcrawl
 	verbs += /mob/living/proc/hide
@@ -192,7 +193,7 @@
 				chemicals -= 30
 
 			if(host.getToxLoss() >= 30 && chemicals > 50)
-				var/randomchem = pickweight("tramadol" = 7, "anti_toxin" = 15, "frostoil" = 3)
+				var/randomchem = pickweight(list("tramadol" = 7, "anti_toxin" = 15, "frostoil" = 3))
 				host.reagents.add_reagent(randomchem, 5)
 				chemicals -= 50
 

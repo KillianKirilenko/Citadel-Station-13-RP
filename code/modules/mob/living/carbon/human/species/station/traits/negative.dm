@@ -82,13 +82,13 @@
 	name = "Toxin Weakness"
 	desc = "You take 25% more toxin damage"
 	cost = -1
-	var_changes = list("toxin_mod" = 1.25)
+	var_changes = list("toxins_mod" = 1.25)
 
 /datum/trait/toxin_weak_plus
 	name = "Major Toxin Weaness"
 	desc = "You take 50% more toxin damage"
 	cost = -2
-	var_changes = list("toxin_mod" = 1.5)
+	var_changes = list("toxins_mod" = 1.5)
 
 /datum/trait/oxy_weak
 	name = "Breathe Weakness"
@@ -96,17 +96,11 @@
 	cost = -1
 	var_changes = list("minimum_breath_pressure" = 20, "oxy_mod" = 1.25)
 
-/datum/trait/oxy_weak_plus
-	name = "Major Breathe Weakness"
-	desc = "You take 50% more breathe damage and require 50% more air (24kpa minimum). Make sure to adjust your emergency EVA tanks."
-	cost = -2
-	var_changes = list("minimum_breath_pressure" = 24, "oxy_mod" = 1.5)
-
 /datum/trait/rad_weak
 	name = "Radiation Weakness"
 	desc = "You take 25% more radition damage"
 	cost = -1
-	var_changes = list("radiation_mod" = 1.35)
+	var_changes = list("radiation_mod" = 1.25)
 
 /datum/trait/rad_weak_plus
 	name = "Major Radiation Weakness"
@@ -127,11 +121,22 @@
 	var_changes = list("siemens_coefficient" = 2.0) //This makes you extremely weak to tasers.
 
 /datum/trait/hollow
-	name = "Hollow Bones/Aluminum Alloy"
-	desc = "Your bones and robot limbs are much easier to break."
+	name = "Weak Bones/Aluminum Alloy"
+	desc = "Your bones and robot limbs are easier to break."
 	cost = -2 //I feel like this should be higher, but let's see where it goes
 
 /datum/trait/hollow/apply(var/datum/species/S,var/mob/living/carbon/human/H)
+	..(S,H)
+	for(var/obj/item/organ/external/O in H.organs)
+		O.min_broken_damage *= 0.75
+		O.min_bruised_damage *= 0.75
+
+/datum/trait/hollow_plus
+	name = "Hollow Bones/Brittle Alloy"
+	desc = "Your bones and robot limbs are significantly easier to break."
+	cost = -4 //I feel like this should be higher, but let's see where it goes
+
+/datum/trait/hollow_plus/apply(var/datum/species/S,var/mob/living/carbon/human/H)
 	..(S,H)
 	for(var/obj/item/organ/external/O in H.organs)
 		O.min_broken_damage *= 0.5

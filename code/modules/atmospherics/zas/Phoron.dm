@@ -78,15 +78,15 @@ obj/var/contaminated = 0
 		var/burn_eyes = 1
 
 		//Check for protective glasses
-		if(glasses && (glasses.body_parts_covered & EYES) && (glasses.item_flags & AIRTIGHT))
+		if(glasses && (glasses.body_parts_covered & EYES) && (glasses.item_flags & ALLOWINTERNALS))
 			burn_eyes = 0
 
 		//Check for protective maskwear
-		if(burn_eyes && wear_mask && (wear_mask.body_parts_covered & EYES) && (wear_mask.item_flags & AIRTIGHT))
+		if(burn_eyes && wear_mask && (wear_mask.body_parts_covered & EYES) && (wear_mask.item_flags & ALLOWINTERNALS))
 			burn_eyes = 0
 
 		//Check for protective helmets
-		if(burn_eyes && head && (head.body_parts_covered & EYES) && (head.item_flags & AIRTIGHT))
+		if(burn_eyes && head && (head.body_parts_covered & EYES) && (head.item_flags & ALLOWINTERNALS))
 			burn_eyes = 0
 
 		//VOREStation Edit - NIF Support
@@ -107,6 +107,8 @@ obj/var/contaminated = 0
 /mob/living/carbon/human/proc/burn_eyes()
 	var/obj/item/organ/internal/eyes/E = internal_organs_by_name[O_EYES]
 	if(E)
+		if(isSynthetic())
+			return //robotic eyes are not affected
 		if(prob(20))
 			to_chat(src, "<span class='danger'>Your eyes burn!</span>")
 		E.damage += 2.5

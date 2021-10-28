@@ -25,11 +25,14 @@
 	can_be_placed_into = null
 	flags = OPENCONTAINER | NOBLUDGEON
 	unacidable = 0
+	drop_sound = 'sound/items/drop/cloth.ogg'
+	pickup_sound = 'sound/items/pickup/cloth.ogg'
+
 
 	var/on_fire = 0
 	var/burn_time = 20 //if the rag burns for too long it turns to ashes
 
-/obj/item/reagent_containers/glass/rag/Initialize()
+/obj/item/reagent_containers/glass/rag/Initialize(mapload)
 	. = ..()
 	update_name()
 
@@ -207,7 +210,7 @@
 	update_name()
 	update_icon()
 
-/obj/item/reagent_containers/glass/rag/process()
+/obj/item/reagent_containers/glass/rag/process(delta_time)
 	if(!can_ignite())
 		visible_message("<span class='warning'>\The [src] burns out.</span>")
 		extinguish()

@@ -95,8 +95,8 @@
 /obj/machinery/alarm/alarms_hidden
 	alarms_hidden = TRUE
 
-/obj/machinery/alarm/server/New()
-	..()
+/obj/machinery/alarm/server/Initialize(mapload)
+	. = ..()
 	req_access = list(access_rd, access_atmospherics, access_engine_equip)
 	TLV["oxygen"] =			list(-1.0, -1.0,-1.0,-1.0) // Partial pressure, kpa
 	TLV["carbon dioxide"] = list(-1.0, -1.0,   5,  10) // Partial pressure, kpa
@@ -115,8 +115,8 @@
 		elect_master(exclude_self = TRUE)
 	return ..()
 
-/obj/machinery/alarm/New()
-	..()
+/obj/machinery/alarm/Initialize(mapload)
+	. = ..()
 	first_run()
 
 /obj/machinery/alarm/proc/first_run()
@@ -137,13 +137,13 @@
 	TLV["temperature"] =	list(T0C - 26, T0C, T0C + 40, T0C + 66) // K
 
 
-/obj/machinery/alarm/Initialize()
+/obj/machinery/alarm/Initialize(mapload)
 	. = ..()
 	set_frequency(frequency)
 	if(!master_is_operating())
 		elect_master()
 
-/obj/machinery/alarm/process()
+/obj/machinery/alarm/process(delta_time)
 	if((stat & (NOPOWER|BROKEN)) || shorted)
 		return
 
@@ -465,7 +465,7 @@
 	frequency.post_signal(src, alert_signal)
 
 /obj/machinery/alarm/attack_ai(mob/user)
-	ui_interact(user)
+	nano_ui_interact(user)
 
 /obj/machinery/alarm/attack_hand(mob/user)
 	. = ..()
@@ -474,10 +474,10 @@
 	return interact(user)
 
 /obj/machinery/alarm/interact(mob/user)
-	ui_interact(user)
+	nano_ui_interact(user)
 	wires.Interact(user)
 
-/obj/machinery/alarm/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, var/master_ui = null, var/datum/topic_state/state = default_state)
+/obj/machinery/alarm/nano_ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, var/master_ui = null, var/datum/topic_state/state = default_state)
 	var/data[0]
 	var/remote_connection = 0
 	var/remote_access = 0
@@ -606,15 +606,15 @@
 /obj/machinery/alarm/CanUseTopic(var/mob/user, var/datum/topic_state/state, var/href_list = list())
 	if(aidisabled && isAI(user))
 		to_chat(user, "<span class='warning'>AI control for \the [src] interface has been disabled.</span>")
-		return STATUS_CLOSE
+		return UI_CLOSE
 
-	. = shorted ? STATUS_DISABLED : STATUS_INTERACTIVE
+	. = shorted ? UI_DISABLED : UI_INTERACTIVE
 
-	if(. == STATUS_INTERACTIVE)
+	if(. == UI_INTERACTIVE)
 		var/extra_href = state.href_list(usr)
 		// Prevent remote users from altering RCON settings unless they already have access
 		if(href_list["rcon"] && extra_href["remote_connection"] && !extra_href["remote_access"])
-			. = STATUS_UPDATE
+			. = UI_UPDATE
 
 	return min(..(), .)
 
@@ -779,13 +779,20 @@
 			return
 	return ..()
 
+//Altclick airalarms to toggle the controlls
+/obj/machinery/alarm/AltClick(mob/user)
+	if(user.Adjacent(src))
+		if(allowed(usr) && !wires.IsIndexCut(AALARM_WIRE_IDSCAN))
+			locked = !locked
+			to_chat(user, "<span class='notice'>You [ locked ? "lock" : "unlock"] the Air Alarm interface.</span>")
+		else
+			to_chat(user, "<span class='warning'>Access denied.</span>")
+
 /obj/machinery/alarm/power_change()
 	..()
 	spawn(rand(0,15))
 		update_icon()
 
-/obj/machinery/alarm/examine(mob/user)
-	..(user)
 /*
 AIR ALARM CIRCUIT
 Just a object used in constructing air alarms
@@ -893,7 +900,7 @@ FIRE ALARM
 	alarm()
 	return
 
-/obj/machinery/firealarm/process()//Note: this processing was mostly phased out due to other code, and only runs when needed
+/obj/machinery/firealarm/process(delta_time)//Note: this processing was mostly phased out due to other code, and only runs when needed
 	if(stat & (NOPOWER|BROKEN))
 		return
 
@@ -1011,7 +1018,7 @@ FIRE ALARM
 		seclevel = newlevel
 		update_icon()
 
-/obj/machinery/firealarm/Initialize()
+/obj/machinery/firealarm/Initialize(mapload)
 	. = ..()
 	if(z in GLOB.using_map.contact_levels)
 		set_security_level(security_level? get_security_level() : "green")

@@ -64,13 +64,13 @@
 /datum/nifsoft/soulcatcher/proc/notify_into(var/message)
 	var/sound = nif.good_sound
 
-	to_chat(nif.human,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>Soulcatcher</b> displays, \"<span class='notice'>[message]</span>\"")
-	nif.human << sound
+	to_chat(nif.human,"<b>\[[icon2html(thing = nif.big_icon, target = nif.human)]NIF\]</b> <b>Soulcatcher</b> displays, \"<span class='notice'>[message]</span>\"")
+	SEND_SOUND(nif.human, sound)
 
 	for(var/brainmob in brainmobs)
 		var/mob/living/carbon/brain/caught_soul/CS = brainmob
-		to_chat(CS,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>Soulcatcher</b> displays, \"<span class='notice'>[message]</span>\"")
-		brainmob << sound
+		to_chat(CS,"<b>\[[icon2html(thing = nif.big_icon, target = CS)]NIF\]</b> <b>Soulcatcher</b> displays, \"<span class='notice'>[message]</span>\"")
+		SEND_SOUND(brainmob, sound)
 
 /datum/nifsoft/soulcatcher/proc/say_into(var/message, var/mob/living/sender, var/mob/eyeobj)
 	message = trim(message)
@@ -85,10 +85,10 @@
 
 	//Not AR Projecting
 	else
-		to_chat(nif.human,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>[sender_name]</b> speaks, \"[message]\"")
+		to_chat(nif.human,"<b>\[[icon2html(thing = nif.big_icon, target = nif.human)]NIF\]</b> <b>[sender_name]</b> speaks, \"[message]\"")
 		for(var/brainmob in brainmobs)
 			var/mob/living/carbon/brain/caught_soul/CS = brainmob
-			to_chat(CS,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>[sender_name]</b> speaks, \"[message]\"")
+			to_chat(CS,"<b>\[[icon2html(thing = nif.big_icon, target = CS)]NIF\]</b> <b>[sender_name]</b> speaks, \"[message]\"")
 
 	log_nsay(message,nif.human.real_name,sender)
 
@@ -105,10 +105,10 @@
 
 	//Not AR Projecting
 	else
-		to_chat(nif.human,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>[sender_name]</b> [message]")
+		to_chat(nif.human,"<b>\[[icon2html(thing = nif.big_icon, target = nif.human)]NIF\]</b> <b>[sender_name]</b> [message]")
 		for(var/brainmob in brainmobs)
 			var/mob/living/carbon/brain/caught_soul/CS = brainmob
-			to_chat(CS,"<b>\[\icon[nif.big_icon]NIF\]</b> <b>[sender_name]</b> [message]")
+			to_chat(CS,"<b>\[[icon2html(thing = nif.big_icon, target = CS)]NIF\]</b> <b>[sender_name]</b> [message]")
 
 	log_nme(message,nif.human.real_name,sender)
 
@@ -119,7 +119,7 @@
 	"Catching Prey \[[setting_flags & NIF_SC_CATCHING_OTHERS ? "Enabled" : "Disabled"]\]" = NIF_SC_CATCHING_OTHERS,
 	"Ext. Hearing \[[setting_flags & NIF_SC_ALLOW_EARS ? "Enabled" : "Disabled"]\]" = NIF_SC_ALLOW_EARS,
 	"Ext. Vision \[[setting_flags & NIF_SC_ALLOW_EYES ? "Enabled" : "Disabled"]\]" = NIF_SC_ALLOW_EYES,
-	"Mind Backups \[[setting_flags & NIF_SC_BACKUPS ? "Enabled" : "Disabled"]\]" = NIF_SC_BACKUPS,
+//	"Mind Backups \[[setting_flags & NIF_SC_BACKUPS ? "Enabled" : "Disabled"]\]" = NIF_SC_BACKUPS,
 	"AR Projecting \[[setting_flags & NIF_SC_PROJECTING ? "Enabled" : "Disabled"]\]" = NIF_SC_PROJECTING,
 	"Design Inside",
 	"Erase Contents")
@@ -132,7 +132,7 @@
 				printed after an intro ending with: \"Around you, you see...\" to the prey. If you already \
 				have prey, this will be printed to them after \"Your surroundings change to...\". Limit 2048 char.", \
 				"VR Environment", html_decode(inside_flavor)) as message
-				new_flavor = sanitize(new_flavor, MAX_MESSAGE_LEN*2)
+				new_flavor = sanitize(new_flavor, 32768, extra = FALSE)
 				inside_flavor = new_flavor
 				nif.notify("Updating VR environment...")
 				for(var/brain in brainmobs)
@@ -161,12 +161,12 @@
 	var/notify_message
 	//Special treatment
 	switch(flag)
-		if(NIF_SC_BACKUPS)
+/*		if(NIF_SC_BACKUPS)
 			if(setting_flags & NIF_SC_BACKUPS)
 				notify_message = "Mind backup system enabled."
 			else
 				notify_message = "Mind backup system disabled."
-
+*/
 		if(NIF_SC_CATCHING_ME)
 			if(setting_flags & NIF_SC_CATCHING_ME)
 				nif.set_flag(NIF_O_SCMYSELF,NIF_FLAGS_OTHER)
@@ -308,7 +308,7 @@
 		return
 
 	. = ..()
-	
+
 	if(!client)
 		return
 
@@ -341,7 +341,7 @@
 		return FALSE
 	..()
 
-/mob/living/carbon/brain/caught_soul/show_message()
+/mob/living/carbon/brain/caught_soul/show_message(msg, type, alt, alt_type)
 	if(ext_blind || !client)
 		return FALSE
 	..()
@@ -368,7 +368,7 @@
 	else
 		return ..(direction)
 
-/mob/living/carbon/brain/caught_soul/say(var/message)
+/mob/living/carbon/brain/caught_soul/say(var/message, var/datum/language/speaking = null, var/verb="says", var/alt_name="", var/whispering = 0)
 	if(silent)
 		return FALSE
 	soulcatcher.say_into(message,src,eyeobj)
@@ -401,6 +401,9 @@
 		eyeobj.pixel_y--
 		eyeobj.is_shifted = TRUE
 
+/mob/living/carbon/brain/caught_soul/allow_examine(atom/A)
+	return TRUE
+
 /mob/living/carbon/brain/caught_soul/emote(var/act,var/m_type=1,var/message = null)
 	if(silent)
 		return FALSE
@@ -430,6 +433,9 @@
 
 	to_chat(src,"<span class='warning'>There's no way out! You're stuck in VR.</span>")
 
+/mob/living/carbon/brain/caught_soul/set_typing_indicator(state)
+	return eyeobj?.set_typing_indicator(state)
+
 ///////////////////
 //A projected AR soul thing
 /mob/observer/eye/ar_soul
@@ -438,9 +444,9 @@
 	icon_state = "beacon"
 	var/mob/living/carbon/human/parent_human
 
-/mob/observer/eye/ar_soul/New(var/mob/brainmob, var/mob/living/carbon/human/human)
+/mob/observer/eye/ar_soul/Initialize(mapload, mob/brainmob, mob/living/carbon/human/human)
 	ASSERT(brainmob && brainmob.client)
-	..()
+	. = ..()
 
 	owner = brainmob				//Set eyeobj's owner
 	parent_human = human			//E-z reference to human
@@ -454,14 +460,25 @@
 
 	//Time to play dressup
 	if(brainmob.client.prefs)
-		var/mob/living/carbon/human/dummy/dummy = new ()
+		var/mob/living/carbon/human/dummy/dummy = new
 		brainmob.client.prefs.dress_preview_mob(dummy)
-		sleep(1 SECOND) //Strange bug in preview code? Without this, certain things won't show up. Yay race conditions?
 		dummy.regenerate_icons()
+		var/image/alpha_mask = new
+		alpha_mask.icon = 'icons/effects/effects.dmi'
+		alpha_mask.icon_state = "scanline"
+		alpha_mask.layer = FLY_LAYER
+		alpha_mask.blend_mode = BLEND_SUBTRACT
+		alpha_mask.color = list(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-2,1,1,1,1)
+		dummy.add_overlay(alpha_mask)
+		COMPILE_OVERLAYS(dummy)
+		dummy.alpha = 192
 
-		var/icon/new_icon = getHologramIcon(getCompoundIcon(dummy))
+		// remove hudlist
+		dummy.overlays -= dummy.hud_list
+		// appearance clone immediately
+		appearance = dummy.appearance
+		plane = PLANE_AUGMENTED
 		qdel(dummy)
-		icon = new_icon
 
 /mob/observer/eye/ar_soul/Destroy()
 	if(parent_human) //It's POSSIBLE they've been deleted before the NIF somehow
@@ -518,7 +535,7 @@
 
 ///////////////////
 //Verbs for humans
-/mob/living/carbon/human/proc/nsay(message as text|null)
+/mob/living/carbon/human/proc/nsay(message as text)
 	set name = "NSay"
 	set desc = "Speak into your NIF's Soulcatcher."
 	set category = "IC"
@@ -534,12 +551,12 @@
 		to_chat(src,"<span class='warning'>You need a loaded mind to use NSay.</span>")
 		return
 	if(!message)
-		message = input("Type a message to say.","Speak into Soulcatcher") as text|null
+		return
 	if(message)
 		var/sane_message = sanitize(message)
 		SC.say_into(sane_message,src)
 
-/mob/living/carbon/human/proc/nme(message as text|null)
+/mob/living/carbon/human/proc/nme(message as message)
 	set name = "NMe"
 	set desc = "Emote into your NIF's Soulcatcher."
 	set category = "IC"
@@ -556,13 +573,20 @@
 		return
 
 	if(!message)
-		message = input("Type an action to perform.","Emote into Soulcatcher") as text|null
+		return
 	if(message)
 		var/sane_message = sanitize(message)
 		SC.emote_into(sane_message,src)
 
 ///////////////////
 //Verbs for soulbrains
+/mob/living/carbon/brain/caught_soul/verb/examine_surroundings()
+	set name = "Examine Surroundings"
+	set desc = "Examine the interior of the soulcatcher you're in."
+	set category = "Soulcatcher"
+
+	to_chat(src, "Around you, you see...<br>[soulcatcher?.inside_flavor]")
+
 /mob/living/carbon/brain/caught_soul/verb/ar_project()
 	set name = "AR Project"
 	set desc = "Project your form into Augmented Reality for those around your predator with the appearance of your loaded character."
@@ -579,7 +603,7 @@
 	if(!client || !client.prefs)
 		return //Um...
 
-	eyeobj = new/mob/observer/eye/ar_soul(src,nif.human)
+	eyeobj = new/mob/observer/eye/ar_soul(src, src, nif.human)
 	soulcatcher.notify_into("[src] now AR projecting.")
 
 /mob/living/carbon/brain/caught_soul/verb/jump_to_owner()

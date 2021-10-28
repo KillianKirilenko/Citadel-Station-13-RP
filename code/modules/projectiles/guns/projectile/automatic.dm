@@ -11,7 +11,7 @@
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(0,-15,-15), dispersion=list(0.0, 0.6, 1.0)))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(60,30,0), dispersion=list(0.0, 0.6, 1.0)))
 
 /obj/item/gun/projectile/automatic/advanced_smg
 	name = "advanced SMG"
@@ -27,7 +27,7 @@
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(0,-10,-10), dispersion=list(0.0, 0.3, 0.6))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(60,30,20), dispersion=list(0.0, 0.3, 0.6))
 	)
 
 /obj/item/gun/projectile/automatic/advanced_smg/update_icon()
@@ -55,7 +55,7 @@
 	auto_eject = 1
 	auto_eject_sound = 'sound/weapons/smg_empty_alarm.ogg'
 
-//	one_handed_penalty = 15
+	one_handed_penalty = 15
 
 /obj/item/gun/projectile/automatic/c20r/update_icon()
 	..()
@@ -82,11 +82,11 @@
 	allowed_magazines = list(/obj/item/ammo_magazine/m545)
 	projectile_type = /obj/item/projectile/bullet/rifle/a545
 
-//	one_handed_penalty = 30
+	one_handed_penalty = 30
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=6,    burst_accuracy=list(0,-15,-30), dispersion=list(0.0, 0.6, 0.6))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=6,    burst_accuracy=list(60,50,45), dispersion=list(0.0, 0.6, 0.6))
 //		list(mode_name="short bursts", 	burst=5, fire_delay=null, move_delay=6,    burst_accuracy=list(0,-15,-30,-30,-45), dispersion=list(0.6, 1.0, 1.0, 1.0, 1.2)),
 		)
 
@@ -142,20 +142,20 @@
 	auto_eject = 1
 	auto_eject_sound = 'sound/weapons/smg_empty_alarm.ogg'
 
-//	one_handed_penalty = 60
+	one_handed_penalty = 60
 
 	burst_delay = 4
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1,    fire_delay=0,    move_delay=null, use_launcher=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="2-round bursts", burst=2,    fire_delay=null, move_delay=6,    use_launcher=null, burst_accuracy=list(0,-15), dispersion=list(0.0, 0.6)),
+		list(mode_name="2-round bursts", burst=2,    fire_delay=null, move_delay=6,    use_launcher=null, burst_accuracy=list(60,45), dispersion=list(0.0, 0.6)),
 		list(mode_name="fire grenades",  burst=null, fire_delay=null, move_delay=null, use_launcher=1,    burst_accuracy=null, dispersion=null)
 		)
 
 	var/use_launcher = 0
 	var/obj/item/gun/launcher/grenade/underslung/launcher
 
-/obj/item/gun/projectile/automatic/z8/New()
-	..()
+/obj/item/gun/projectile/automatic/z8/Initialize(mapload)
+	. = ..()
 	launcher = new(src)
 
 /obj/item/gun/projectile/automatic/z8/attackby(obj/item/I, mob/user)
@@ -188,11 +188,11 @@
 	return
 
 /obj/item/gun/projectile/automatic/z8/examine(mob/user)
-	..()
+	. = ..()
 	if(launcher.chambered)
-		to_chat(user, "\The [launcher] has \a [launcher.chambered] loaded.")
+		. += "\The [launcher] has \a [launcher.chambered] loaded."
 	else
-		to_chat(user, "\The [launcher] is empty.")
+		. += "\The [launcher] is empty."
 
 /obj/item/gun/projectile/automatic/l6_saw
 	name = "light machine gun"
@@ -211,7 +211,7 @@
 	allowed_magazines = list(/obj/item/ammo_magazine/m545saw, /obj/item/ammo_magazine/m545)
 	projectile_type = /obj/item/projectile/bullet/rifle/a545
 
-//	one_handed_penalty = 90
+	one_handed_penalty = 90
 
 	var/cover_open = 0
 
@@ -226,8 +226,8 @@
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(0,-15,-15), dispersion=list(0.0, 0.6, 1.0)),
-		list(mode_name="short bursts",	burst=5, move_delay=6, burst_accuracy = list(0,-15,-15,-30,-30), dispersion = list(0.6, 1.0, 1.0, 1.0, 1.2))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(60,30,0), dispersion=list(0.0, 0.6, 1.0)),
+		list(mode_name="short bursts",	burst=5, move_delay=6, burst_accuracy = list(60,50,45,40,35), dispersion = list(0.6, 1.0, 1.0, 1.0, 1.2))
 		)
 
 /obj/item/gun/projectile/automatic/l6_saw/special_check(mob/user)
@@ -290,11 +290,11 @@
 	allowed_magazines = list(/obj/item/ammo_magazine/m12gdrum)
 	projectile_type = /obj/item/projectile/bullet/shotgun
 
-//	one_handed_penalty = 60
+	one_handed_penalty = 30 //The AA12 can be fired one-handed fairly easily.
 
 	firemodes = list(
 		list(mode_name="semiauto", burst=1, fire_delay=0),
-		list(mode_name="3-round bursts", burst=3, move_delay=6, burst_accuracy = list(0,-15,-15,-30,-30), dispersion = list(0.0, 0.6, 0.6))
+		list(mode_name="3-round bursts", burst=3, move_delay=6, burst_accuracy = list(60,40,30,25,15), dispersion = list(0.0, 0.6, 0.6))
 //		list(mode_name="6-round bursts", burst=6, move_delay=6, burst_accuracy = list(0,-15,-15,-30,-30, -30), dispersion = list(0.6, 1.0, 1.0, 1.0, 1.2, 1.2)),
 		)
 
@@ -308,7 +308,7 @@
 
 /obj/item/gun/projectile/automatic/mini_uzi
 	name = "\improper Uzi"
-	desc = "The iconic Uzi is a lightweight, compact, fast firing machine pistol. Cybersun Industries famously still produces these designs, which have changed little since the 20th century. Uses .45 rounds."
+	desc = "The iconic Uzi is a lightweight, compact, fast firing machine pistol. Cybersun Industries were the last major manufacturer of these designs, which have changed little since the 20th century. Uses .45 rounds."
 	icon_state = "mini-uzi"
 	w_class = ITEMSIZE_NORMAL
 	load_method = MAGAZINE
@@ -319,7 +319,7 @@
 
 	firemodes = list(
 		list(mode_name="semiauto", burst=1, fire_delay=0),
-		list(mode_name="3-round bursts", burst=3, burst_delay=1, fire_delay=4, move_delay=4, burst_accuracy = list(0,-15,-15,-30,-30), dispersion = list(0.6, 1.0, 1.0))
+		list(mode_name="3-round bursts", burst=3, burst_delay=1, fire_delay=4, move_delay=4, burst_accuracy = list(60,40,30,20,15), dispersion = list(0.6, 1.0, 1.0))
 		)
 
 /obj/item/gun/projectile/automatic/mini_uzi/update_icon()
@@ -329,6 +329,34 @@
 	else
 		icon_state = "mini-uzi-empty"
 
+/obj/item/gun/projectile/automatic/mini_uzi/custom
+	name = "\improper custom Uzi"
+	desc = "The icon Uzi si a lightweight, compact, fast firing machine pistol. These traits make it a popular holdout option for Pathfinders assigned to hazardous expeditions. Uses .45 rounds."
+	icon_state = "mini-uzi-custom"
+	pin = /obj/item/firing_pin/explorer
+
+/obj/item/gun/projectile/automatic/mini_uzi/custom/update_icon()
+	..()
+	if(ammo_magazine)
+		icon_state = "mini-uzi-custom"
+	else
+		icon_state = "mini-uzi-custom-empty"
+
+/obj/item/gun/projectile/automatic/mini_uzi/taj
+	name = "\improper Adhomai Uzi"
+	desc = "The Hotak's Arms machine pistol has developed a fierce reputation for its use by guerillas of the Democratic People's Republic of Adhomai. Its top loading magazine allows one to go completely prone in the deep snow banks of Adhomai while maintaining good weapon stability."
+	icon_state = "mini-uzi-taj"
+	item_state = "mini-uzi-taj"
+
+/obj/item/gun/projectile/automatic/mini_uzi/taj/update_icon()
+	..()
+	if(ammo_magazine)
+		icon_state = "mini-uzi-taj"
+		item_state = "mini-uzi-taj"
+	else
+		icon_state = "mini-uzi-taj-empty"
+		item_state = "mini-uzi-taj-empty"
+
 /obj/item/gun/projectile/automatic/p90
 	name = "personal defense weapon"
 	desc = "The H90K is a compact, large capacity submachine gun produced by Hephaestus Industries. Despite its fierce reputation, it still manages to feel like a toy. Uses 9mm rounds."
@@ -336,6 +364,7 @@
 	item_state = "p90"
 	w_class = ITEMSIZE_NORMAL
 	caliber = "9mm"
+	fire_sound = 'sound/weapons/gunshot/gunshot_uzi.wav'
 	origin_tech = list(TECH_COMBAT = 5, TECH_MATERIAL = 2)
 	slot_flags = SLOT_BELT // ToDo: Belt sprite.
 	load_method = MAGAZINE
@@ -344,7 +373,7 @@
 
 	firemodes = list(
 		list(mode_name="semiauto", burst=1, fire_delay=0),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(0,-15,-15), dispersion=list(0.0, 0.6, 1.0))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(60,30,30), dispersion=list(0.0, 0.6, 1.0))
 		)
 
 /obj/item/gun/projectile/automatic/p90/update_icon()
@@ -355,7 +384,7 @@
 	desc = "An H90K from Hephaestus Industries. This one has a different colored receiver and a sling."
 	icon_state = "p90smgC"
 	magazine_type = /obj/item/ammo_magazine/m9mmp90/hunter
-	slot_flags = SLOT_BELT|SLOT_BACK 
+	slot_flags = SLOT_BELT|SLOT_BACK
 	pin = /obj/item/firing_pin/explorer
 
 /obj/item/gun/projectile/automatic/p90/custom/update_icon()
@@ -375,7 +404,7 @@
 
 	firemodes = list(
 		list(mode_name="semiauto", burst=1, fire_delay=0),
-		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(0,-15,-15), dispersion=list(0.0, 0.6, 1.0))
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=4,    burst_accuracy=list(60,30,25), dispersion=list(0.0, 0.6, 1.0))
 		)
 
 /obj/item/gun/projectile/automatic/tommygun/update_icon()
@@ -398,11 +427,11 @@
 	allowed_magazines = list(/obj/item/ammo_magazine/m762, /obj/item/ammo_magazine/m762m)
 	projectile_type = /obj/item/projectile/bullet/rifle/a762
 
-//	one_handed_penalty = 45
+	one_handed_penalty = 45
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="2-round bursts", burst=2, fire_delay=null, move_delay=6,    burst_accuracy=list(0,-15), dispersion=list(0.0, 0.6))
+		list(mode_name="2-round bursts", burst=2, fire_delay=null, move_delay=6,    burst_accuracy=list(60,45), dispersion=list(0.0, 0.6))
 		)
 
 /obj/item/gun/projectile/automatic/bullpup/update_icon(var/ignore_inhands)
@@ -433,7 +462,7 @@ obj/item/gun/projectile/automatic/fal
 
 	firemodes = list(
 		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
-		list(mode_name="2-round bursts", burst=2, fire_delay=null, move_delay=6,    burst_accuracy=list(0,-15), dispersion=list(0.0, 0.6))
+		list(mode_name="2-round bursts", burst=2, fire_delay=null, move_delay=6,    burst_accuracy=list(60,35), dispersion=list(0.0, 0.6))
 		)
 
 /obj/item/gun/projectile/automatic/fal/update_icon(var/ignore_inhands)
@@ -461,12 +490,20 @@ obj/item/gun/projectile/automatic/automat
 	burst = 3
 	fire_delay = 7.2
 	move_delay = 6
-	burst_accuracy = list(0,-15,-15)
+	burst_accuracy = list(60,30,15)
 	dispersion = list(0.0, 0.6,1.0)
 
 obj/item/gun/projectile/automatic/automat/holy
 	ammo_type = /obj/item/ammo_casing/a762/silver
 	holy = TRUE
+
+obj/item/gun/projectile/automatic/automat/taj
+	name = "Adhomai automat"
+	desc = "The Hadii-Wrack Avtomat, is an aging internal magazine automatic rifle of the People's Republic of Adhomai's Grand People's Army whose long and storied service life is coming to an end as it is phased out in favor of more modern automatics."
+	icon_state = "automat-taj"
+	item_state = "automat-taj"
+	wielded_item_state = "automat-taj-wielded"
+	fire_anim = ""
 
 /obj/item/gun/projectile/automatic/holyshot
 	name = "Holy automatic shotgun"
@@ -483,11 +520,11 @@ obj/item/gun/projectile/automatic/automat/holy
 	allowed_magazines = list(/obj/item/ammo_magazine/holyshot_mag, /obj/item/ammo_magazine/holyshot_mag/stake)
 	projectile_type = /obj/item/projectile/bullet/shotgun
 
-//	one_handed_penalty = 60
+	one_handed_penalty = 40
 
 	firemodes = list(
 		list(mode_name="semiauto", burst=1, fire_delay=0),
-		list(mode_name="2-round burst", burst=2, move_delay=6, burst_accuracy = list(0,-15,-15,-30,-30), dispersion = list(0.0, 0.6, 0.6))
+		list(mode_name="2-round burst", burst=2, move_delay=6, burst_accuracy = list(60,50,40,30,25), dispersion = list(0.0, 0.6, 0.6))
 		)
 
 /obj/item/gun/projectile/automatic/holyshot/update_icon()
@@ -497,3 +534,35 @@ obj/item/gun/projectile/automatic/automat/holy
 	else
 		icon_state = "holyshotgun_empty"
 	return
+
+//Clown Rifle
+/obj/item/gun/projectile/automatic/clown_rifle
+	name = "clown assault rifle"
+	desc = "The WSS-29m6 is the latest version of the standard Columbina service rifle. Originally a cheap knock-off of the STS-35, the m6 now matches its inspiration in durability. Utilizing a proprietary ROF system, the m6 is able to fire unorthodox, yet effective, weaponry."
+	icon_state = "clownrifle"
+	item_state = "clownrifle"
+	wielded_item_state = "clownrifle_wielded"
+	w_class = ITEMSIZE_LARGE
+	force = 10
+	caliber = "organic"
+	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 1, TECH_ILLEGAL = 4)
+	slot_flags = SLOT_BACK
+	load_method = MAGAZINE
+	magazine_type = /obj/item/ammo_magazine/mcompressedbio/large/banana
+	allowed_magazines = list(/obj/item/ammo_magazine/mcompressedbio/large/banana)
+	projectile_type = /obj/item/projectile/bullet/organic
+
+	one_handed_penalty = 30
+
+	firemodes = list(
+		list(mode_name="semiauto",       burst=1, fire_delay=0,    move_delay=null, burst_accuracy=null, dispersion=null),
+		list(mode_name="3-round bursts", burst=3, fire_delay=null, move_delay=6,    burst_accuracy=list(60,50,45), dispersion=list(0.0, 0.6, 0.6))
+//		list(mode_name="short bursts", 	burst=5, fire_delay=null, move_delay=6,    burst_accuracy=list(0,-15,-30,-30,-45), dispersion=list(0.6, 1.0, 1.0, 1.0, 1.2)),
+		)
+
+/obj/item/gun/projectile/automatic/clown_rifle/update_icon()
+	..()
+	if(ammo_magazine)
+		icon_state = "[initial(icon_state)]"
+	else
+		icon_state = "[initial(icon_state)]-empty"

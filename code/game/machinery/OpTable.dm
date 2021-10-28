@@ -1,9 +1,10 @@
 /obj/machinery/optable
-	name = "Operating Table"
+	name = "the operating table"
 	desc = "Used for advanced medical procedures."
 	icon = 'icons/obj/surgery.dmi'
 	icon_state = "table2-idle"
 	density = 1
+	circuit = /obj/item/circuitboard/operating_table
 	anchored = 1.0
 	use_power = USE_POWER_IDLE
 	idle_power_usage = 1
@@ -14,13 +15,27 @@
 	var/strapped = 0.0
 	var/obj/machinery/computer/operating/computer = null
 
-/obj/machinery/optable/New()
-	..()
+/obj/machinery/optable/Initialize(mapload)
+	. = ..()
+	component_parts = list()
+	component_parts += new /obj/item/stock_parts/manipulator(src)
+	component_parts += new /obj/item/stock_parts/manipulator(src)
+	component_parts += new /obj/item/stock_parts/scanning_module(src)
+	component_parts += new /obj/item/stock_parts/capacitor(src)
+	component_parts += new /obj/item/stock_parts/console_screen(src)
+	component_parts += new /obj/item/healthanalyzer(src)
+	component_parts += new /obj/item/stack/material/glass/reinforced (src, 2)
+
+	RefreshParts()
+
+/obj/machinery/optable/Initialize(mapload)
+	. = ..()
 	for(var/direction in list(NORTH,EAST,SOUTH,WEST))
 		computer = locate(/obj/machinery/computer/operating, get_step(src, direction))
 		if(computer)
 			computer.table = src
 			break
+
 //	spawn(100) //Wont the MC just call this process() before and at the 10 second mark anyway?
 //		process()
 
@@ -54,7 +69,7 @@
 		return TRUE
 
 /obj/machinery/optable/MouseDrop_T(obj/O as obj, mob/user as mob)
-
+	. = ..()
 	if((!(istype(O, /obj/item)) || user.get_active_hand() != O))
 		return
 	user.drop_item()
@@ -73,7 +88,7 @@
 	icon_state = "table2-idle"
 	return 0
 
-/obj/machinery/optable/process()
+/obj/machinery/optable/process(delta_time)
 	check_victim()
 
 /obj/machinery/optable/proc/take_victim(mob/living/carbon/C, mob/living/carbon/user as mob)
@@ -86,8 +101,10 @@
 		C.client.eye = src
 	C.resting = 1
 	C.loc = src.loc
-	for(var/obj/O in src)
+	// now that we hold parts, this must be commented out to prevent dumping our parts onto our loc. not sure what this was intended to do when it was written.
+	/*for(var/obj/O in src)
 		O.loc = src.loc
+	*/
 	add_fingerprint(user)
 	if(ishuman(C))
 		var/mob/living/carbon/human/H = C
@@ -116,7 +133,7 @@
 
 	take_victim(usr,usr)
 
-/obj/machinery/optable/attackby(obj/item/W as obj, mob/living/carbon/user as mob)
+/obj/machinery/optable/attackby(obj/item/W as obj, var/obj/item/I, mob/living/carbon/user as mob)
 	if(istype(W, /obj/item/grab))
 		var/obj/item/grab/G = W
 		if(iscarbon(G.affecting) && check_table(G.affecting))
@@ -133,3 +150,18 @@
 		to_chat(usr, "<span class='notice'>Unbuckle \the [patient] first!</span>")
 		return 0
 	return 1
+
+/obj/machinery/sleeper/RefreshParts()
+	var/cap_rating = 0
+
+	idle_power_usage = initial(idle_power_usage)
+	active_power_usage = initial(active_power_usage)
+
+	for(var/obj/item/stock_parts/P in component_parts)
+		if(istype(P, /obj/item/stock_parts/capacitor))
+			cap_rating += P.rating
+
+	cap_rating = max(1, round(cap_rating / 2))
+
+	idle_power_usage /= cap_rating
+	active_power_usage /= cap_rating

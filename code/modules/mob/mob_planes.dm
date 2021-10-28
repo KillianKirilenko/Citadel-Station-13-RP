@@ -29,6 +29,8 @@
 	plane_masters[VIS_CH_SPECIAL] 	= new /obj/screen/plane_master{plane = PLANE_CH_SPECIAL}		//"Special" role stuff
 	plane_masters[VIS_CH_STATUS_OOC]= new /obj/screen/plane_master{plane = PLANE_CH_STATUS_OOC}		//OOC status HUD
 
+	plane_masters[VIS_STATUS]		= new /obj/screen/plane_master{plane = PLANE_STATUS}			//Status indicators that show over mob heads.
+
 	plane_masters[VIS_ADMIN1] 		= new /obj/screen/plane_master{plane = PLANE_ADMIN1}			//For admin use
 	plane_masters[VIS_ADMIN2] 		= new /obj/screen/plane_master{plane = PLANE_ADMIN2}			//For admin use
 	plane_masters[VIS_ADMIN3] 		= new /obj/screen/plane_master{plane = PLANE_ADMIN3}			//For admin use
@@ -39,6 +41,7 @@
 	plane_masters[VIS_TURFS]	= new /obj/screen/plane_master/main{plane = TURF_PLANE}
 	plane_masters[VIS_OBJS]		= new /obj/screen/plane_master/main{plane = OBJ_PLANE}
 	plane_masters[VIS_MOBS]		= new /obj/screen/plane_master/main{plane = MOB_PLANE}
+	plane_masters[VIS_CLOAKED]	= new /obj/screen/plane_master/cloaked								//Cloaked atoms!
 
 	..()
 
@@ -67,6 +70,7 @@
 	else if(!state && (plane in my_mob.planes_visible))
 		LAZYREMOVE(my_mob.planes_visible, plane)
 
+/*
 /datum/plane_holder/proc/set_desired_alpha(var/which = null, var/new_alpha)
 	ASSERT(which)
 	var/obj/screen/plane_master/PM = plane_masters[which]
@@ -77,6 +81,7 @@
 		var/list/subplanes = PM.sub_planes
 		for(var/SP in subplanes)
 			set_vis(which = SP, new_alpha = new_alpha)
+*/
 
 /datum/plane_holder/proc/set_ao(var/which = null, var/enabled = FALSE)
 	ASSERT(which)
@@ -172,6 +177,13 @@
 /obj/screen/plane_master/ghosts
 	plane = PLANE_GHOSTS
 	desired_alpha = 127 //When enabled, they're like half-transparent
+
+/////////////////
+//Cloaked atoms are visible to ghosts (or for other reasons?)
+/obj/screen/plane_master/cloaked
+	plane = CLOAKED_PLANE
+	desired_alpha = 80
+	color = "#0000FF"
 
 /////////////////
 //The main game planes start normal and visible

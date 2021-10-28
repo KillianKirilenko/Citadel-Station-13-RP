@@ -26,6 +26,9 @@
 	var/base_icon
 	var/base_name
 	var/unwielded_force_divisor = 0.25
+	hitsound = "swing_hit"
+	drop_sound = 'sound/items/drop/sword.ogg'
+	pickup_sound = 'sound/items/pickup/sword.ogg'
 
 /obj/item/material/twohanded/update_held_icon()
 	var/mob/living/M = loc
@@ -59,10 +62,10 @@
 	force_unwielded = round(force_wielded*unwielded_force_divisor)
 	force = force_unwielded
 	throwforce = round(force*thrown_force_divisor)
-	//world << "[src] has unwielded force [force_unwielded], wielded force [force_wielded] and throwforce [throwforce] when made from default material [material.name]"
+	//to_chat(world, "[src] has unwielded force [force_unwielded], wielded force [force_wielded] and throwforce [throwforce] when made from default material [material.name]")
 
-/obj/item/material/twohanded/New()
-	..()
+/obj/item/material/twohanded/Initialize(newloc, material_key)
+	. = ..()
 	update_icon()
 
 //Allow a small chance of parrying melee attacks when wielded - maybe generalize this to other weapons someday
@@ -103,6 +106,8 @@
 	attack_verb = list("attacked", "chopped", "cleaved", "torn", "cut")
 	applies_material_colour = 0
 	can_cleave = TRUE
+	drop_sound = 'sound/items/drop/axe.ogg'
+	pickup_sound = 'sound/items/pickup/axe.ogg'
 
 /obj/item/material/twohanded/fireaxe/update_held_icon()
 	var/mob/living/M = loc
@@ -148,8 +153,8 @@
 	desc = "This is a toy version of the mighty fire axe! Charge at your friends for maximum enjoyment while screaming at them."
 	description_info = "This is a toy version of the mighty fire axe! Charge at your friends for maximum enjoyment while screaming at them."
 
-/obj/item/material/twohanded/fireaxe/foam/New(var/newloc)
-	..(newloc,"foam")
+/obj/item/material/twohanded/fireaxe/foam/Initialize(mapload, material_key)
+	return ..(mapload,"foam")
 
 /obj/item/material/twohanded/fireaxe/foam/afterattack()
 	return
@@ -180,6 +185,7 @@
 	edge = 0
 	sharp = 1
 	hitsound = 'sound/weapons/bladeslice.ogg'
+	mob_throw_hit_sound =  'sound/weapons/pierce.ogg'
 	attack_verb = list("attacked", "poked", "jabbed", "torn", "gored")
 	default_material = "glass"
 	applies_material_colour = 0
@@ -265,7 +271,7 @@
 			G.dust()
 			return
 		else
-			G.stun_effect_act(10 , 50,def_zone = BP_TORSO, src)
+			G.stun_effect_act(10 , 50, BP_TORSO, src)
 			G.take_organ_damage(10)
 			G.Paralyse(20)
 			playsound(src.loc, "sparks", 50, 1)

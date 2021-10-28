@@ -43,9 +43,9 @@
 /obj/item/soap/deluxe
 	icon_state = "soapdeluxe"
 
-/obj/item/soap/deluxe/New()
+/obj/item/soap/deluxe/Initialize(mapload)
+	. = ..()
 	desc = "A deluxe Waffle Co. brand bar of soap. Smells of [pick("lavender", "vanilla", "strawberry", "chocolate" ,"space")]."
-	..()
 
 /obj/item/soap/syndie
 	desc = "An untrustworthy bar of soap. Smells of fear."
@@ -94,8 +94,8 @@
 /obj/item/cane/concealed
 	var/concealed_blade
 
-/obj/item/cane/concealed/New()
-	..()
+/obj/item/cane/concealed/Initialize(mapload)
+	. = ..()
 	var/obj/item/material/butterfly/switchblade/temp_blade = new(src)
 	concealed_blade = temp_blade
 	temp_blade.attack_self()
@@ -203,6 +203,8 @@
 /obj/item/disk
 	name = "disk"
 	icon = 'icons/obj/items.dmi'
+	drop_sound = 'sound/items/drop/disk.ogg'
+	pickup_sound =  'sound/items/pickup/disk.ogg'
 
 /obj/item/disk/nuclear
 	name = "nuclear authentication disk"
@@ -245,6 +247,15 @@
 	throw_range = 5
 	w_class = ITEMSIZE_SMALL
 	attack_verb = list("warned", "cautioned", "smashed")
+
+/obj/item/caution/attackby(var/obj/item/D, mob/user as mob)
+	if(D.is_wirecutter())
+		to_chat(user, "<span class='notice'>You snap the handle of \the [src] with \the [D].  It's too warped to stand on its own now.</span>")
+		user.put_in_hands(new /obj/item/clothing/suit/armor/caution)
+		user.drop_from_inventory(src)
+		qdel(src)
+	else
+		return ..()
 
 /obj/item/caution/cone
 	desc = "This cone is trying to warn you of something!"
@@ -504,10 +515,10 @@
 	w_class = ITEMSIZE_SMALL
 	var/rating = 1
 
-/obj/item/stock_parts/New()
-	src.pixel_x = rand(-5.0, 5)
-	src.pixel_y = rand(-5.0, 5)
-	..()
+/obj/item/stock_parts/Initialize(mapload)
+	. = ..()
+	pixel_x = rand(-5.0, 5)
+	pixel_y = rand(-5.0, 5)
 
 /obj/item/stock_parts/get_rating()
 	return rating
@@ -531,9 +542,9 @@
 	var/charge = 0
 	var/max_charge = 1000
 
-/obj/item/stock_parts/capacitor/New()
+/obj/item/stock_parts/capacitor/Initialize(mapload)
 	. = ..()
-	max_charge *= rating
+	max_charge *= rating	// this is garbage someone remove it later and hardcode
 
 /obj/item/stock_parts/capacitor/proc/charge(var/amount)
 	charge += amount

@@ -1,10 +1,11 @@
 // Dimension of overmap (squares 4 lyfe)
 var/global/list/map_sectors = list()
 
-/area/overmap/
+/area/overmap
 	name = "System Map"
 	icon_state = "start"
 	requires_power = 0
+	dynamic_lighting = DYNAMIC_LIGHTING_FORCED
 	base_turf = /turf/unsimulated/map
 
 /turf/unsimulated/map
@@ -19,10 +20,13 @@ var/global/list/map_sectors = list()
 	var/turf/unsimulated/map/edge/wrap_buddy
 
 /turf/unsimulated/map/edge/Initialize()
-	. = ..()
-	// This could be done by using the using_map.overmap_size much faster, HOWEVER, doing it programatically to 'find'
-	//	 the edges this way allows for 'sub overmaps' elsewhere and whatnot.
-	for(var/side in alldirs)	// The order of this list is relevant: It should definitely break on finding a cardinal FIRST.
+	..()
+	return INITIALIZE_HINT_LATELOAD
+
+/turf/unsimulated/map/edge/LateInitialize()
+	//This could be done by using the GLOB.using_map.overmap_size much faster, HOWEVER, doing it programatically to 'find'
+	//  the edges this way allows for 'sub overmaps' elsewhere and whatnot.
+	for(var/side in GLOB.alldirs) //The order of this list is relevant: It should definitely break on finding a cardinal FIRST.
 		var/turf/T = get_step(src, side)
 		if(T?.type == /turf/unsimulated/map) //Not a wall, not something else, EXACTLY a flat map turf.
 			map_is_to_my = side
@@ -73,6 +77,7 @@ var/global/list/map_sectors = list()
 		if(x == GLOB.using_map.overmap_size)
 			I.pixel_x = 5*i + 2
 		add_overlay(I)
+	AddElement(/datum/element/turf_z_transparency)
 
 /turf/unsimulated/map/Entered(var/atom/movable/O, var/atom/oldloc)
 	..()

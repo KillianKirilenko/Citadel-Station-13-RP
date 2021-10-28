@@ -9,6 +9,7 @@
 	force = 10
 	slot_flags = SLOT_BACK
 	projectile_type = /obj/item/projectile/ion
+	one_handed_penalty = 15
 
 /obj/item/gun/energy/ionrifle/emp_act(severity)
 	..(max(severity, 4)) //so it doesn't EMP itself, I guess
@@ -94,6 +95,7 @@
 	self_recharge = 1
 	recharge_time = 5 //Time it takes for shots to recharge (in ticks)
 	charge_meter = 0
+	one_handed_penalty = 20
 
 /obj/item/gun/energy/meteorgun/pen
 	name = "meteor pen"
@@ -103,6 +105,7 @@
 	item_state = "pen"
 	w_class = ITEMSIZE_TINY
 	slot_flags = SLOT_BELT
+	one_handed_penalty = 0
 
 
 /obj/item/gun/energy/mindflayer
@@ -110,6 +113,7 @@
 	desc = "A custom-built weapon of some kind."
 	icon_state = "xray"
 	projectile_type = /obj/item/projectile/beam/mindflayer
+	one_handed_penalty = 15
 
 /obj/item/gun/energy/toxgun
 	name = "phoron pistol"
@@ -189,6 +193,7 @@ obj/item/gun/energy/staff/focus
 	accuracy = 75 // Suppressive weapons don't work too well if there's no risk of being hit.
 	burst_delay = 1 // Burst faster than average.
 	origin_tech = list(TECH_COMBAT = 6, TECH_MAGNET = 6, TECH_ILLEGAL = 6)
+	one_handed_penalty = 60
 
 	firemodes = list(
 		list(mode_name="single shot", burst = 1, burst_accuracy = list(75), dispersion = list(0), charge_cost = 24),
@@ -297,10 +302,6 @@ obj/item/gun/energy/staff/focus
 	icon_state = "medbeam"
 	item_state = "medbeam"
 	icon = 'icons/obj/gun/energy.dmi'
-	item_icons = list(
-		slot_l_hand_str = 'icons/mob/items/lefthand_guns_vr.dmi',
-		slot_r_hand_str = 'icons/mob/items/righthand_guns_vr.dmi',
-		)
 	slot_flags = SLOT_BELT
 	accuracy = 100
 	fire_delay = 12
@@ -320,12 +321,13 @@ obj/item/gun/energy/staff/focus
 	force = 5
 	slot_flags = SLOT_BELT
 	w_class = ITEMSIZE_NORMAL
-	projectile_type = /obj/item/projectile/bullet/pistol/medium
+	projectile_type = /obj/item/projectile/bullet/pistol/medium/silver
 	origin_tech = null
 	fire_delay = 10		//Old pistol
 	charge_cost = 480	//to compensate a bit for self-recharging
 	cell_type = /obj/item/cell/device/weapon/recharge/captain
 	battery_lock = 1
+	one_handed_penalty = 0
 
 /obj/item/gun/energy/service/attack_self(mob/user)
 	cycle_weapon(user)
@@ -368,27 +370,27 @@ obj/item/gun/energy/staff/focus
 /obj/item/gun/energy/service/shatter
 	name = "service weapon (shatter)"
 	icon_state = "service_shatter"
-	projectile_type = /obj/item/projectile/bullet/pellet/shotgun
-	fire_delay = 20		//Doubled for strength.
+	projectile_type = /obj/item/projectile/bullet/pellet/shotgun/silver
+	fire_delay = 15		//Increased by 50% for strength.
 	charge_cost = 600	//Charge increased due to shotgun round.
 
 /obj/item/gun/energy/service/spin
 	name = "service weapon (spin)"
 	icon_state = "service_spin"
 	projectile_type = /obj/item/projectile/bullet/pistol/spin
-	fire_delay = 1		//High fire rate.
-	charge_cost = 100	//Lower cost per shot to encourage rapid fire.
+	fire_delay = 0	//High fire rate.
+	charge_cost = 80	//Lower cost per shot to encourage rapid fire.
 
 /obj/item/gun/energy/service/pierce
 	name = "service weapon (pierce)"
 	icon_state = "service_pierce"
-	projectile_type = /obj/item/projectile/bullet/rifle/a762/ap
-	fire_delay = 20		//Doubled for strength.
+	projectile_type = /obj/item/projectile/bullet/rifle/a762/ap/silver
+	fire_delay = 15		//Increased by 50% for strength.
 	charge_cost = 600	//Charge increased due to sniper round.
 
 /obj/item/gun/energy/service/charge
 	name = "service weapon (charge)"
 	icon_state = "service_charge"
-	projectile_type = /obj/item/projectile/bullet/burstbullet    //Formerly: obj/item/projectile/bullet/gyro. A little too robust.
-	fire_delay = 30
+	projectile_type = /obj/item/projectile/bullet/burstbullet/service    //Formerly: obj/item/projectile/bullet/gyro. A little too robust.
+	fire_delay = 20
 	charge_cost = 800	//Three shots.

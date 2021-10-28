@@ -25,7 +25,7 @@
 /obj/machinery/artifact_harvester/attackby(var/obj/I as obj, var/mob/user as mob)
 	if(istype(I,/obj/item/anobattery))
 		if(!inserted_battery)
-			to_chat(user, "<font color='blue'>You insert [I] into [src].</font>")
+			to_chat(user, "<font color=#4F49AF>You insert [I] into [src].</font>")
 			user.drop_item()
 			I.loc = src
 			inserted_battery = I
@@ -71,7 +71,7 @@
 	user << browse(dat, "window=artharvester;size=450x500")
 	onclose(user, "artharvester")
 
-/obj/machinery/artifact_harvester/process()
+/obj/machinery/artifact_harvester/process(delta_time)
 	if(stat & (NOPOWER|BROKEN))
 		return
 
