@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <base href="../../../" />
+    <link rel="stylesheet" href="dmdoc.css" />
+    <title>&#x2F;datum&#x2F;controller&#x2F;subsystem&#x2F;mapping - Citadel Station 13 - HRP</title>
+</head>
+<body>
+<header>
+    <a href="index.html">Citadel Station 13 - HRP</a> -
+    <a href="index.html#modules">Modules</a> -
+    <a href="index.html#types">Types</a>
+ &mdash; <a href="datum/controller/subsystem/mapping.html#var">Var Details</a> - <a href="datum/controller/subsystem/mapping.html#proc">Proc Details</a></header>
+<main>
+<h1>Mapping <aside>/<a href="datum.html">datum</a>/<a href="datum/controller/subsystem.html">controller/subsystem</a>/<a href="datum/controller/subsystem/mapping.html">mapping</a></aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L4">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 4"/></a></h1>
+
+<table class="summary" cellspacing="0"><tr><td colspan="2"><h2>Vars</h2></td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#var/config">config</a></th><td>The current map config datum the round is using</td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#var/next_map_config">next_map_config</a></th><td>The next map to load</td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#var/obfuscation_secret">obfuscation_secret</a></th><td>&quot;secret&quot; key</td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#var/stat_map_name">stat_map_name</a></th><td>Cached map name for statpanel</td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#var/z_list">z_list</a></th><td>Zlevel manager list of zlevels.</td></tr><tr><td colspan="2"><h2>Procs</h2></td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#proc/PreInit">PreInit</a></th><td>Obfuscation module</td></tr>
+            <tr><th><a href="datum/controller/subsystem/mapping.html#proc/get_obfuscated_id">get_obfuscated_id</a></th><td>Generates an obfuscated but constant ID for an original ID for cases where you don't want players codediving for an ID.
+This is slightly more expensive but is unique for an id/idtype combo, meaning it's safe to reveal - use in cases where you want to allow a player to reverse engineer,
+but want them to find out ICly rather than codedive for an ID</td></tr></table>
+    <h2 id="var">Var Details</h2><h3 id="var/config"><aside class="declaration">var </aside>config
+            <aside>&ndash; /static/<a href="datum.html">datum</a>/<a href="datum/map_config.html">map_config</a></aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L24">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 24"/></a></h3>
+        <p>The current map config datum the round is using</p><h3 id="var/next_map_config"><aside class="declaration">var </aside>next_map_config
+            <aside>&ndash; /static/<a href="datum.html">datum</a>/<a href="datum/map_config.html">map_config</a></aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L26">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 26"/></a></h3>
+        <p>The next map to load</p><h3 id="var/obfuscation_secret"><aside class="declaration">var </aside>obfuscation_secret
+            <aside>&ndash; </aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L36">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 36"/></a></h3>
+        <p>&quot;secret&quot; key</p><h3 id="var/stat_map_name"><aside class="declaration">var </aside>stat_map_name
+            <aside>&ndash; /static</aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L29">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 29"/></a></h3>
+        <p>Cached map name for statpanel</p><h3 id="var/z_list"><aside class="declaration">var </aside>z_list
+            <aside>&ndash; /list</aside>
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/_mapping.dm#L19">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;_mapping.dm 19"/></a></h3>
+        <p>Zlevel manager list of zlevels.</p><h2 id="proc">Proc Details</h2><h3 id="proc/PreInit"><aside class="parent"><a title="/datum/controller/subsystem" href="datum/controller/subsystem.html#proc/PreInit">&uarr;</a></aside>PreInit<aside>() 
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/obfuscation.dm#L6">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;obfuscation.dm 6"/></a></aside>
+        </h3>
+        <p>Obfuscation module</p>
+<p>Allows for generating arbitrary obfuscation IDs from static mapload time IDs, that are deterministic within a round.</p><h3 id="proc/get_obfuscated_id"><aside class="declaration">proc </aside>get_obfuscated_id<aside>(original, id_type) 
+        
+    
+            <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/blob/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5/code/controllers/subsystems/mapping/obfuscation.dm#L18">
+        <img src="git.png" width="16" height="16" title="code&#x2F;controllers&#x2F;subsystems&#x2F;mapping&#x2F;obfuscation.dm 18"/></a></aside>
+        </h3>
+        <p>Generates an obfuscated but constant ID for an original ID for cases where you don't want players codediving for an ID.
+This is slightly more expensive but is unique for an id/idtype combo, meaning it's safe to reveal - use in cases where you want to allow a player to reverse engineer,
+but want them to find out ICly rather than codedive for an ID</p>
+<p>Both original and id_type are CASE INSENSITIVE.</p></main>
+<footer>
+    vorestation.dme
+    <a href="https://github.com/KillianKirilenko/Citadel-Station-13-RP/tree/2e6d8d5f7f87e4b5cbc19d86a4092158e99231b5">2e6d8d5</a>
+        (master) &mdash; <a href="https://github.com/SpaceManiac/SpacemanDMM/blob/master/src/dmdoc/README.md">dmdoc 1.3.0</a></footer>
+</body>
+</html>
